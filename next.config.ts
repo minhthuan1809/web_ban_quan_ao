@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     domains: [
       'i.pravatar.cc',
       'plus.unsplash.com',
-      // Add other image domains you're using
+      'images.unsplash.com'
     ]
   }
 };

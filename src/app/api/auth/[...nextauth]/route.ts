@@ -6,7 +6,7 @@ if (!process.env.GITHUB_ID || !process.env.GITHUB_SECRET || !process.env.GOOGLE_
   throw new Error('Missing environment variables for authentication providers');
 }
 
-export const authOptions = {
+const authOptions = {
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID!,

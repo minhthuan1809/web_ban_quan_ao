@@ -4,6 +4,7 @@ import React, { useEffect } from 'react'
 import { Eye, EyeOff, Github, Lock, Mail } from 'lucide-react';
 import { signIn ,useSession} from "next-auth/react"
 import  { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function PageLogin() {
     const { data } = useSession()
@@ -30,12 +31,15 @@ useEffect(() => {
       <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Left side - Illustration */}
         <div className="hidden md:flex items-center justify-center bg-blue-100 p-8">
-          <div className="w-full h-full bg-cover bg-center rounded-2xl" 
-               style={{
-                 backgroundImage: "url('https://images.unsplash.com/photo-1507679799987-c6e8cd9c85f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')",
-                 backgroundPosition: 'center'
-               }}
-          />
+          <div className="relative w-full h-full rounded-2xl overflow-hidden">
+            <Image
+              src="https://images.unsplash.com/photo-1507679799987-c6e8cd9c85f8"
+              alt="Login illustration"
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
         </div>
 
         {/* Right side - Login form */}
