@@ -3,6 +3,7 @@ import React from "react";
 import { UserIcon, MapPinIcon, LockIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from 'next/image';
 
 const data = [
   {
@@ -71,11 +72,14 @@ export default function UserProfile() {
     <div>
       <div className="w-full md:max-w-96 bg-white p-6 md:p-8 m-4 rounded-lg">
         <div className="flex items-center space-x-4 mb-8">
-          <img
-            src="https://i.pravatar.cc/150?img=1"
-            alt="Profile"
-            className="w-20 h-20 rounded-full object-cover ring-4 ring-blue-50"
-          />
+          <div className="relative w-20 h-20">
+            <Image
+              src="https://i.pravatar.cc/150?img=1"
+              alt="Profile"
+              fill
+              className="rounded-full object-cover ring-4 ring-blue-50"
+            />
+          </div>
           <div>
             <h1 className="text-2xl font-semibold text-gray-800">
               Nguyễn Minh Em
