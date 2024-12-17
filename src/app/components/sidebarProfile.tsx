@@ -74,7 +74,7 @@ export default function UserProfile() {
         <div className="flex items-center space-x-4 mb-8">
           <div className="relative w-20 h-20">
             <Image
-              src="https://i.pravatar.cc/150?img=1"
+              src="https://plus.unsplash.com/premium_photo-1687686676757-9d849a16e4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGVyc2lvbnxlbnwwfHwwfHx8MA%3D%3D"
               alt="Profile"
               fill
               className="rounded-full object-cover ring-4 ring-blue-50"

@@ -1,5 +1,6 @@
 import React from "react";
 import { Mail, Phone, MapPin, Facebook, Instagram, Linkedin } from "lucide-react";
+import Image from "next/image";
 
 export default function PageFooter() {
   return (
@@ -9,10 +10,12 @@ export default function PageFooter() {
           {/* Brand Section */}
           <div className="flex flex-col items-center md:items-start">
             <div className="flex items-center space-x-4 mb-6">
-              <img 
+              <Image 
                 src="https://plus.unsplash.com/premium_photo-1687686676757-9d849a16e4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGVyc2lvbnxlbnwwfHwwfHx8MA%3D%3D" 
                 className="w-20 h-20 rounded-full border-4 border-white shadow-lg" 
                 alt="MINHTHUAN Logo" 
+                height={80}
+                width={80}
               />
               <div>
                 <p className="text-3xl font-extrabold text-gray-800 tracking-wider">MINHTHUAN</p>

@@ -5,6 +5,7 @@ import { ShoppingCart, User, Search, Menu, X, LogOut, Settings } from "lucide-re
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
+import Image from "next/image";
 
 type User = {
   user: {
@@ -25,27 +26,41 @@ export default function Navbar() {
   ];
   const [user, setUser] = useState<User | null>();
   const Urlparams = usePathname();
-  const { data } = useSession();
+  const { data: session, status } = useSession();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   useEffect(() => {
-    if (data) {
-      setUser(data as User);
+    if (status === "authenticated" && session) {
+      setUser(session as User);
+    } else {
+      setUser(null);
     }
-  }, [data]);
+  }, [session, status]);
+
+  if (status === "loading") {
+    return (
+      <nav className="bg-white shadow-lg sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-3">
+          <div className="animate-pulse h-14 bg-gray-200 rounded"></div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50 transition-shadow duration-300 hover:shadow-xl">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-screen-xl">
         {/* Logo Section */}
         <Link href="/" className="flex items-center space-x-3 group">
-          <img
+          <Image
             className="rounded-full w-14 h-14 object-cover transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
             src="https://plus.unsplash.com/premium_photo-1687686676757-9d849a16e4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGVyc2lvbnxlbnwwfHwwfHx8MA%3D%3D"
             alt="MINHTHUAN Logo"
+            width={56}
+            height={56}
           />
           <span className="text-2xl font-bold text-blue-800 group-hover:text-blue-600 transition-colors duration-300">
             MINHTHUAN
@@ -124,9 +139,11 @@ export default function Navbar() {
                     <div className="p-4">
                       {/* User Profile Section */}
                       <div className="flex items-center space-x-4 border-b pb-3 mb-2">
-                        <img 
+                        <Image 
                           src={user.user.image || '/default-avatar.png'} 
                           alt={`${user.user.name}'s avatar`} 
+                          width={56}
+                          height={56}
                           className="w-14 h-14 rounded-full border-2 border-blue-200 object-cover"
                         />
                         <div>
@@ -187,10 +204,12 @@ export default function Navbar() {
             {/* Mobile Menu Header */}
             <div className="flex justify-between items-center mb-8">
               <Link href="/" className="flex items-center space-x-3">
-                <img
+                <Image
                   className="rounded-full w-14 h-14 object-cover"
-                  src="/logo.png"
+                  src="https://plus.unsplash.com/premium_photo-1687686676757-9d849a16e4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGVyc2lvbnxlbnwwfHwwfHx8MA%3D%3D"
                   alt="MINHTHUAN Logo"
+                  width={56}
+                  height={56}
                 />
                 <span className="text-2xl font-bold text-blue-800">
                   MINHTHUAN
