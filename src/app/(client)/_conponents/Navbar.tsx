@@ -16,7 +16,6 @@ type User = {
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showAuthOptions, setShowAuthOptions] = useState(false);
   const navLinks = [
     { label: "Trang chủ", href: "/" },
     { label: "Sản phẩm", href: "/products" },
@@ -34,7 +33,7 @@ export default function Navbar() {
 
   useEffect(() => {
     if (data) {
-      setUser(data as any);
+      setUser(data as User);
     }
   }, [data]);
 

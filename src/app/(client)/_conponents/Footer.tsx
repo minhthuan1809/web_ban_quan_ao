@@ -36,7 +36,7 @@ export default function PageFooter() {
           <div className="text-center md:text-left">
             <h2 className="text-2xl font-bold text-gray-800 mb-5 border-b-2 border-gray-300 pb-2">VỀ CHÚNG TÔI</h2>
             <p className="text-gray-600 leading-relaxed text-justify">
-              "MINHTHUAN" là cửa hàng thời trang chuyên nghiệp, cam kết mang đến những sản phẩm chất lượng cao và dịch vụ xuất sắc. Chúng tôi tin rằng thời trang không chỉ là quần áo, mà còn là cách thể hiện cá tính riêng của mỗi người.
+              &ldquo;MINHTHUAN&rdquo; là cửa hàng thời trang chuyên nghiệp, cam kết mang đến những sản phẩm chất lượng cao và dịch vụ xuất sắc. Chúng tôi tin rằng thời trang không chỉ là quần áo, mà còn là cách thể hiện cá tính riêng của mỗi người.
             </p>
           </div>
 

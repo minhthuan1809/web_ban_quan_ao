@@ -16,14 +16,15 @@ const router = useRouter()
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-
+    console.log('Login attempt with:', email, password);
   };
 useEffect(() => {
     if(data){
         router.push('/')
     }
-  }, [data])
+  }, [data, router])
   
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
       <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
