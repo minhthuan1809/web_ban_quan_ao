@@ -19,3 +19,12 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.product-swiper .swiper-button-next,
+.product-swiper .swiper-button-prev {
+  color: #1e40af;
+}
+
+.product-swiper .swiper-pagination-bullet-active {
+  background: #1e40af;
+}
