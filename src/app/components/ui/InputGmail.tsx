@@ -2,7 +2,7 @@
 import { Input } from "@nextui-org/react";
 import { Mail } from "lucide-react";
 import { useState } from "react";
-
+//thuan
 export default function InputGmail({
   placeholder,
   label,
