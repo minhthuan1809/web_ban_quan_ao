@@ -1,13 +1,9 @@
 "use client";
+import GetIconComponent from "@/app/_util/icon";
 import { Input } from "@nextui-org/react";
 import * as Icon from "lucide-react";
 
-// Hàm lấy Icon Component từ `lucide-react`
-function getIconComponent(icon?: keyof typeof Icon): React.ElementType | null {
-  return icon ? (Icon[icon] as React.ElementType) : null;
-}
-
-export default function InputGmail({
+export default function InputInformation({
   placeholder,
   label,
   value,
@@ -20,25 +16,24 @@ export default function InputGmail({
   onChange: (value: string) => void;
   icon?: keyof typeof Icon;
 }) {
-  const IconComponent = getIconComponent(icon);
-
   return (
     <Input
       isRequired
+      type="text"
       classNames={{
         inputWrapper: "w-full mt-[1rem]",
       }}
       startContent={
-        IconComponent ? (
-          <IconComponent
-            size={20}
-            className="text-2xl text-default-400 pointer-events-none flex-shrink-0"
-          />
-        ) : null
+        <GetIconComponent
+          icon={icon}
+          size={20}
+          className="text-2xl text-default-400 pointer-events-none flex-shrink-0"
+        />
       }
       label={label}
       labelPlacement={"outside"}
-      maxLength={30}
+      maxLength={70}
+      autoFocus
       placeholder={placeholder}
       variant="bordered"
       value={value}
