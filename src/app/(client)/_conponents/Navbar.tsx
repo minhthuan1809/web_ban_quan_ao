@@ -1,7 +1,15 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { ShoppingCart, User, Search, Menu, X, LogOut, Settings } from "lucide-react";
+import {
+  ShoppingCart,
+  User,
+  Search,
+  Menu,
+  X,
+  LogOut,
+  Settings,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { signOut } from "next-auth/react";
@@ -12,8 +20,8 @@ type User = {
     image?: string | null;
     name?: string | null;
     email?: string | null;
-  }
-}
+  };
+};
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -27,7 +35,7 @@ export default function Navbar() {
   const [user, setUser] = useState<User | null>();
   const Urlparams = usePathname();
   const { data: session, status } = useSession();
-
+  console.log("session", session);
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
@@ -88,7 +96,12 @@ export default function Navbar() {
                   className={`text-gray-700 font-medium hover:text-blue-600 transition-colors relative group`}
                 >
                   {link.label}
-                  <span className={`absolute bottom-[-4px] left-0 h-0.5 bg-blue-600 transition-all duration-300 ${Urlparams === link.href ? "w-full" : "w-0 group-hover:w-full"}`}
+                  <span
+                    className={`absolute bottom-[-4px] left-0 h-0.5 bg-blue-600 transition-all duration-300 ${
+                      Urlparams === link.href
+                        ? "w-full"
+                        : "w-0 group-hover:w-full"
+                    }`}
                   />
                 </Link>
               </li>
@@ -104,18 +117,16 @@ export default function Navbar() {
                 placeholder="Tìm kiếm..."
                 className="pl-10 pr-4 py-2 w-64 border border-blue-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all duration-300 group-hover:shadow-md"
               />
-              <Search 
-                size={20} 
-                className="absolute left-3 top-3 text-blue-400 group-hover:text-blue-600 transition-colors" 
+              <Search
+                size={20}
+                className="absolute left-3 top-3 text-blue-400 group-hover:text-blue-600 transition-colors"
               />
             </div>
 
             {/* Icons */}
             <div className="flex items-center space-x-4">
               {/* Shopping Cart */}
-              <button 
-                className="relative group text-gray-600 hover:text-blue-600 transition-colors"
-              >
+              <button className="relative group text-gray-600 hover:text-blue-600 transition-colors">
                 <ShoppingCart size={24} />
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   0
@@ -124,14 +135,12 @@ export default function Navbar() {
 
               {/* User/Auth Button */}
               <div className="relative group">
-                <button 
-                  className="text-gray-600 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1"
-                >
+                <button className="text-gray-600 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1">
                   <User size={24} />
                 </button>
 
                 {/* Auth Dropdown */}
-                <div 
+                <div
                   className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl border border-blue-100 overflow-hidden z-50 
                   opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
                 >
@@ -139,9 +148,9 @@ export default function Navbar() {
                     <div className="p-4">
                       {/* User Profile Section */}
                       <div className="flex items-center space-x-4 border-b pb-3 mb-2">
-                        <Image 
-                          src={user.user.image || '/default-avatar.png'} 
-                          alt={`${user.user.name}'s avatar`} 
+                        <Image
+                          src={user.user.image || "/default-avatar.png"}
+                          alt={`${user.user.name}'s avatar`}
                           width={56}
                           height={56}
                           className="w-14 h-14 rounded-full border-2 border-blue-200 object-cover"
@@ -158,14 +167,14 @@ export default function Navbar() {
 
                       {/* User Actions */}
                       <div className="space-y-2">
-                        <Link 
-                          href="/profile" 
+                        <Link
+                          href="/profile"
                           className="flex items-center space-x-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors"
                         >
                           <Settings size={20} className="text-blue-600" />
                           <span>Cài đặt tài khoản</span>
                         </Link>
-                        <button 
+                        <button
                           onClick={() => signOut()}
                           className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-red-50 rounded-md transition-colors text-red-600"
                         >
@@ -231,8 +240,8 @@ export default function Navbar() {
                     href={link.href}
                     onClick={toggleMobileMenu}
                     className={`block py-3 text-lg text-center rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 ${
-                      Urlparams === link.href 
-                        ? "bg-blue-100 text-blue-600 font-semibold" 
+                      Urlparams === link.href
+                        ? "bg-blue-100 text-blue-600 font-semibold"
                         : "text-gray-700 hover:bg-blue-50"
                     }`}
                   >
@@ -259,17 +268,13 @@ export default function Navbar() {
 
               {/* Mobile Icons */}
               <div className="flex justify-center space-x-8">
-                <button 
-                  className="text-gray-600 hover:text-blue-600 relative group transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-2"
-                >
+                <button className="text-gray-600 hover:text-blue-600 relative group transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-2">
                   <ShoppingCart size={28} />
                   <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                     0
                   </span>
                 </button>
-                <button 
-                  className="text-gray-600 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-2"
-                >
+                <button className="text-gray-600 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-2">
                   <User size={28} />
                 </button>
               </div>
