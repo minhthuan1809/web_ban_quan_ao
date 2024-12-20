@@ -151,7 +151,7 @@ export default function Navbar() {
                         <Image
                           src={user?.user.picture || "/default-avatar.jpg"}
                           alt={
-                            user?.name
+                            user?.user.name
                               ? `${user.user.name}'s avatar`
                               : "User avatar"
                           }
