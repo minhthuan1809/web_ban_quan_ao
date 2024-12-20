@@ -22,16 +22,13 @@ const authOptions: AuthOptions = {
       : []),
   ],
   callbacks: {
-    // Kiểm tra token trước khi tạo session
-    async session({ token }: { session: any; token: any }) {
-      // Nếu token có lỗi, không cho phép tạo session
-      if (token.error) {
-        throw new Error("Xác thực thất bại");
-      }
-      return token;
+    async session({ session, token }) {
+      return {
+        ...session,
+        user: token,
+      };
     },
-    // xử lý token và chặn đăng nhập nếu có lỗi
-    async jwt({ token, account }) {
+    async jwt({ account, token }) {
       try {
         if (account?.id_token) {
           const response = await fetch(
@@ -40,31 +37,26 @@ const authOptions: AuthOptions = {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${account.id_token}`,
-                "Content-Type": "application/json",
               },
             }
           );
 
           if (!response.ok) {
-            throw new Error("Lỗi xác thực từ server");
+            throw new Error("Failed to fetch data");
           }
 
           const data = await response.json();
-
-          // Sử dụng dữ liệu từ server thay vì tạo timestamp mới
-          return {
-            ...token,
-            ...data,
-          };
+          token = data.data.user;
+          return token;
         }
+        return token;
       } catch (error) {
-        console.error("Lỗi trong quá trình xác thực:", error);
-        token.error = "AuthError";
+        console.log("error", error);
+        return token;
       }
-
-      return token;
     },
   },
+
   pages: {
     signIn: "/",
     error: "/login",
