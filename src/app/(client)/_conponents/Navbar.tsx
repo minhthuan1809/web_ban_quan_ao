@@ -16,11 +16,9 @@ import { signOut } from "next-auth/react";
 import Image from "next/image";
 
 type User = {
-  user: {
-    image?: string | null;
-    name?: string | null;
-    email?: string | null;
-  };
+  picture?: string | null;
+  name?: string | null;
+  email?: string | null;
 };
 
 export default function Navbar() {
@@ -149,19 +147,17 @@ export default function Navbar() {
                       {/* User Profile Section */}
                       <div className="flex items-center space-x-4 border-b pb-3 mb-2">
                         <Image
-                          src={user.user.image || "/default-avatar.png"}
-                          alt={`${user.user.name}'s avatar`}
+                          src={user.picture || "/default-avatar.png"}
+                          alt={`${user.name}'s avatar`}
                           width={56}
                           height={56}
                           className="w-14 h-14 rounded-full border-2 border-blue-200 object-cover"
                         />
                         <div>
                           <p className="font-semibold text-gray-800 text-lg">
-                            {user.user.name}
+                            {user.name}
                           </p>
-                          <p className="text-sm text-gray-500">
-                            {user.user.email}
-                          </p>
+                          <p className="text-sm text-gray-500">{user.email}</p>
                         </div>
                       </div>
 
