@@ -28,9 +28,7 @@ export default function InputGmail({
     onChange(newValue);
 
     if (!newValue.includes("@")) {
-      setError("Email cần chứa '@gmail.com'.");
-    } else if (!newValue.endsWith("@gmail.com")) {
-      setError("Chỉ hỗ trợ email '@gmail.com'.");
+      setError("Email cần chứa nhập đúng định dạng gmail");
     } else {
       setError(null);
     }
@@ -43,6 +41,8 @@ export default function InputGmail({
         classNames={{
           inputWrapper: "w-full mt-[1rem]",
         }}
+        validationState={error ? "invalid" : "valid"}
+        errorMessage={""}
         startContent={
           <Mail
             size={20}

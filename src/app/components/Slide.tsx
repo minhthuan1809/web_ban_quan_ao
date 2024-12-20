@@ -38,7 +38,7 @@ const slides = [
 
 export default function Slide() {
   return (
-    <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="w-full  px-4 sm:px-6 lg:px-8 py-8">
       <div className="relative">
         <Swiper
           modules={[Autoplay, Navigation, Pagination]}
