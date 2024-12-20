@@ -3,6 +3,7 @@ import * as Icon from "lucide-react";
 import GetIconComponent from "@/app/_util/icon";
 import InputInformation from "@/app/components/ui/InputInformation";
 import FormContact from "./FormContact";
+import Link from "next/link";
 
 export default function ContactPage() {
   const contact = [
@@ -33,13 +34,13 @@ export default function ContactPage() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <nav className="flex items-center space-x-2 mb-8">
-          <a
+          <Link
             href="/"
             className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
           >
             <GetIconComponent icon="House" size={20} />
             <span className="ml-1 text-sm font-medium">Trang chủ</span>
-          </a>
+          </Link>
           <span className="text-gray-400">/</span>
           <span className="text-sm text-gray-600">Liên hệ</span>
         </nav>
