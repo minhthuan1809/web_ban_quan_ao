@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
-import React, { useState } from "react";
-import { User, Mail, Lock, Phone } from "lucide-react";
+import { useState } from "react";
 import InputPassword from "@/app/components/ui/InputPassword";
 import InputGmail from "@/app/components/ui/InputGmail";
 import InputInformation from "@/app/components/ui/InputInformation";

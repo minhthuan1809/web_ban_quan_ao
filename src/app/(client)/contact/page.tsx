@@ -1,7 +1,6 @@
 import React from "react";
 import * as Icon from "lucide-react";
 import GetIconComponent from "@/app/_util/icon";
-import InputInformation from "@/app/components/ui/InputInformation";
 import FormContact from "./FormContact";
 import Link from "next/link";
 

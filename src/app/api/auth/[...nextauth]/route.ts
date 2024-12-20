@@ -21,25 +21,25 @@ const authOptions: AuthOptions = {
         ]
       : []),
   ],
-  callbacks: {
-    // xử lý session
-    async session({ session, token }) {
-      return {
-        ...session,
-        user: {
-          ...session.user,
-          id: token.sub,
-        },
-      };
-    },
-    // xử lý token
-    async jwt({ token, user, account }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-  },
+  // callbacks: {
+  //   // xử lý session
+  //   async session({ session, token }) {
+  //     return {
+  //       ...session,
+  //       user: {
+  //         ...session.user,
+  //         id: token.sub,
+  //       },
+  //     };
+  //   },
+  //   // xử lý token
+  //   async jwt({ token, user, _account }) {
+  //     if (user) {
+  //       token.id = user.id;
+  //     }
+  //     return token;
+  //   },
+  // },
   pages: {
     signIn: "/login",
   },
