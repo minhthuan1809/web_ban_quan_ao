@@ -29,36 +29,42 @@ const authOptions: AuthOptions = {
       };
     },
     async jwt({ account, token }) {
-      try {
-        if (account?.id_token) {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL_CLIENT}/auth/login`,
-            {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${account.id_token}`,
-              },
-            }
-          );
-
-          if (!response.ok) {
-            throw new Error("Failed to fetch data");
-          }
-
-          const data = await response.json();
-          token = data.data.user;
-          return token;
+      console.log("account", account);
+      function getToken() {
+        if (account?.provider === "github") {
+          return account.access_token;
         }
-        return token;
+        if (account?.provider === "google") {
+          return account.id_token;
+        }
+        return null;
+      }
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL_CLIENT}/auth/login`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${getToken()}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch data");
+        }
+
+        const data = await response.json();
+        return data.user;
       } catch (error) {
         console.log("error", error);
-        return token;
+        return null;
       }
     },
   },
 
   pages: {
-    signIn: "/",
+    signIn: "/login",
     error: "/login",
   },
   secret: process.env.NEXTAUTH_SECRET,

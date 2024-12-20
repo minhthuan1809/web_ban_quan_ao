@@ -17,7 +17,7 @@ import Image from "next/image";
 
 type User = {
   user: {
-    picture?: string | null;
+    avatar?: string | null;
     name?: string | null;
     email?: string | null;
   };
@@ -149,7 +149,7 @@ export default function Navbar() {
                       {/* User Profile Section */}
                       <div className="flex items-center space-x-4 border-b pb-3 mb-2">
                         <Image
-                          src={user?.user.picture || "/default-avatar.jpg"}
+                          src={user?.user.avatar || "/default-avatar.jpg"}
                           alt={
                             user?.user.name
                               ? `${user.user.name}'s avatar`
