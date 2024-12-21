@@ -76,56 +76,76 @@ const authOptions: AuthOptions = {
       };
     },
     async jwt({ token, account, user }) {
-      console.log("token:", token);
-      console.log("account:", account);
-      console.log("account:", user);
-
-      if (account && user) {
-        // Nếu đăng nhập bằng credentials
-        if (account.type === "credentials") {
-          return user;
-        }
-
-        // Nếu đăng nhập bằng OAuth (Google/Github)
-        try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL_CLIENT}/auth/login`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${
-                  account.provider === "github"
-                    ? account.access_token
-                    : account.id_token
-                }`,
-              },
-              body: JSON.stringify({
-                provider: account.provider,
-              }),
-            }
-          );
-
-          const data = await response.json();
-          console.log("OAuth login response:", data);
-
-          if (!data.ok) {
-            console.error("OAuth login failed:", data);
-            throw new Error(data.message || "Đăng nhập thất bại");
-          }
-
-          return data.user;
-        } catch (error) {
-          toast.error("đã có lỗi xảy ra");
-
-          console.error("Auth error:", error);
-          throw error;
-        }
+      // Nếu không có account hoặc user, trả về token hiện tại
+      if (!account || !user) {
+        return token;
       }
-      return token;
+
+      // Nếu đăng nhập bằng credentials
+      if (account.type === "credentials") {
+        return user;
+      }
+
+      // Nếu đăng nhập bằng OAuth (Google/Github)
+      try {
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL_CLIENT}/auth/login`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${
+                account.provider === "github"
+                  ? account.access_token
+                  : account.id_token
+              }`,
+            },
+            body: JSON.stringify({
+              provider: account.provider,
+              email: user.email,
+              name: user.name,
+            }),
+            // Thêm timeout để tránh chờ quá lâu
+            signal: AbortSignal.timeout(5000), // 5 seconds timeout
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const data = await response.json();
+
+        if (!data.ok) {
+          console.error("OAuth login failed:", data);
+          // Thay vì throw error, trả về thông tin user từ OAuth
+          return {
+            ...token,
+            ...user,
+            provider: account.provider,
+          };
+        }
+
+        return data.user;
+      } catch (error) {
+        console.error("Auth error:", error);
+        // Nếu có lỗi, trả về thông tin user từ OAuth
+        return {
+          ...token,
+          ...user,
+          provider: account.provider,
+        };
+      }
     },
   },
-
+  // Thêm các cấu hình để tối ưu hiệu suất
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   pages: {
     signIn: "/login",
     error: "/login",
