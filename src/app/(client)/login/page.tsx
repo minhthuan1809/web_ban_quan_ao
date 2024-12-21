@@ -6,6 +6,7 @@ import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import InputGmail from "@/app/components/ui/InputGmail";
 import InputPassword from "@/app/components/ui/InputPassword";
+import { toast } from "react-toastify";
 
 export default function PageLogin() {
   const { data } = useSession();
@@ -15,6 +16,22 @@ export default function PageLogin() {
   const router = useRouter();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    try {
+      const result = await signIn("credentials", {
+        email: gmail,
+        password: password,
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error(result.error);
+      } else {
+        router.push("/");
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
   useEffect(() => {
     if (data) {
