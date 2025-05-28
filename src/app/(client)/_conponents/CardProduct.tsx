@@ -1,7 +1,7 @@
 "use client"
 import Image from 'next/image';
 import React from 'react'
-import FormatPrice from '@/app/_util/formatPrice';
+import FormatPrice from '@/app/_util/FormatPrice';
 import { 
   Card, 
   CardBody, 

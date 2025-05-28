@@ -2,32 +2,33 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import InputGmail from "@/app/components/ui/InputGmail";
-import InputPassword from "@/app/components/ui/InputPassword";
-import { authLogin_API } from "@/app/_service/authClient";
-import { setCookie } from "cookies-next";
+import { authForgotPassword_API } from "@/app/_service/authClient";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
 
-export default function PageLogin() {
-  const [password, setPassword] = useState("");
+export default function PageForgotPassword() {
   const [gmail, setGmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await authLogin_API({
-        email: gmail,
-        password: password,
-      });
-      setCookie("token", JSON.stringify(response));
-      toast.success("Đăng nhập thành công");
-      router.push("/");
+      const response = await authForgotPassword_API(gmail);
+      if (response.status === 200) {
+        setShowModal(true);
+        setTimeout(() => {
+          setShowModal(false);
+          router.push("/");
+        }, 2000);
+      } else {
+        toast.error("Có lỗi xảy ra, vui lòng thử lại sau");
+      }
     } catch (error) {
-      toast.error("Đăng nhập thất bại");
+      toast.error("Có lỗi xảy ra, vui lòng thử lại sau");
       console.error(error);
     } finally {
       setLoading(false);
@@ -40,6 +41,24 @@ export default function PageLogin() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl">
+            <div className="text-center">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="mt-4 text-lg font-medium text-gray-900">Email đã được gửi!</h3>
+              <p className="mt-2 text-sm text-gray-500">
+                Vui lòng kiểm tra email của bạn để đặt lại mật khẩu
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Left side - Illustration */}
         <div className="hidden md:flex items-center justify-center bg-blue-100 p-8">
@@ -53,59 +72,25 @@ export default function PageLogin() {
           />
         </div>
 
-        {/* Right side - Login form */}
+        {/* Right side - Forgot Password form */}
         <div className="flex flex-col justify-center px-8 py-12">
           <div className="sm:mx-auto sm:w-full sm:max-w-md">
             <h2 className="text-center text-4xl font-bold text-gray-800 mb-6 tracking-tight">
-              Đăng Nhập
+              Quên Mật Khẩu
             </h2>
             <p className="text-center text-gray-500 mb-8">
-              Chào mừng bạn quay trở lại! Vui lòng nhập thông tin.
+              Vui lòng nhập email của bạn để đặt lại mật khẩu
             </p>
           </div>
 
-          <form className="space-y-4" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
             {/* gmail */}
             <InputGmail
               placeholder="xxx@gmail.com"
-              label="Tên đăng nhập"
+              label="Email"
               value={gmail}
               onChange={(value) => setGmail(value)}
             />
-            {/* Mật khẩu */}
-            <div className="pt-[4px]">
-              <InputPassword
-                placeholder="Nhập mật khẩu"
-                label="Mật khẩu"
-                value={password}
-                onChange={(value) => setPassword(value)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-900"
-                >
-                  Ghi nhớ đăng nhập
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <Link
-                  href="/forgot-password"
-                  className="font-medium text-blue-600 hover:text-blue-500"
-                >
-                  Quên mật khẩu?
-                </Link>
-              </div>
-            </div>
 
             <div>
               <button
@@ -122,19 +107,19 @@ export default function PageLogin() {
                     Đang xử lý...
                   </div>
                 ) : (
-                  "Đăng Nhập"
+                  "Gửi Yêu Cầu"
                 )}
               </button>
             </div>
 
             <div className="text-sm text-center mt-6">
               <p className="text-gray-600">
-                Bạn chưa có tài khoản?{" "}
+                Quay lại trang{" "}
                 <Link
-                  href="/register"
+                  href="/login"
                   className="font-semibold text-blue-600 hover:text-blue-500"
                 >
-                  Đăng Ký Ngay
+                  Đăng Nhập
                 </Link>
               </p>
             </div>
