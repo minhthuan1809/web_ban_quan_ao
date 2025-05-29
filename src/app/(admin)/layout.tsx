@@ -122,9 +122,9 @@ export default function Layout({children}: {children: React.ReactNode}) {
           icon: "Users",
         },
         {
-          name: "Bài Viết",
-          href: "/articles",
-          icon: "FileText",
+          name: "Danh mục và Nguyên liệu",
+          href: "/category_material",
+          icon: "ChartBarStacked",
         },
         {
           name: "Liên Hệ",
