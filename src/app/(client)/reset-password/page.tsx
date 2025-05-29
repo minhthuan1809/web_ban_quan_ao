@@ -1,12 +1,12 @@
 "use client";
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation';
 import InputPassword from '@/app/components/ui/InputPassword';
 import { authResetPassword_API } from '@/app/_service/authClient';
 import { toast } from 'react-toastify';
 import Loading from '@/app/_util/Loading';
 
-export default function PageResetPassword() {
+function ResetPasswordForm() {
     const params = useSearchParams();
     const token = params.get('token');
     const [password, setPassword] = useState('');
@@ -115,5 +115,13 @@ export default function PageResetPassword() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function PageResetPassword() {
+    return (
+        <Suspense fallback={<Loading />}>
+            <ResetPasswordForm />
+        </Suspense>
     );
 }

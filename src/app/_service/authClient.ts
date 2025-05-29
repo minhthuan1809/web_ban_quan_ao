@@ -83,6 +83,8 @@ export const authForgotPassword_API = async (email: string) => {
     throw error;
   }
 };
+
+
 export const authResetPassword_API = async (token: string, password: string) => {
   try {
     const response = await axios.post(`${API_URL}/auth/reset-password?token=${token}&newPassword=${password}`, {

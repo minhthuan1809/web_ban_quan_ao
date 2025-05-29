@@ -69,7 +69,7 @@ export default function ProductPage() {
           <Button 
             color="primary"
             startContent={<Plus className="w-4 h-4" />}
-            className="bg-blue-500 font-medium"
+            className="bg-blue-500 font-medium text-white"
           >
             Thêm Mới
           </Button>
