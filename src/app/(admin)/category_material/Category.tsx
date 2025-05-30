@@ -3,8 +3,8 @@ import { addCategory_API, deleteCategory_API, getCategory_API, updateCategory_AP
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Input, Spinner } from "@nextui-org/react";
 import { Plus, Search } from 'lucide-react';
-import getTable from './getTable';
-import ModalAdd_Edit_Category_Material from './ModalAdd_Edit_Category_Material';
+import getTable from '../_conponents/getTable';
+import ModalAdd_Edit_Category_Material from '../_modal/ModalAdd_Edit_Category_Material';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { toast } from 'react-toastify';
 import Loading from '@/app/_util/Loading';
@@ -27,7 +27,7 @@ export default function Category() {
         try {
             setLoading(true);
             const response = await getCategory_API(searchValue, currentPage, rowsPerPage, "", "");
-            setCategory(response.data);
+            setCategory(response.data.reverse());
             setTotalPage(response.metadata.total_page);
         } catch (err: any) {
             toast.error(err.message);
@@ -112,9 +112,9 @@ export default function Category() {
     return (
         <div className="p-6 w-full">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-2xl font-bold">Phân loại</h1>
+                    <h1 className="text-2xl font-bold">Danh Mục</h1>
                 <Button className="bg-blue-500 text-white" startContent={<Plus size={20} />} onPress={() => setIsOpen(true)}>
-                    Thêm phân loại
+                    Thêm Danh Mục
                 </Button>
             </div>
 
@@ -128,8 +128,8 @@ export default function Category() {
                 />
             </div>
 
-            { loading ? <div className="flex justify-center items-center min-h-[400px]"><Loading/></div> : getTable(category.reverse(), handleDelete, handleEdit, totalPage, currentPage, setCurrentPage)}
-            {/* modal thêm sửa phân loại */}
+            { loading ? <Loading/>: getTable(category, handleDelete, handleEdit, totalPage, currentPage, setCurrentPage, "danh mục")}
+            {/* modal thêm sửa danh mục */}
             <ModalAdd_Edit_Category_Material
                 isOpen={loading ? false : isOpen}
                 onClose={() => {
@@ -137,8 +137,8 @@ export default function Category() {
                     setEditCategory(null);
                     setName("");
                 }}
-                title="Thêm phân loại"
-                titleInput="Tên phân loại"
+                title="Thêm danh mục"
+                titleInput="Tên danh mục"
                 name={name}
                 setName={setName}
                 handleFinish={editCategory ? handleFinishEdit : handleAddCategory}

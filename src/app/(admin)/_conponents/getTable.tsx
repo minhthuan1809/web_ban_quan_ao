@@ -18,16 +18,17 @@ export default function getTable(
   handleEdit: (item: any) => void,
   totalPage: number,
   currentPage: number,
-  setCurrentPage: (page: number) => void
+  setCurrentPage: (page: number) => void,
+  title: string
 ) {
   return (
     <div className="flex flex-col gap-4">
       <Table
-        aria-label="Bảng phân loại"
+        aria-label={`Bảng ${title}`}
         className="min-h-[400px]"
       >
         <TableHeader>
-          <TableColumn>TÊN PHÂN LOẠI</TableColumn>
+          <TableColumn>TÊN</TableColumn>
           <TableColumn>THAO TÁC</TableColumn>
         </TableHeader>
         <TableBody

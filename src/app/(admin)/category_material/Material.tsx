@@ -3,8 +3,8 @@ import { addMaterial_API, deleteMaterial_API, getmaterial_API, updateMaterial_AP
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Input, Spinner } from "@nextui-org/react";
 import { Plus, Search } from "lucide-react";
-import getTable from "./getTable";
-import ModalAdd_Edit_Category_Material from "./ModalAdd_Edit_Category_Material";
+import getTable from "../_conponents/getTable";
+import ModalAdd_Edit_Category_Material from "../_modal/ModalAdd_Edit_Category_Material";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
@@ -37,7 +37,7 @@ export default function Material() {
         ""
       );
       
-      setMaterial(response.data);
+      setMaterial(response.data.reverse());
       setTotalPage(response.metadata.total_page);
     } catch (err: any) {
       toast.error(err.message);
@@ -147,7 +147,7 @@ export default function Material() {
         />
       </div>
       {/* render bảng */}
-      {loading ? <div className="flex justify-center items-center min-h-[400px]"><Loading/></div> : getTable(material || [], handleDeleteMaterial ,    handleEditMaterial , totalPage, currentPage, setCurrentPage)}
+      {loading ? <div className="flex justify-center items-center min-h-[400px]"><Loading/></div> : getTable(material || [], handleDeleteMaterial ,    handleEditMaterial , totalPage, currentPage, setCurrentPage, "chất liệu" )}
       {/*  modal thêm vật liệu */}
       <ModalAdd_Edit_Category_Material
         isOpen={loading ? false : isOpen}

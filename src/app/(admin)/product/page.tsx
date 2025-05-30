@@ -12,11 +12,13 @@ import { deleteProduct_API, getProducts_API } from '@/app/_service/products';
 import { Product } from './typeProduct';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { toast } from 'react-toastify';
+import ModalAdd_Edit_Product from '../_modal/ModalAdd_Edit_Product';
 
 export default function ProductPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isRefetch, setIsRefetch] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const { accessToken } = useAuthInfor();
 
   useEffect(() => {
@@ -70,6 +72,7 @@ export default function ProductPage() {
             color="primary"
             startContent={<Plus className="w-4 h-4" />}
             className="bg-blue-500 font-medium text-white"
+            onPress={() => setIsOpen(true)}
           >
             Thêm Mới
           </Button>
@@ -211,6 +214,13 @@ export default function ProductPage() {
             </div>
           )}
         </div>
+        <ModalAdd_Edit_Product
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          title="Thêm sản phẩm"
+          handleFinish={() => {}}
+          loadingBtn={false}
+        />
       </div>
     </div>
   );
