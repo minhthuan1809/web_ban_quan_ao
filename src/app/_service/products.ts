@@ -27,3 +27,17 @@ export const deleteProduct_API = async (id: number, token: string) => {
         throw error;
     }
 }
+
+export const CreateProduct_API = async (data: any, token: string) => {
+    try {
+        const response = await axios.post(`${API_URL}/products`, data, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+        return response.data;
+    } catch (error) {
+        throw error;
+    }
+}

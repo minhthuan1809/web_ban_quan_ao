@@ -1,27 +1,51 @@
 import React, { useState } from 'react'
-import { Input, Select, SelectItem, Textarea, Button, Checkbox, Divider } from "@nextui-org/react"
+import { Input, Textarea, Button, Checkbox, Divider } from "@nextui-org/react"
 import InputMateria from '../_conponents/category/InputMateria';
 import InputCategory from '../_conponents/category/InputCategory';
 import Variants from '../_conponents/Variants';
+import InputTakeImg from '@/app/_util/ui/InputTakeImg';
+import { uploadToCloudinary } from '@/app/_util/upload_img_cloudinary';
+import { CreateProduct_API } from '@/app/_service/products';
+import useAuthInfor from '@/app/customHooks/AuthInfor';
+import { toast } from 'react-toastify';
+
+interface ProductForm {
+  name: string;
+  categoryId: string;
+  imageUrls: File[];
+  teamId: string;
+  materialId: string;
+  season: string;
+  jerseyType: string;
+  isFeatured: boolean;
+  description: string;
+  price: number;
+  salePrice: number;
+  variants: {
+    size: string;
+    priceAdjustment: number;
+    code: string;
+    stockQuantity: number;
+  }[];
+  materialList: any[];
+}
 
 export default function ModalAdd_Edit_Product({
     isOpen,
     onClose,
     title,
-    handleFinish,
-    loadingBtn,
   }: {
     isOpen: boolean;
     onClose: () => void;
     title: string;
-    handleFinish: () => void;
-    loadingBtn: boolean;
   }) {
 
-  const [form, setForm] = useState({
+  const {accessToken} = useAuthInfor()
+  const [loadingBtn, setLoadingBtn] = useState(false)
+  const [form, setForm] = useState<ProductForm>({
     name: '',
     categoryId: '',
-    imageUrls: [''],
+    imageUrls: [],
     teamId: '',
     materialId: '',
     season: '',
@@ -39,6 +63,62 @@ export default function ModalAdd_Edit_Product({
     materialList: [],
   });
 
+  const handleClose = () => {
+    setForm({
+      name: '',
+      categoryId: '',
+      imageUrls: [],
+      teamId: '',
+      materialId: '',
+      season: '',
+      jerseyType: '',
+      isFeatured: false,
+      description: '',
+      price: 0,
+      salePrice: 0,
+      variants: [],
+      materialList: [],
+    })
+    onClose()
+  }
+
+  const handleFinish = async () => {
+    try {
+      setLoadingBtn(true)
+      const uploadedImages = await uploadToCloudinary(form.imageUrls, "product")
+      if(uploadedImages.length > 0){
+        const data = {
+          "name": form.name,
+          "categoryId": Number(form.categoryId),
+          "imageUrls": uploadedImages,
+          "teamId": 1,
+          "materialId": Number(form.materialId),
+          "season": form.season,
+          "jerseyType": form.jerseyType,
+          "isFeatured": form.isFeatured,
+          "description": form.description,
+          "price": form.price,
+          "salePrice": form.salePrice,
+          "variants": form.variants
+        }
+        console.log(data);
+        
+        const response = await CreateProduct_API(data, accessToken)
+        if(response.success){
+          toast.success("Thêm sản phẩm thành công")
+          handleClose()
+        } else {
+          toast.error("Thêm sản phẩm thất bại")
+        }
+      }
+    } catch (error) {
+      toast.error("Có lỗi xảy ra khi thêm sản phẩm")
+      console.error(error)
+    } finally {
+      setLoadingBtn(false)
+    }
+  }
+
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center ${isOpen ? '' : 'hidden'}`}>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
@@ -46,12 +126,19 @@ export default function ModalAdd_Edit_Product({
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
           <button 
-            onClick={onClose}
+            onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
+
+        <InputTakeImg
+          images={form.imageUrls}
+          setImages={(value) => setForm({...form, imageUrls: value})}
+          onChange={(value) => setForm({...form, imageUrls: value})}
+          numberImg={10}
+        />
 
         <Divider className="my-4"/>
 
@@ -94,6 +181,7 @@ export default function ModalAdd_Edit_Product({
                 label="Giá khuyến mãi"
                 labelPlacement="outside"
                 type="number"
+                name="salePrice"
                 value={form.salePrice.toString()}
                 onChange={(e) => setForm({...form, salePrice: Number(e.target.value)})}
                 variant="bordered"
@@ -123,6 +211,10 @@ export default function ModalAdd_Edit_Product({
                 label: "font-medium"
               }}
             />
+             <InputMateria 
+              setMaterial={(value) => setForm({...form, materialId: value})}
+              material={form.materialId}
+            />
             <Input
               label="Loại áo"
               placeholder="Nhập loại áo..."
@@ -135,12 +227,9 @@ export default function ModalAdd_Edit_Product({
                 label: "font-medium"
               }}
             />
-            <InputMateria 
-              setMaterial={(value) => setForm({...form, materialId: value})}
-              material={form.materialId}
-            />
+           
             </div>
-            <Variants />
+            <Variants variants={form.variants} setVariants={(value) => setForm({...form, variants: value})} />
 
           <div>
             <Textarea
@@ -172,10 +261,9 @@ export default function ModalAdd_Edit_Product({
         </div>
 
         <Divider className="my-6"/>
-
         <div className="flex justify-end gap-3">
           <Button
-            onPress={onClose}
+            onPress={handleClose}
             variant="bordered"
             size="lg"
             className="min-w-[120px]"
@@ -187,7 +275,7 @@ export default function ModalAdd_Edit_Product({
             isLoading={loadingBtn}
             color="primary"
             size="lg"
-            className="min-w-[120px]"
+            className="min-w-[120px] bg-blue-500 text-white"
           >
             {loadingBtn ? 'Đang xử lý...' : 'Xác nhận'}
           </Button>

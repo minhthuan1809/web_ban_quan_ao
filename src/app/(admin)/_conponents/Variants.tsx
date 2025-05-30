@@ -16,9 +16,8 @@ interface Errors {
   stockQuantity?: string;
 }
 
-export default function Variants() {
+export default function Variants( {variants, setVariants}: {variants: Variant[], setVariants: (variants: Variant[]) => void} ) {
   const [showModal, setShowModal] = useState(false);
-  const [variants, setVariants] = useState<Variant[]>([]);
   const [currentVariant, setCurrentVariant] = useState<Variant>({
     size: "",
     priceAdjustment: 0,
