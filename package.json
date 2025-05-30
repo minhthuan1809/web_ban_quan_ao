@@ -9,10 +9,7 @@
   },
   "dependencies": {
     "@heroui/toast": "^2.0.9",
-    "@nextui-org/input": "^2.4.6",
     "@nextui-org/react": "^2.6.8",
-    "@nextui-org/system": "^2.4.4",
-    "@nextui-org/theme": "^2.4.3",
     "@react-hook/media-query": "^1.1.1",
     "axios": "^1.9.0",
     "cookies-next": "^6.0.0",

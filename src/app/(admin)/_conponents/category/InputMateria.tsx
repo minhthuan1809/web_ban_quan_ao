@@ -1,8 +1,9 @@
 "use client"
-import { getmaterial_API } from '@/app/_service/category';
 import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'react-toastify';
-import { Autocomplete, AutocompleteItem } from '@nextui-org/react';
+import { getmaterial_API } from '@/app/_service/category'
+import { toast } from 'react-toastify'
+import { Input } from '@nextui-org/react';
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 
 interface Material {
   id: number;
@@ -12,62 +13,87 @@ interface Material {
   updatedAt: number;
 }
 
-export default function InputMateria({setMaterial, material}: {setMaterial: (material: string) => void, material: string}) {
-    const [loading, setLoading] = useState(false);
-    const [totalPage, setTotalPage] = useState(0);
-    const [materialList, setMaterialList] = useState<Material[]>([]);
-    const [searchTerm, setSearchTerm] = useState("");
+export default function InputMateria({setMaterial}: {setMaterial: (material: string) => void, material: string}) {
+  const [loading, setLoading] = useState(false);
+  const [materialList, setMaterialList] = useState<Material[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showDropdown, setShowDropdown] = useState(false);
 
-    const fetchCategory = useCallback(async () => {
-        try {   
-          setLoading(true);
-          const response = await getmaterial_API(
-            searchTerm,
-            1,
-            10,
-            "",
-            ""
-          );
-          setMaterialList(response.data.reverse());
-          setTotalPage(response.metadata.total_page);
-        } catch (err: any) {
-          toast.error(err.message);
-        } finally {
-          setLoading(false);
-        }
-      }, [searchTerm]);        
+  const fetchCategory = useCallback(async () => {
+    try {   
+      setLoading(true);
+      const response = await getmaterial_API(
+        searchTerm,
+        1,
+        10,
+        "",
+        ""
+      );
+      setMaterialList(response.data.reverse());
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchTerm]);        
 
-      useEffect(() => {
-        const debounceTimer = setTimeout(() => {
-          fetchCategory();
-        }, 500);
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      fetchCategory();
+    }, 500);
 
-        return () => clearTimeout(debounceTimer);
-      }, [fetchCategory, searchTerm]);
+    return () => clearTimeout(debounceTimer);
+  }, [fetchCategory, searchTerm]);
 
   return (
-    <div className="relative">
-      <Autocomplete
-        label="Chọn vật liệu" 
-        placeholder="Tìm kiếm vật liệu..."
-        defaultItems={materialList}
-        value={material}
-        onInputChange={setSearchTerm}
-        onSelectionChange={(value) => setMaterial(value as string)}
-        isLoading={loading}
-        className="w-full"
-        variant="bordered"
-        classNames={{
-          base: "max-w-full",
-          listbox: "bg-white w-full min-w-[200px] border border-gray-200 shadow-lg",
-        }}
-      >
-        {(item) => (
-          <AutocompleteItem key={item.id} value={item.id.toString()}>
-            {item.name}
-          </AutocompleteItem>
+    <div className="relative w-full">
+      <div className="relative">
+        <Input
+          label="Vật liệu"
+          labelPlacement="outside"
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onFocus={() => setShowDropdown(true)}
+          onBlur={() => {
+            setTimeout(() => {
+              setShowDropdown(false)
+            }, 200)
+          }}
+          endContent={ !showDropdown ? <ChevronDownIcon className='w-4 h-4' /> : <ChevronUpIcon className='w-4 h-4' />}
+          placeholder="Chọn vật liệu"
+          variant="bordered"
+          size='lg'
+        />
+        {loading && (
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            <div className="w-5 h-5 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+          </div>
         )}
-      </Autocomplete>
+      </div>
+
+      {showDropdown && (
+        <div className="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto z-50">
+          {materialList.map((item) => (
+            <div
+              key={item.id}
+              className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+              onClick={() => {
+                setMaterial(item.id.toString());
+                setSearchTerm(item.name);
+                setShowDropdown(false);
+              }}
+            >
+              {item.name}
+            </div>
+          ))}
+          {materialList.length === 0 && !loading && (
+            <div className="px-4 py-2 text-gray-500">
+              Không tìm thấy kết quả
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }

@@ -56,7 +56,7 @@ export default function Navbar() {
       setUser(null);
       setUser_Zustand(null);
       deleteCookie("token");
-      router.push("/login");
+      router.push("/");
       return;
     }
 
