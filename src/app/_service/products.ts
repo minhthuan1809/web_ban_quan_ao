@@ -8,7 +8,7 @@ export const getProducts_API = async (search: string, page: number, limit: numbe
                 'Content-Type': 'application/json',
             },
         });
-        return response.data;
+        return response;
     } catch (error) {
         throw error;
     }
