@@ -10,17 +10,21 @@ export const metadata: Metadata = {
 };
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { Providers } from "./providers";
+
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en">
+    <html lang="en" className="light">
       <body>
-        <ToastContainer position="bottom-left" />
-        {children}
+        <ToastContainer position="bottom-left" autoClose={2000} />
+        <Providers >
+          {children}
+        </Providers>
       </body>
     </html>
-  );
+  )
 }

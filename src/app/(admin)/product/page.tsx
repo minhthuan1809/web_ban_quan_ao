@@ -29,7 +29,7 @@ export default function ProductPage() {
       try {
         const response = await getProducts_API(searchTerm, page, limit, sort, filter)
         if (response.status === 200) {
-          setProducts(response.data.data)
+          setProducts(response.data.data.reverse())
           setTotalPage(response.data.metadata.total_page)
         } else {
           toast.error("Đã có lỗi xảy ra !")

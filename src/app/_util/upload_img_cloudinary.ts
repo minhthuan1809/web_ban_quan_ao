@@ -9,11 +9,11 @@ export const uploadToCloudinary = async (files: (File | string)[], type: string)
       // At this point, file must be a File object
       const fileObj = file as File;
 
-      // Validate file type
-      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      if (!validTypes.includes(fileObj.type)) {
-        throw new Error(`Invalid file type: ${fileObj.type}. Supported types: JPEG, PNG, GIF, WEBP`);
+      // Validate file type - accept all image types
+      if (!fileObj.type.startsWith('image/')) {
+        throw new Error(`Invalid file type: ${fileObj.type}. Only image files are supported.`);
       }
+
       // Convert File to base64
       const base64String = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();

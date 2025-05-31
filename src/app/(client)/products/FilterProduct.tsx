@@ -12,12 +12,14 @@ import {
   Slider,
   Divider,
 } from "@nextui-org/react"
-import { ChevronUpIcon, ChevronDownIcon } from "lucide-react"
+import { ChevronUp, ChevronDown } from "lucide-react"
 
 export default function FilterProduct() {
   const [selectedCategories, setSelectedCategories] = useState(["sports-clothing"])
   const [selectedSizes, setSelectedSizes] = useState(["L"])
   const [priceRange, setPriceRange] = useState([0, 4905500])
+  const [expandedKeys, setExpandedKeys] = useState(new Set(["categories", "sizes"]))
+  const [isFilterExpanded, setIsFilterExpanded] = useState(true)
 
   const categories = [
     { key: "sports-clothing", label: "QUẦN ÁO THỂ THAO" },
@@ -44,31 +46,39 @@ export default function FilterProduct() {
   }
 
   return (
-    <Card className="w-full max-w-[280px] h-fit">
-      <CardBody className="p-0 max-h-screen overflow-y-auto scrollbar-hide">
-        {/* Header */}
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-800">BỘ LỌC</h2>
+    <Card className="w-full lg:w-[280px] h-fit shadow-sm overflow-hidden border border-gray-200 rounded-lg">
+      <CardBody className="p-0 overflow-hidden">
+        {/* Header - Collapsible on mobile */}
+        <div 
+          className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 cursor-pointer lg:cursor-default flex items-center justify-between"
+          onClick={() => {
+            // Only toggle on mobile/tablet (screen width < 1024px)
+            if (window.innerWidth < 1024) {
+              setIsFilterExpanded(!isFilterExpanded)
+            }
+          }}
+        >
+          <h2 className="text-sm sm:text-base font-semibold text-gray-900">BỘ LỌC</h2>
+          <ChevronDown 
+            className={`text-gray-500 transition-transform lg:hidden ${
+              isFilterExpanded ? 'rotate-180' : ''
+            }`} 
+            size={16} 
+          />
         </div>
 
-        {/* Product Categories */}
-        <Accordion defaultExpandedKeys={["categories"]} className="px-0" selectionMode="multiple">
-          <AccordionItem
-            key="categories"
-            aria-label="Danh mục sản phẩm"
-            title={<span className="text-blue-600 font-medium text-sm">DANH MỤC SẢN PHẨM</span>}
-            indicator={({ isOpen }) => (isOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />)}
-            classNames={{
-              title: "text-blue-600",
-              content: "px-4 py-2",
-              base: "border-none",
-            }}
-          >
+        {/* Filter Content */}
+        <div className={`transition-all duration-300 ease-in-out ${
+          isFilterExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 lg:max-h-none lg:opacity-100'
+        } overflow-hidden lg:overflow-visible`}>
+          {/* Product Categories */}
+          <div className="px-4 sm:px-6 py-3 sm:py-4">
+            <h3 className="text-xs sm:text-sm font-medium text-gray-800 mb-3">DANH MỤC SẢN PHẨM</h3>
             <CheckboxGroup
               value={selectedCategories}
               onValueChange={setSelectedCategories}
               classNames={{
-                wrapper: "gap-2",
+                wrapper: "gap-2 sm:gap-3",
               }}
             >
               {categories.map((category) => (
@@ -76,7 +86,7 @@ export default function FilterProduct() {
                   key={category.key}
                   value={category.key}
                   classNames={{
-                    label: "text-sm text-gray-700",
+                    label: "text-xs sm:text-sm text-gray-700",
                     wrapper: "before:border-gray-300",
                   }}
                 >
@@ -84,35 +94,22 @@ export default function FilterProduct() {
                 </Checkbox>
               ))}
             </CheckboxGroup>
-          </AccordionItem>
-        </Accordion>
+          </div>
 
-        <Divider className="my-1" />
+          <Divider />
 
-        {/* Size Selection */}
-        <Accordion defaultExpandedKeys={["sizes"]} className="px-0" selectionMode="multiple">
-          <AccordionItem
-            key="sizes"
-            aria-label="Size"
-            title={<span className="text-gray-800 font-medium text-sm">SIZE</span>}
-            indicator={({ isOpen }) => (isOpen ? <ChevronUpIcon size={16} /> : <ChevronDownIcon size={16} />)}
-            classNames={{
-              content: "px-4 py-2",
-              base: "border-none",
-            }}
-          >
-            <div className="grid grid-cols-3 gap-2">
+          {/* Size Selection */}
+          <div className="px-4 sm:px-6 py-3 sm:py-4">
+            <h3 className="text-xs sm:text-sm font-medium text-gray-800 mb-3">SIZE</h3>
+            <div className="grid grid-cols-3 sm:grid-cols-2 gap-1.5 sm:gap-2">
               {sizes.map((size) => (
-                <Chip
+                <div
                   key={size.key}
-                  variant={selectedSizes.includes(size.key) ? "solid" : "bordered"}
-                  classNames={{
-                    base: `cursor-pointer justify-center h-9 transition-colors ${
-                      selectedSizes.includes(size.key)
-                        ? "bg-gray-800 text-white hover:bg-gray-700"
-                        : "border-gray-300 text-gray-700 hover:border-gray-400"
-                    }`,
-                  }}
+                  className={`cursor-pointer h-7 sm:h-9 flex items-center justify-center rounded border transition-colors text-xs sm:text-sm ${
+                    selectedSizes.includes(size.key)
+                      ? "bg-gray-900 text-white border-gray-900"
+                      : "border-gray-300 text-gray-700 hover:border-gray-400"
+                  }`}
                   onClick={() => {
                     if (selectedSizes.includes(size.key)) {
                       setSelectedSizes(selectedSizes.filter((s) => s !== size.key))
@@ -122,30 +119,35 @@ export default function FilterProduct() {
                   }}
                 >
                   {size.label}
-                </Chip>
+                </div>
               ))}
             </div>
-          </AccordionItem>
-        </Accordion>
-
-        <Divider className="my-1" />
-
-        <div className="space-y-4 px-4 py-2">
-          <div className="text-center text-sm text-blue-600 font-medium">
-            {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
           </div>
-          <Slider
-            step={50000}
-            minValue={0}
-            maxValue={5000000}
-            value={priceRange}
-            onChange={(value) => setPriceRange(value as number[])}
-            className="w-full"
-            classNames={{
-              track: "bg-gray-200",
-              thumb: "bg-gray-800 border-2 border-white shadow-lg hover:scale-110 transition-transform",
-            }}
-          />
+
+          <Divider />
+
+          {/* Price Range */}
+          <div className="px-4 sm:px-6 py-3 sm:py-4">
+            <h3 className="text-xs sm:text-sm font-medium text-gray-800 mb-3 sm:mb-4">KHOẢNG GIÁ</h3>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="text-center text-xs sm:text-sm text-gray-700 font-medium">
+                {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
+              </div>
+              <Slider
+                step={50000}
+                minValue={0}
+                maxValue={5000000}
+                value={priceRange}
+                onChange={(value) => setPriceRange(value as number[])}
+                size="sm"
+                classNames={{
+                  track: "bg-gray-200",
+                  filler: "bg-gray-800",
+                  thumb: "bg-gray-800 border-2 border-white shadow-md hover:scale-110 transition-transform",
+                }}
+              />
+            </div>
+          </div>
         </div>
       </CardBody>
     </Card>

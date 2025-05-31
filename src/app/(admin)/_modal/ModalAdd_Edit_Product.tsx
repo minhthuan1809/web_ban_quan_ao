@@ -105,30 +105,39 @@ export default function ModalAdd_Edit_Product({
   };
 
   const callApiCloudinary = async () => {
-    let uploadedImages = form.imageUrls;
-    // Only upload new images if they're not already URLs
-    const newImages = form.imageUrls.filter(img => typeof img !== 'string');
-    if (newImages.length > 0) {
-      const newUploadedImages = await uploadToCloudinary(newImages, "kick-style");
-      uploadedImages = [...form.imageUrls.filter(img => typeof img === 'string'), ...newUploadedImages];
-    }
-    const data = {
-      "name": form.name,
-      "categoryId": Number(form.categoryId),
-      "imageUrls": uploadedImages,
-      "teamId": Number(form.teamId),
-      "materialId": Number(form.materialId),
-      "season": form.season,
-      "jerseyType": form.jerseyType,
-      "isFeatured": form.isFeatured,
-      "description": form.description,
-      "price": form.price,
-      "salePrice": form.salePrice,
-      "variants": form.variants
-    }
+    try {
+      let uploadedImages = form.imageUrls;
+      const newImages = form.imageUrls.filter(img => typeof img !== 'string');
+      
+      if (newImages.length > 0) {
+        try {
+          const newUploadedImages = await uploadToCloudinary(newImages, "kick-style");
+          uploadedImages = [...form.imageUrls.filter(img => typeof img === 'string'), ...newUploadedImages];
+        } catch (error) {
+          toast.error("Có lỗi khi tải lên hình ảnh. Vui lòng kiểm tra định dạng file.");
+          throw error;
+        }
+      }
 
-    return data;
-  }
+      return {
+        "name": form.name,
+        "categoryId": Number(form.categoryId),
+        "imageUrls": uploadedImages,
+        "teamId": Number(form.teamId),
+        "materialId": Number(form.materialId),
+        "season": form.season,
+        "jerseyType": form.jerseyType,
+        "isFeatured": form.isFeatured,
+        "description": form.description,
+        "price": form.price,
+        "salePrice": form.salePrice,
+        "variants": form.variants
+      };
+    } catch (error) {
+      console.error("Error in callApiCloudinary:", error);
+      throw error;
+    }
+  };
 
   // handle finish
   const handleFinish = async () => {
@@ -140,6 +149,7 @@ export default function ModalAdd_Edit_Product({
       setLoadingBtn(true)
       const data = await callApiCloudinary();
       const response = await CreateProduct_API(data, accessToken);
+      
       if (response.status === 200) {
         toast.success("Thêm sản phẩm thành công");
         handleClose();
