@@ -18,6 +18,8 @@ export default function ProductPage() {
   const [sort, setSort] = useState("createdAt")
   const [filter, setFilter] = useState("all")
   const [isRefetch, setIsRefetch] = useState(false)
+  const [edit, setEdit] = useState(false)
+
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -117,11 +119,12 @@ export default function ProductPage() {
         loading={loading}
         handleDeleteProduct={handleDeleteProduct}
         setIsOpen={setIsOpen}
+        setEdit={setEdit}
       />
 
       {/* Modal placeholder */}
       {isOpen && (
-        <ModalAdd_Edit_Product isOpen={isOpen} onClose={() => setIsOpen(false)} refetch={() => setIsRefetch(prev => !prev)} />
+        <ModalAdd_Edit_Product isOpen={isOpen} onClose={() => setIsOpen(false)} refetch={() => setIsRefetch(prev => !prev)} edit={edit} />
       )}
     </div>
   );

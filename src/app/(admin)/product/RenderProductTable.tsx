@@ -9,17 +9,18 @@ interface RenderProductTableProps {
   loading: boolean;
   handleDeleteProduct: (product: any) => void;
   setIsOpen: (isOpen: boolean) => void;
+  setEdit: (product: any) => void;
 }
 
 export default function RenderProductTable({
   products,
   loading,
   handleDeleteProduct,
-  setIsOpen
+  setIsOpen,
+  setEdit
 }: RenderProductTableProps) {
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState("");
-  const [showDescription, setShowDescription] = useState(false);
   const [description, setDescription] = useState<any>(null);
 
   const toggleRowExpansion = (productId: number) => {
@@ -176,7 +177,10 @@ export default function RenderProductTable({
                   <div className="col-span-1 flex items-center justify-center">
                     <div className="flex gap-1">
                       <div className="relative group">
-                        <button className="w-8 h-8 flex items-center justify-center text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        <button className="w-8 h-8 flex items-center justify-center text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" onClick={() => {
+                          setIsOpen(true)
+                          setEdit(product)
+                        }}>
                           <Edit className="w-4 h-4" />
                         </button>
                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 px-2 py-1 text-xs text-white bg-gray-900 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap">
@@ -246,8 +250,8 @@ export default function RenderProductTable({
                                 )}
                               </div>
                             </div>
-                            <div className="flex justify-start gap-1 item-center">
-                              <span className="text-gray-600">Mô tả:</span>
+                            <div >
+                              <p className="text-gray-600">Mô tả:</p>
                               <button className="text-blue-600 hover:text-blue-800 hover:underline" onClick={() => setDescription(product.description)}>Xem chi tiết</button>
                             </div>
                             <div>

@@ -19,7 +19,7 @@ export default function RenderTextEditer({ value }: RenderTextEditerProps) {
     const sanitizedValue = sanitizeHTML(value);
 
     return (
-        <div className="text-editor-container">
+        <div className="text-editor-container border border-gray-300 rounded-lg p-4">
             <div
                 className="text-content"
                 dangerouslySetInnerHTML={{ __html: sanitizedValue }}

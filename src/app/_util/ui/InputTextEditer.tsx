@@ -1,35 +1,28 @@
 'use client';
 
-import React, { useEffect } from 'react';
-import SunEditor from 'suneditor-react';
+import React from 'react';
+import dynamic from 'next/dynamic';
+import 'suneditor/dist/css/suneditor.min.css';
 import { uploadToCloudinary } from '../upload_img_cloudinary';
+
+const SunEditor = dynamic(() => import('suneditor-react'), {
+    ssr: false,
+});
 
 interface InputTextEditorProps {
     value: string;
-    onChange: (content: string) => void;
+    onChange: (value: string) => void;
     height?: number;
 }
 
-const InputTextEditor: React.FC<InputTextEditorProps> = ({
-    value,
-    onChange,
-    height = 500,
-}) => {
-    // Đảm bảo giá trị ban đầu được set
-    useEffect(() => {
-        if (value === undefined) {
-            onChange('');
-        }
-    }, []);
-
+const InputTextEditor: React.FC<InputTextEditorProps> = ({ value, onChange, height = 200 }) => {
     const handleChange = (content: string) => {
-        // Đảm bảo luôn trả về string, không phải undefined
-        onChange(content || '');
+        onChange(content);
     };
 
     return (
         <SunEditor
-            setContents={value || ''}
+            setContents={value}
             onChange={handleChange}
             height={`${height}px`}
             setOptions={{
@@ -39,52 +32,16 @@ const InputTextEditor: React.FC<InputTextEditorProps> = ({
                     ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript'],
                     ['removeFormat'],
                     ['fontColor', 'hiliteColor'],
-                    ['indent', 'outdent'],
-                    ['align', 'horizontalRule', 'list', 'table'],
-                    ['link', 'image', 'video'],
+                    ['align', 'list', 'lineHeight'],
+                    ['outdent', 'indent'],
+                    ['table', 'link', 'image'],
                     ['fullScreen', 'showBlocks', 'codeView'],
-                    ['preview', 'print'],
-                    ['save', 'template'],
                 ],
                 defaultTag: 'div',
-                minHeight: '300px',
+                minHeight: '150px',
                 showPathLabel: false,
-                font: [
-                    'Arial',
-                    'Comic Sans MS',
-                    'Courier New',
-                    'Impact',
-                    'Georgia',
-                    'Tahoma',
-                    'Trebuchet MS',
-                    'Verdana'
-                ],
-                formats: ['p', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
-                fontSize: [8, 10, 12, 14, 16, 18, 20, 24, 28, 36, 48, 72],
-                colorList: [
-                    '#ff0000', '#ff8c00', '#ffff00', '#008000', '#0000ff', '#4b0082', '#800080',
-                    '#000000', '#808080', '#ffffff'
-                ],
-                imageUploadSizeLimit: 5242880,
-                imageAccept: '.jpg, .jpeg, .png, .gif',
-                videoAccept: '.mp4, .webm',
-                videoUploadSizeLimit: 52428800,
-                imageResizing: true,
-                imageHeightShow: true,
-                imageAlignShow: true,
-                imageWidth: '100%',
-                imageHeight: 'auto',
-                charCounter: true,
-                linkTargetNewWindow: true,
-                mediaAutoSelect: false,
-                addTagsWhitelist: 'figure[style] img[style]',
-                attributesWhitelist: {
-                    all: 'style|align|class',
-                    figure: 'style',
-                    img: 'style|src|alt'
-                },
-                pasteTagsWhitelist: 'figure|img|p|div|h1|h2|h3|h4|h5|h6|b|strong|i|em|u|s|span|a|br',
-                resizingBar: true
+                charCounter: false,
+                resizingBar: false,
             }}
 
             // thêm hình ảnh lên server

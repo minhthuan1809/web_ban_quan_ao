@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Input, Textarea, Button, Checkbox, Divider } from "@nextui-org/react"
 import InputMateria from '../_conponents/category/InputMateria';
 import InputCategory from '../_conponents/category/InputCategory';
 import Variants from '../_conponents/Variants';
 import InputTakeImg from '@/app/_util/ui/InputTakeImg';
 import { uploadToCloudinary } from '@/app/_util/upload_img_cloudinary';
-import { CreateProduct_API } from '@/app/_service/products';
+import { CreateProduct_API, UpdateProduct_API } from '@/app/_service/products';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { toast } from 'react-toastify';
 import InputTextEditor from '@/app/_util/ui/InputTextEditer';
@@ -48,16 +48,38 @@ const initialFormState: FormData = {
 export default function ModalAdd_Edit_Product({
   isOpen,
   onClose,
-  refetch
+  refetch,
+  edit
 }: {
   isOpen: boolean;
   onClose: () => void;
+  edit: any
   refetch: () => void;
 }) {
   const { accessToken } = useAuthInfor()
   const [loadingBtn, setLoadingBtn] = useState(false)
   const [errors, setErrors] = useState<any>({})
   const [form, setForm] = useState<FormData>(initialFormState);
+
+  useEffect(() => {
+    if (edit) {
+      setForm({
+        name: edit.name || '',
+        categoryId: edit.category?.id || '',
+        imageUrls: edit.imageUrls || [],
+        teamId: edit.team?.id || '1',
+        materialId: edit.material?.id || '',
+        season: edit.season || '',
+        jerseyType: edit.jerseyType || '',
+        isFeatured: edit.isFeatured || false,
+        description: edit.description || '',
+        price: edit.price || 0,
+        salePrice: edit.salePrice || 0,
+        variants: edit.variants || [],
+        materialList: [],
+      });
+    }
+  }, [edit]);
 
   const handleClose = () => {
     setForm(initialFormState);
@@ -80,36 +102,54 @@ export default function ModalAdd_Edit_Product({
 
     try {
       setLoadingBtn(true)
-      const uploadedImages = await uploadToCloudinary(form.imageUrls, "product")
-      if (uploadedImages.length > 0) {
-        const data = {
-          "name": form.name,
-          "categoryId": Number(form.categoryId),
-          "imageUrls": uploadedImages,
-          "teamId": 1,
-          "materialId": Number(form.materialId),
-          "season": form.season,
-          "jerseyType": form.jerseyType,
-          "isFeatured": form.isFeatured,
-          "description": form.description,
-          "price": form.price,
-          "salePrice": form.salePrice,
-          "variants": form.variants
-        }
-        const response = await CreateProduct_API(data, accessToken)
+      let uploadedImages = form.imageUrls;
+
+      // Only upload new images if they're not already URLs
+      const newImages = form.imageUrls.filter(img => typeof img !== 'string');
+      if (newImages.length > 0) {
+        const newUploadedImages = await uploadToCloudinary(newImages, "product");
+        uploadedImages = [...form.imageUrls.filter(img => typeof img === 'string'), ...newUploadedImages];
+      }
+
+      const data = {
+        "name": form.name,
+        "categoryId": Number(form.categoryId),
+        "imageUrls": uploadedImages,
+        "teamId": Number(form.teamId),
+        "materialId": Number(form.materialId),
+        "season": form.season,
+        "jerseyType": form.jerseyType,
+        "isFeatured": form.isFeatured,
+        "description": form.description,
+        "price": form.price,
+        "salePrice": form.salePrice,
+        "variants": form.variants
+      }
+
+      let response;
+      if (edit) {
+        response = await UpdateProduct_API(edit.id, data, accessToken);
         if (response.status === 200) {
-          toast.success("Thêm sản phẩm thành công")
-          handleClose()
-          refetch()
-        } else {
-          toast.error(response.data.message)
+          toast.success("Cập nhật sản phẩm thành công");
+        }
+      } else {
+        response = await CreateProduct_API(data, accessToken);
+        if (response.status === 200) {
+          toast.success("Thêm sản phẩm thành công");
         }
       }
+
+      if (response.status === 200) {
+        handleClose();
+        refetch();
+      } else {
+        toast.error(response.data.message);
+      }
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi thêm sản phẩm, Tên sản phẩm đã tồn tại")
-      console.error(error)
+      toast.error(edit ? "Có lỗi xảy ra khi cập nhật sản phẩm" : "Có lỗi xảy ra khi thêm sản phẩm");
+      console.error(error);
     } finally {
-      setLoadingBtn(false)
+      setLoadingBtn(false);
     }
   }
 
@@ -118,7 +158,7 @@ export default function ModalAdd_Edit_Product({
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
       <div className="bg-white rounded-xl p-8 z-10 w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Thêm sản phẩm</h2>
+          <h2 className="text-2xl font-bold text-gray-800">{edit ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}</h2>
           <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
@@ -127,13 +167,16 @@ export default function ModalAdd_Edit_Product({
           </button>
         </div>
 
-        <InputTakeImg
-          images={form.imageUrls}
-          setImages={(value) => handleInputChange('imageUrls', value)}
-          onChange={(value) => handleInputChange('imageUrls', value)}
-          numberImg={10}
-        />
-        {errors.imageUrls && <p className="text-red-500 text-sm mt-1">{errors.imageUrls}</p>}
+        <div className="mb-6">
+          <p className="font-medium mb-2">Hình ảnh sản phẩm</p>
+          <InputTakeImg
+            images={form.imageUrls || []}
+            setImages={(value) => handleInputChange('imageUrls', value)}
+            onChange={(value) => handleInputChange('imageUrls', value)}
+            numberImg={10}
+          />
+          {errors.imageUrls && <p className="text-red-500 text-sm mt-1">{errors.imageUrls}</p>}
+        </div>
 
         <Divider className="my-4" />
 
@@ -163,7 +206,7 @@ export default function ModalAdd_Edit_Product({
                   label="Giá"
                   labelPlacement="outside"
                   type="number"
-                  value={form.price.toString()}
+                  value={form.price?.toString() || '0'}
                   onChange={(e) => handleInputChange('price', Number(e.target.value))}
                   variant="bordered"
                   size="lg"
@@ -185,7 +228,7 @@ export default function ModalAdd_Edit_Product({
                 labelPlacement="outside"
                 type="number"
                 name="salePrice"
-                value={form.salePrice.toString()}
+                value={form.salePrice?.toString() || '0'}
                 onChange={(e) => handleInputChange('salePrice', Number(e.target.value))}
                 variant="bordered"
                 size="lg"
@@ -203,7 +246,7 @@ export default function ModalAdd_Edit_Product({
             <div>
               <InputCategory
                 setCategory={(value) => handleInputChange('categoryId', value)}
-                category={form.categoryId.toString()}
+                category={form.categoryId?.toString() || ''}
               />
               {errors.categoryId && <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>}
             </div>
@@ -228,7 +271,7 @@ export default function ModalAdd_Edit_Product({
             <div>
               <InputMateria
                 setMaterial={(value) => handleInputChange('materialId', value)}
-                material={form.materialId.toString()}
+                material={form.materialId?.toString() || ''}
               />
               {errors.materialId && <p className="text-red-500 text-sm mt-1">{errors.materialId}</p>}
             </div>
@@ -298,7 +341,7 @@ export default function ModalAdd_Edit_Product({
             size="lg"
             className="min-w-[120px] bg-blue-500 text-white"
           >
-            {loadingBtn ? 'Đang xử lý...' : 'Xác nhận'}
+            {loadingBtn ? 'Đang xử lý...' : edit ? 'Cập nhật' : 'Xác nhận'}
           </Button>
         </div>
       </div>

@@ -3,10 +3,10 @@ import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
 
 interface InputTakeImgProps {
-  onChange: (value: File[]) => void;
+  onChange: (value: (File | string)[]) => void;
   numberImg: number;
-  images: File[];
-  setImages: (value: File[]) => void;
+  images: (File | string)[];
+  setImages: (value: (File | string)[]) => void;
 }
 
 export default function InputTakeImg({
@@ -19,17 +19,23 @@ export default function InputTakeImg({
   const [selectedPreviewImage, setSelectedPreviewImage] = useState<string>('');
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
+
+  console.log("images", images);
+
   // Update preview URLs when images change
   useEffect(() => {
     const generatePreviews = async () => {
       const urls = await Promise.all(
         images.map((file) => {
+          if (typeof file === 'string') {
+            return file;
+          }
           return new Promise<string>((resolve) => {
             const reader = new FileReader();
             reader.onloadend = () => {
               resolve(reader.result as string);
             };
-            reader.readAsDataURL(file);
+            reader.readAsDataURL(file as File);
           });
         })
       );
@@ -79,9 +85,9 @@ export default function InputTakeImg({
             />
             <div className="w-full h-full flex flex-col items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-                <circle cx="8.5" cy="8.5" r="1.5"/>
-                <polyline points="21 15 16 10 5 21"/>
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <polyline points="21 15 16 10 5 21" />
               </svg>
               <span className="text-xs text-gray-500 mt-2">Thêm ảnh ({images.length}/{numberImg})</span>
             </div>
@@ -90,11 +96,11 @@ export default function InputTakeImg({
 
         {previewUrls.map((previewUrl, index) => (
           <div key={index} className="relative w-[120px] h-[120px]">
-            <Image 
-              src={previewUrl} 
-              alt={`Preview ${index + 1}`} 
-              width={120} 
-              height={120} 
+            <Image
+              src={previewUrl}
+              alt={`Preview ${index + 1}`}
+              width={120}
+              height={120}
               className="w-full h-full object-cover rounded-lg cursor-pointer"
               onClick={() => handlePreviewImage(previewUrl)}
             />
@@ -113,7 +119,7 @@ export default function InputTakeImg({
 
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div 
+          <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => setIsOpen(false)}
           ></div>

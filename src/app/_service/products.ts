@@ -41,3 +41,16 @@ export const CreateProduct_API = async (data: any, token: string) => {
         throw error;
     }
 }
+export const UpdateProduct_API = async (id: number, data: any, token: string) => {
+    try {
+        const response = await axios.put(`${API_URL}/products/${id}`, data, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`,
+            },
+        });
+        return response;
+    } catch (error) {
+        throw error;
+    }
+}

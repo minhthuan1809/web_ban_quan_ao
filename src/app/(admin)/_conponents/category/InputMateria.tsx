@@ -13,14 +13,14 @@ interface Material {
   updatedAt: number;
 }
 
-export default function InputMateria({setMaterial}: {setMaterial: (material: string) => void, material: string}) {
+export default function InputMateria({ setMaterial, material }: { setMaterial: (c: string) => void, material: string }) {
   const [loading, setLoading] = useState(false);
   const [materialList, setMaterialList] = useState<Material[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const fetchCategory = useCallback(async () => {
-    try {   
+  const fetchMaterial = useCallback(async () => {
+    try {
       setLoading(true);
       const response = await getmaterial_API(
         searchTerm,
@@ -35,15 +35,24 @@ export default function InputMateria({setMaterial}: {setMaterial: (material: str
     } finally {
       setLoading(false);
     }
-  }, [searchTerm]);        
+  }, [searchTerm]);
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      fetchCategory();
+      fetchMaterial();
     }, 500);
 
     return () => clearTimeout(debounceTimer);
-  }, [fetchCategory, searchTerm]);
+  }, [fetchMaterial, searchTerm]);
+
+  useEffect(() => {
+    if (material) {
+      const selectedmaterial = materialList.find(item => item.id.toString() === material);
+      if (selectedmaterial) {
+        setSearchTerm(selectedmaterial.name);
+      }
+    }
+  }, [material, materialList]);
 
   return (
     <div className="relative w-full">
@@ -60,7 +69,7 @@ export default function InputMateria({setMaterial}: {setMaterial: (material: str
               setShowDropdown(false)
             }, 200)
           }}
-          endContent={ !showDropdown ? <ChevronDownIcon className='w-4 h-4' /> : <ChevronUpIcon className='w-4 h-4' />}
+          endContent={!showDropdown ? <ChevronDownIcon className='w-4 h-4' /> : <ChevronUpIcon className='w-4 h-4' />}
           placeholder="Chọn vật liệu"
           variant="bordered"
           size='lg'

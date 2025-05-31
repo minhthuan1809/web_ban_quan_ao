@@ -13,14 +13,14 @@ interface Material {
   updatedAt: number;
 }
 
-export default function InputCategory({setCategory, category}: {setCategory: (category: string) => void, category: string}) {
+export default function InputCategory({ setCategory, category }: { setCategory: (category: string) => void, category: string }) {
   const [loading, setLoading] = useState(false);
   const [categoryList, setCategoryList] = useState<Material[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
 
   const fetchCategory = useCallback(async () => {
-    try {   
+    try {
       setLoading(true);
       const response = await getCategory_API(
         searchTerm,
@@ -29,13 +29,13 @@ export default function InputCategory({setCategory, category}: {setCategory: (ca
         "",
         ""
       );
-        setCategoryList(response.data.reverse());
+      setCategoryList(response.data.reverse());
     } catch (err: any) {
       toast.error(err.message);
     } finally {
       setLoading(false);
     }
-  }, [searchTerm]);        
+  }, [searchTerm]);
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
@@ -44,6 +44,15 @@ export default function InputCategory({setCategory, category}: {setCategory: (ca
 
     return () => clearTimeout(debounceTimer);
   }, [fetchCategory, searchTerm]);
+
+  useEffect(() => {
+    if (category) {
+      const selectedCategory = categoryList.find(item => item.id.toString() === category);
+      if (selectedCategory) {
+        setSearchTerm(selectedCategory.name);
+      }
+    }
+  }, [category, categoryList]);
 
   return (
     <div className="relative w-full">
@@ -60,7 +69,7 @@ export default function InputCategory({setCategory, category}: {setCategory: (ca
               setShowDropdown(false)
             }, 200)
           }}
-          endContent={ !showDropdown ? <ChevronDownIcon className='w-4 h-4' /> : <ChevronUpIcon className='w-4 h-4' />}
+          endContent={!showDropdown ? <ChevronDownIcon className='w-4 h-4' /> : <ChevronUpIcon className='w-4 h-4' />}
           placeholder="Chọn danh mục"
           variant="bordered"
           size='lg'
@@ -74,7 +83,7 @@ export default function InputCategory({setCategory, category}: {setCategory: (ca
 
       {showDropdown && (
         <div className="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto z-50">
-            {categoryList.map((item) => (
+          {categoryList.map((item) => (
             <div
               key={item.id}
               className="px-4 py-2 cursor-pointer hover:bg-gray-100"
