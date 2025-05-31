@@ -62,7 +62,10 @@ export default function ModalAdd_Edit_Product({
   const [form, setForm] = useState<FormData>(initialFormState);
 
   useEffect(() => {
-    if (edit) {
+    if (!isOpen) {
+      setForm(initialFormState);
+      setErrors({});
+    } else if (edit) {
       setForm({
         name: edit.name || '',
         categoryId: edit.category?.id || '',
@@ -79,9 +82,13 @@ export default function ModalAdd_Edit_Product({
         materialList: [],
       });
     }
-  }, [edit]);
+  }, [edit, isOpen]);
 
   const handleClose = () => {
+    if (loadingBtn) {
+      toast.error("Vui lòng đợi xử lý xong!");
+      return;
+    }
     setForm(initialFormState);
     setErrors({});
     onClose();
@@ -94,52 +101,44 @@ export default function ModalAdd_Edit_Product({
     }));
   };
 
+  const callApiCloudinary = async () => {
+    let uploadedImages = form.imageUrls;
+    // Only upload new images if they're not already URLs
+    const newImages = form.imageUrls.filter(img => typeof img !== 'string');
+    if (newImages.length > 0) {
+      const newUploadedImages = await uploadToCloudinary(newImages, "kick-style");
+      uploadedImages = [...form.imageUrls.filter(img => typeof img === 'string'), ...newUploadedImages];
+    }
+    const data = {
+      "name": form.name,
+      "categoryId": Number(form.categoryId),
+      "imageUrls": uploadedImages,
+      "teamId": Number(form.teamId),
+      "materialId": Number(form.materialId),
+      "season": form.season,
+      "jerseyType": form.jerseyType,
+      "isFeatured": form.isFeatured,
+      "description": form.description,
+      "price": form.price,
+      "salePrice": form.salePrice,
+      "variants": form.variants
+    }
+
+    return data;
+  }
+
+  // handle finish
   const handleFinish = async () => {
     if (!validateForm(form, setErrors)) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc!");
       return;
     }
-
     try {
       setLoadingBtn(true)
-      let uploadedImages = form.imageUrls;
-
-      // Only upload new images if they're not already URLs
-      const newImages = form.imageUrls.filter(img => typeof img !== 'string');
-      if (newImages.length > 0) {
-        const newUploadedImages = await uploadToCloudinary(newImages, "product");
-        uploadedImages = [...form.imageUrls.filter(img => typeof img === 'string'), ...newUploadedImages];
-      }
-
-      const data = {
-        "name": form.name,
-        "categoryId": Number(form.categoryId),
-        "imageUrls": uploadedImages,
-        "teamId": Number(form.teamId),
-        "materialId": Number(form.materialId),
-        "season": form.season,
-        "jerseyType": form.jerseyType,
-        "isFeatured": form.isFeatured,
-        "description": form.description,
-        "price": form.price,
-        "salePrice": form.salePrice,
-        "variants": form.variants
-      }
-
-      let response;
-      if (edit) {
-        response = await UpdateProduct_API(edit.id, data, accessToken);
-        if (response.status === 200) {
-          toast.success("Cập nhật sản phẩm thành công");
-        }
-      } else {
-        response = await CreateProduct_API(data, accessToken);
-        if (response.status === 200) {
-          toast.success("Thêm sản phẩm thành công");
-        }
-      }
-
+      const data = await callApiCloudinary();
+      const response = await CreateProduct_API(data, accessToken);
       if (response.status === 200) {
+        toast.success("Thêm sản phẩm thành công");
         handleClose();
         refetch();
       } else {
@@ -153,13 +152,35 @@ export default function ModalAdd_Edit_Product({
     }
   }
 
+  // edit
+  const handleEdit = async () => {
+    try {
+      setLoadingBtn(true)
+    const data = await callApiCloudinary();
+    const response = await UpdateProduct_API(edit.id, data, accessToken);
+    if (response.status === 200) {
+      toast.success("Cập nhật sản phẩm thành công");
+      handleClose();
+      refetch();
+    } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(edit ? "Có lỗi xảy ra khi cập nhật sản phẩm" : "Có lỗi xảy ra khi thêm sản phẩm");
+      console.error(error);
+    } finally {
+      setLoadingBtn(false);
+    }
+  }
+
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center ${isOpen ? '' : 'hidden'}`}>
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose}></div>
       <div className="bg-white rounded-xl p-8 z-10 w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">{edit ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}</h2>
           <button
+            disabled={loadingBtn}
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
           >
@@ -335,7 +356,7 @@ export default function ModalAdd_Edit_Product({
             Hủy
           </Button>
           <Button
-            onPress={handleFinish}
+            onPress={edit ? handleEdit : handleFinish}
             isLoading={loadingBtn}
             color="primary"
             size="lg"

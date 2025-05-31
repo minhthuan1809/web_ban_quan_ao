@@ -1,14 +1,19 @@
-export const uploadToCloudinary = async (files: File[], type: string): Promise<string[]> => {
+export const uploadToCloudinary = async (files: (File | string)[], type: string): Promise<string[]> => {
   try {
-
-
     const uploadPromises = files.map(async (file) => {
-      // Validate file type
-      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
-      if (!validTypes.includes(file.type)) {
-        throw new Error(`Invalid file type: ${file.type}. Supported types: JPEG, PNG, GIF, WEBP`);
+      
+      if (typeof file === 'string' && file.includes('cloudinary.com')) {
+        return file;
       }
 
+      // At this point, file must be a File object
+      const fileObj = file as File;
+
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!validTypes.includes(fileObj.type)) {
+        throw new Error(`Invalid file type: ${fileObj.type}. Supported types: JPEG, PNG, GIF, WEBP`);
+      }
       // Convert File to base64
       const base64String = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
@@ -22,13 +27,11 @@ export const uploadToCloudinary = async (files: File[], type: string): Promise<s
         };
 
         reader.onerror = () => {
-          reject(new Error(`Failed to read file: ${file.name}`));
+          reject(new Error(`Failed to read file: ${fileObj.name}`));
         };
 
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(fileObj);
       });
-
-
       try {
         const response = await fetch('/api/cloudinary', {
           method: 'POST',
@@ -40,30 +43,26 @@ export const uploadToCloudinary = async (files: File[], type: string): Promise<s
             type: type
           }),
         });
-
         const data = await response.json();
 
         if (!response.ok) {
-          console.error('Server response:', data);
           throw new Error(data.details || data.error || `Upload failed with status ${response.status}`);
         }
 
         if (!data.success || !data.data?.secure_url) {
-          console.error('Invalid server response:', data);
           throw new Error('Invalid response format from server');
         }
 
-        console.log(`Successfully uploaded: ${file.name}`);
+        console.log(`Successfully uploaded: ${fileObj.name}`);
         return data.data.secure_url;
 
       } catch (error) {
-        console.error(`Error uploading ${file.name}:`, error);
+        console.error(`Error uploading ${fileObj.name}:`, error);
         throw error;
       }
     });
 
     const results = await Promise.all(uploadPromises);
-    console.log('All uploads completed successfully');
     return results;
 
   } catch (error) {

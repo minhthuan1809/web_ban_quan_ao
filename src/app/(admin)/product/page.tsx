@@ -51,32 +51,6 @@ export default function ProductPage() {
         toast.error("Không tìm thấy ảnh sản phẩm");
         return;
       }
-
-      // xóa ảnh trên severs
-      for (const imageUrl of product.imageUrls) {
-        if (typeof imageUrl === 'string') {
-          const matches = imageUrl.match(/\/v\d+\/(.*?)\/([^/]+)$/);
-          if (!matches) {
-            console.error("Invalid image URL format:", imageUrl);
-            continue;
-          }
-          const folder = matches[1];
-          const publicId = matches[2].split('.')[0];
-          const response = await fetch("/api/cloudinary", {
-            method: "DELETE",
-            body: JSON.stringify({ id: publicId, folder: folder }),
-            headers: {
-              "Content-Type": "application/json",
-            },
-          });
-
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.details || 'Failed to delete image');
-          }
-        }
-      }
-
       const deleteRes = await deleteProduct_API(product.id, accessToken);
       if (deleteRes.status === 204) {
         toast.success("Xóa sản phẩm thành công")
@@ -84,7 +58,30 @@ export default function ProductPage() {
       } else {
         toast.error("Xóa sản phẩm thất bại")
       }
+    // xóa ảnh trên severs
+    for (const imageUrl of product.imageUrls) {
+      if (typeof imageUrl === 'string') {
+        const matches = imageUrl.match(/\/v\d+\/(.*?)\/([^/]+)$/);
+        if (!matches) {
+          console.error("Invalid image URL format:", imageUrl);
+          continue;
+        }
+        const folder = matches[1];
+        const publicId = matches[2].split('.')[0];
+        const response = await fetch("/api/cloudinary", {
+          method: "DELETE",
+          body: JSON.stringify({ id: publicId, folder: folder }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
 
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.details || 'Failed to delete image');
+        }
+      }
+    }
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa sản phẩm");

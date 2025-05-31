@@ -20,7 +20,6 @@ export default function InputTakeImg({
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
 
-  console.log("images", images);
 
   // Update preview URLs when images change
   useEffect(() => {
