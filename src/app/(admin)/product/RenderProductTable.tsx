@@ -299,7 +299,7 @@ export default function RenderProductTable({
                             <h4 className="font-semibold text-gray-900 mb-3">Hình ảnh ({product.imageUrls.length})</h4>
                             <div className="grid grid-cols-4 gap-2">
                               {product.imageUrls.map((url: string, index: number) => (
-                                <div key={index} className="w-full h-20 relative overflow-hidden rounded-lg border border-gray-200">
+                                <div key={index} className="aspect-square relative overflow-hidden rounded-lg border border-gray-200">
                                   <img
                                     src={url}
                                     alt={`${product.name} - ${index + 1}`}

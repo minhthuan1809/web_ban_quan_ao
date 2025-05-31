@@ -14,7 +14,7 @@ export default function Category() {
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchValue, setSearchValue] = useState("");
-    const rowsPerPage = 10;
+    const rowsPerPage = 30;
     const [refresh, setRefresh] = useState(false);
     const [editCategory, setEditCategory] = useState<any>(null);
     const [isOpen, setIsOpen] = useState(false);
