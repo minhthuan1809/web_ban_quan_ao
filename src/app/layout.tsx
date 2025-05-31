@@ -1,6 +1,8 @@
 // thư viện
 import type { Metadata } from "next";
 import "./globals.css";
+import 'suneditor/dist/css/suneditor.min.css';
+
 // thêm từ các component
 export const metadata: Metadata = {
   title: "Create Next App",

@@ -2,7 +2,6 @@
 
 import React, { useEffect } from 'react';
 import SunEditor from 'suneditor-react';
-import 'suneditor/dist/css/suneditor.min.css';
 import { uploadToCloudinary } from '../upload_img_cloudinary';
 
 interface InputTextEditorProps {

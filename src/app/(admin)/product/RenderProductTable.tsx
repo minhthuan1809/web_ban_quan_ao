@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Eye, Trash2, Search, Plus, Edit, ChevronDown, ChevronRight, Filter } from 'lucide-react';
+import { Eye, Trash2, Search, Plus, Edit, ChevronDown, ChevronRight, Filter, X } from 'lucide-react';
 import Loading from '@/app/_util/Loading';
 import FormatPrice from '@/app/_util/FormatPrice';
+import RenderTextEditer from '@/app/_util/ui/RenderTextEditer';
 
 interface RenderProductTableProps {
   products: any[];
@@ -10,14 +11,16 @@ interface RenderProductTableProps {
   setIsOpen: (isOpen: boolean) => void;
 }
 
-export default function RenderProductTable({ 
-  products, 
-  loading, 
+export default function RenderProductTable({
+  products,
+  loading,
   handleDeleteProduct,
-  setIsOpen 
+  setIsOpen
 }: RenderProductTableProps) {
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [searchTerm, setSearchTerm] = useState("");
+  const [showDescription, setShowDescription] = useState(false);
+  const [description, setDescription] = useState<any>(null);
 
   const toggleRowExpansion = (productId: number) => {
     const newExpanded = new Set(expandedRows);
@@ -85,7 +88,7 @@ export default function RenderProductTable({
         {/* Product Rows */}
         <div className="divide-y divide-gray-100">
           {loading ? (
-            <Loading/>
+            <Loading />
           ) : filteredProducts.length > 0 ? (
             filteredProducts.map((product: any, index: number) => (
               <React.Fragment key={index}>
@@ -125,7 +128,7 @@ export default function RenderProductTable({
                         {product?.name}
                       </h3>
                       <p className="text-sm text-gray-600 truncate">
-                        {product?.description || "Chưa có mô tả"}
+                        {product?.description?.value || "Chưa có mô tả"}
                       </p>
                     </div>
                   </div>
@@ -159,14 +162,12 @@ export default function RenderProductTable({
 
                   {/* Status */}
                   <div className="col-span-2 flex items-center justify-center">
-                    <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${
-                      product.isDeleted 
-                        ? 'bg-red-100 text-red-800' 
-                        : 'bg-green-100 text-green-800'
-                    }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                        product.isDeleted ? 'bg-red-400' : 'bg-green-400'
-                      }`}></span>
+                    <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${product.isDeleted
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-green-100 text-green-800'
+                      }`}>
+                      <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${product.isDeleted ? 'bg-red-400' : 'bg-green-400'
+                        }`}></span>
                       {product.isDeleted ? "Ngừng bán" : "Hoạt động"}
                     </span>
                   </div>
@@ -183,7 +184,7 @@ export default function RenderProductTable({
                         </div>
                       </div>
                       <div className="relative group">
-                        <button 
+                        <button
                           onClick={() => handleDeleteProduct(product)}
                           className="w-8 h-8 flex items-center justify-center text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                         >
@@ -205,7 +206,7 @@ export default function RenderProductTable({
                         {/* Thông tin chi tiết */}
                         <div className="space-y-4">
                           <h4 className="font-semibold text-gray-900 mb-3">Thông tin chi tiết</h4>
-                          
+
                           <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
                               <span className="text-gray-600">Mã sản phẩm:</span>
@@ -244,6 +245,10 @@ export default function RenderProductTable({
                                   </span>
                                 )}
                               </div>
+                            </div>
+                            <div className="flex justify-start gap-1 item-center">
+                              <span className="text-gray-600">Mô tả:</span>
+                              <button className="text-blue-600 hover:text-blue-800 hover:underline" onClick={() => setDescription(product.description)}>Xem chi tiết</button>
                             </div>
                             <div>
                               <span className="text-gray-600">Ngày tạo:</span>
@@ -316,7 +321,7 @@ export default function RenderProductTable({
               <p className="text-gray-600 mb-4">
                 Thử thay đổi từ khóa tìm kiếm hoặc thêm sản phẩm mới
               </p>
-              <button 
+              <button
                 onClick={() => setIsOpen(true)}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
@@ -327,6 +332,19 @@ export default function RenderProductTable({
           )}
         </div>
       </div>
+      {description && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h4 className="text-2xl font-semibold">Mô tả sản phẩm</h4>
+              <button className="text-gray-600 hover:text-gray-800" onClick={() => setDescription(null)}>
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <RenderTextEditer value={description} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
