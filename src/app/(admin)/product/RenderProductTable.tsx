@@ -3,6 +3,8 @@ import { Eye, Trash2, Search, Plus, Edit, ChevronDown, ChevronRight, Filter, X }
 import Loading from '@/app/_util/Loading';
 import FormatPrice from '@/app/_util/FormatPrice';
 import RenderTextEditer from '@/app/_util/ui/RenderTextEditer';
+import { Pagination } from '@nextui-org/react';
+import Modadescription from '../_modal/Modadescription';
 
 interface RenderProductTableProps {
   products: any[];
@@ -10,6 +12,11 @@ interface RenderProductTableProps {
   handleDeleteProduct: (product: any) => void;
   setIsOpen: (isOpen: boolean) => void;
   setEdit: (product: any) => void;
+  setSearchTerm: (searchTerm: string) => void;
+  searchTerm: string;
+  totalPage: number;
+  currentPage: number;
+  onChangePage: (onChangePage: number) => void;
 }
 
 export default function RenderProductTable({
@@ -17,10 +24,14 @@ export default function RenderProductTable({
   loading,
   handleDeleteProduct,
   setIsOpen,
-  setEdit
+  setEdit,
+  setSearchTerm,
+  searchTerm,
+  totalPage = 0,
+  currentPage = 1,
+  onChangePage
 }: RenderProductTableProps) {
   const [expandedRows, setExpandedRows] = useState(new Set());
-  const [searchTerm, setSearchTerm] = useState("");
   const [description, setDescription] = useState<any>(null);
 
   const toggleRowExpansion = (productId: number) => {
@@ -36,13 +47,6 @@ export default function RenderProductTable({
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('vi-VN');
   };
-
-  const filteredProducts = Array.isArray(products) ? products.filter((product: any) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ) : [];
-
-
-
   return (
     <div className="mx-auto px-6 py-6">
       {/* Search Bar */}
@@ -66,7 +70,7 @@ export default function RenderProductTable({
               Tất cả
             </button>
             <span className="text-sm text-gray-600">
-              Hiển thị {filteredProducts.length} sản phẩm
+              Hiển thị {products.length} sản phẩm
             </span>
           </div>
         </div>
@@ -90,8 +94,8 @@ export default function RenderProductTable({
         <div className="divide-y divide-gray-100">
           {loading ? (
             <Loading />
-          ) : filteredProducts.length > 0 ? (
-            filteredProducts.map((product: any, index: number) => (
+          ) : products.length > 0 ? (
+            products.map((product: any, index: number) => (
               <React.Fragment key={index}>
                 {/* Main Row */}
                 <div className="grid grid-cols-12 gap-4 p-4 hover:bg-gray-50 transition-colors">
@@ -125,12 +129,10 @@ export default function RenderProductTable({
                         </span>
                         <span className="text-xs text-gray-500">ID: {product.id}</span>
                       </div>
-                      <h3 className="font-medium text-gray-900 mb-1 truncate">
+                      <h3 className="font-bold p-2 text-gray-900 mb-1 truncate">
                         {product?.name}
                       </h3>
-                      <p className="text-sm text-gray-600 truncate">
-                        {product?.description?.value || "Chưa có mô tả"}
-                      </p>
+                   
                     </div>
                   </div>
 
@@ -336,19 +338,25 @@ export default function RenderProductTable({
           )}
         </div>
       </div>
-      {description && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl w-full max-h-[80vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h4 className="text-2xl font-semibold">Mô tả sản phẩm</h4>
-              <button className="text-gray-600 hover:text-gray-800" onClick={() => setDescription(null)}>
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <RenderTextEditer value={description} />
-          </div>
-        </div>
-      )}
+      {/* Modal mô tả sản phẩm */}
+      <Modadescription description={description} onClose={() => setDescription(null)} />
+      {/* Pagination */}
+       <div className="flex justify-center mt-4">
+        {totalPage > 1 && (
+          <Pagination
+            total={totalPage}
+            page={currentPage}
+            onChange={onChangePage}
+            showControls
+            variant="bordered"
+            classNames={{
+            wrapper: "gap-2",
+            item: "w-8 h-8 text-sm rounded-lg",
+            cursor: "bg-blue-500 text-white font-bold",
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

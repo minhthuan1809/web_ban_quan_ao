@@ -36,7 +36,7 @@ export default function ChooseCategoryHeader() {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
-          <button className='absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-[10rem] h-[2.4rem] bg-blue-500 text-white rounded-lg'>
+          <button className='absolute right-3 top-1/2 transform -translate-y-1/2  w-[10rem] h-[2.4rem] bg-blue-500 text-white rounded-lg'>
             Tìm kiếm
           </button>
         </div>

@@ -53,7 +53,6 @@ export const uploadToCloudinary = async (files: (File | string)[], type: string)
           throw new Error('Invalid response format from server');
         }
 
-        console.log(`Successfully uploaded: ${fileObj.name}`);
         return data.data.secure_url;
 
       } catch (error) {

@@ -14,21 +14,23 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
+  const [limit, setLimit] = useState(30)
   const [sort, setSort] = useState("createdAt")
   const [filter, setFilter] = useState("all")
   const [isRefetch, setIsRefetch] = useState(false)
   const [edit, setEdit] = useState(false)
+  const [searchTerm, setSearchTerm] = useState("")
+  const [totalPage, setTotalPage] = useState(0)
 
 
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const response = await getProducts_API("", page, limit, sort, filter)
-
+        const response = await getProducts_API(searchTerm, page, limit, sort, filter)
         if (response.status === 200) {
           setProducts(response.data.data)
+          setTotalPage(response.data.metadata.total_page)
         } else {
           toast.error("Đã có lỗi xảy ra !")
         }
@@ -43,7 +45,7 @@ export default function ProductPage() {
     }, 500)
 
     return () => clearTimeout(timeout)
-  }, [page, limit, sort, filter, isRefetch])
+  }, [page, limit, sort, filter, isRefetch, searchTerm])
 
   const handleDeleteProduct = async (product: any) => {
     try {
@@ -111,17 +113,24 @@ export default function ProductPage() {
         </div>
       </div>
 
+
+      {/* Render Product Table */}
       <RenderProductTable
         products={products}
         loading={loading}
         handleDeleteProduct={handleDeleteProduct}
         setIsOpen={setIsOpen}
         setEdit={setEdit}
+        setSearchTerm={setSearchTerm}
+        searchTerm={searchTerm}
+        totalPage={totalPage}
+        onChangePage={setPage}
+        currentPage={page}
       />
 
       {/* Modal placeholder */}
       {isOpen && (
-        <ModalAdd_Edit_Product isOpen={isOpen} onClose={() => setIsOpen(false)} refetch={() => setIsRefetch(prev => !prev)} edit={edit} />
+        <ModalAdd_Edit_Product isOpen={isOpen} onClose={() => setIsOpen(false)} refetch={() => setIsRefetch(prev => !prev)} edit={edit} setEdit={setEdit}/>
       )}
     </div>
   );

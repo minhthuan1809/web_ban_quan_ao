@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react'
-import { Input, Textarea, Button, Checkbox, Divider } from "@nextui-org/react"
+import { Input, Textarea, Button, Checkbox, Divider, Spinner } from "@nextui-org/react"
 import InputMateria from '../_conponents/category/InputMateria';
 import InputCategory from '../_conponents/category/InputCategory';
 import Variants from '../_conponents/Variants';
@@ -49,11 +49,13 @@ export default function ModalAdd_Edit_Product({
   isOpen,
   onClose,
   refetch,
-  edit
+  edit,
+  setEdit
 }: {
   isOpen: boolean;
   onClose: () => void;
   edit: any
+  setEdit: (edit: any) => void;
   refetch: () => void;
 }) {
   const { accessToken } = useAuthInfor()
@@ -91,6 +93,7 @@ export default function ModalAdd_Edit_Product({
     }
     setForm(initialFormState);
     setErrors({});
+    setEdit(null);
     onClose();
   };
 
@@ -362,7 +365,7 @@ export default function ModalAdd_Edit_Product({
             size="lg"
             className="min-w-[120px] bg-blue-500 text-white"
           >
-            {loadingBtn ? 'Đang xử lý...' : edit ? 'Cập nhật' : 'Xác nhận'}
+            {loadingBtn ? <Spinner /> : edit ? 'Cập nhật' : 'Xác nhận'}
           </Button>
         </div>
       </div>
