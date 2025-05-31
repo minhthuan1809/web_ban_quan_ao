@@ -5,13 +5,14 @@ import { deleteProduct_API, getProducts_API } from '@/app/_service/products';
 import { toast } from 'react-toastify';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import RenderProductTable from './RenderProductTable';
+import ModalAdd_Edit_Product from '../_modal/ModalAdd_Edit_Product';
 
 export default function ProductPage() {
-  const {accessToken} = useAuthInfor()
+  const { accessToken } = useAuthInfor()
   const [products, setProducts] = useState<any[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
- 
+
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [sort, setSort] = useState("createdAt")
@@ -23,8 +24,8 @@ export default function ProductPage() {
       setLoading(true);
       try {
         const response = await getProducts_API("", page, limit, sort, filter)
-        
-        if(response.status === 200){
+
+        if (response.status === 200) {
           setProducts(response.data.data)
         } else {
           toast.error("Đã có lỗi xảy ra !")
@@ -42,15 +43,50 @@ export default function ProductPage() {
     return () => clearTimeout(timeout)
   }, [page, limit, sort, filter, isRefetch])
 
-  const handleDeleteProduct = (product: any) => {
-    deleteProduct_API(product.id, accessToken).then((res) => {
-      if(res.status === 204){
-        toast.success(res.message)
+  const handleDeleteProduct = async (product: any) => {
+    try {
+      if (!product?.imageUrls?.length) {
+        toast.error("Không tìm thấy ảnh sản phẩm");
+        return;
+      }
+
+      // xóa ảnh trên severs
+      for (const imageUrl of product.imageUrls) {
+        if (typeof imageUrl === 'string') {
+          const matches = imageUrl.match(/\/v\d+\/(.*?)\/([^/]+)$/);
+          if (!matches) {
+            console.error("Invalid image URL format:", imageUrl);
+            continue;
+          }
+          const folder = matches[1];
+          const publicId = matches[2].split('.')[0];
+          const response = await fetch("/api/cloudinary", {
+            method: "DELETE",
+            body: JSON.stringify({ id: publicId, folder: folder }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.details || 'Failed to delete image');
+          }
+        }
+      }
+
+      const deleteRes = await deleteProduct_API(product.id, accessToken);
+      if (deleteRes.status === 204) {
+        toast.success("Xóa sản phẩm thành công")
         setIsRefetch(prev => !prev)
       } else {
-        toast.error(res.message)
+        toast.error("Xóa sản phẩm thất bại")
       }
-    })
+
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa sản phẩm");
+    }
   };
 
   return (
@@ -65,7 +101,7 @@ export default function ProductPage() {
               </h1>
               <p className="text-gray-600 text-sm">Quản lý sản phẩm của bạn</p>
             </div>
-            <button 
+            <button
               onClick={() => setIsOpen(true)}
               className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
             >
@@ -76,7 +112,7 @@ export default function ProductPage() {
         </div>
       </div>
 
-      <RenderProductTable 
+      <RenderProductTable
         products={products}
         loading={loading}
         handleDeleteProduct={handleDeleteProduct}
@@ -85,18 +121,7 @@ export default function ProductPage() {
 
       {/* Modal placeholder */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Thêm sản phẩm</h3>
-            <p className="text-gray-600 mb-4">Modal thêm sản phẩm sẽ được implement ở đây</p>
-            <button 
-              onClick={() => setIsOpen(false)}
-              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
+        <ModalAdd_Edit_Product isOpen={isOpen} onClose={() => setIsOpen(false)} refetch={() => setIsRefetch(prev => !prev)} />
       )}
     </div>
   );

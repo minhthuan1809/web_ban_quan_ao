@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react'
 import { Input, Textarea, Button, Checkbox, Divider } from "@nextui-org/react"
 import InputMateria from '../_conponents/category/InputMateria';
@@ -8,85 +10,78 @@ import { uploadToCloudinary } from '@/app/_util/upload_img_cloudinary';
 import { CreateProduct_API } from '@/app/_service/products';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { toast } from 'react-toastify';
+import InputTextEditor from '@/app/_util/ui/InputTextEditer';
+import { validateForm } from './js/validateFormAddProduct';
 
-interface ProductForm {
+interface FormData {
   name: string;
-  categoryId: string;
-  imageUrls: File[];
-  teamId: string;
-  materialId: string;
+  categoryId: string | number;
+  imageUrls: any[];
+  teamId: string | number;
+  materialId: string | number;
   season: string;
   jerseyType: string;
   isFeatured: boolean;
   description: string;
   price: number;
   salePrice: number;
-  variants: {
-    size: string;
-    priceAdjustment: number;
-    code: string;
-    stockQuantity: number;
-  }[];
+  variants: any[];
   materialList: any[];
 }
 
-export default function ModalAdd_Edit_Product({
-    isOpen,
-    onClose,
-    title,
-  }: {
-    isOpen: boolean;
-    onClose: () => void;
-    title: string;
-  }) {
+const initialFormState: FormData = {
+  name: '',
+  categoryId: '',
+  imageUrls: [],
+  teamId: '1',
+  materialId: '',
+  season: '',
+  jerseyType: '',
+  isFeatured: false,
+  description: '',
+  price: 0,
+  salePrice: 0,
+  variants: [],
+  materialList: [],
+};
 
-  const {accessToken} = useAuthInfor()
+export default function ModalAdd_Edit_Product({
+  isOpen,
+  onClose,
+  refetch
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  refetch: () => void;
+}) {
+  const { accessToken } = useAuthInfor()
   const [loadingBtn, setLoadingBtn] = useState(false)
-  const [form, setForm] = useState<ProductForm>({
-    name: '',
-    categoryId: '',
-    imageUrls: [],
-    teamId: '',
-    materialId: '',
-    season: '',
-    jerseyType: '',
-    isFeatured: false,
-    description: '',
-    price: 0,
-    salePrice: 0,
-    variants: [{
-      size: '',
-      priceAdjustment: 0,
-      code: '',
-      stockQuantity: 0
-    }],
-    materialList: [],
-  });
+  const [errors, setErrors] = useState<any>({})
+  const [form, setForm] = useState<FormData>(initialFormState);
 
   const handleClose = () => {
-    setForm({
-      name: '',
-      categoryId: '',
-      imageUrls: [],
-      teamId: '',
-      materialId: '',
-      season: '',
-      jerseyType: '',
-      isFeatured: false,
-      description: '',
-      price: 0,
-      salePrice: 0,
-      variants: [],
-      materialList: [],
-    })
-    onClose()
-  }
+    setForm(initialFormState);
+    setErrors({});
+    onClose();
+  };
+
+  const handleInputChange = (field: keyof FormData, value: any) => {
+    setForm(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
 
   const handleFinish = async () => {
+    if (!validateForm(form, setErrors)) {
+      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc!");
+      return;
+    }
+
     try {
       setLoadingBtn(true)
       const uploadedImages = await uploadToCloudinary(form.imageUrls, "product")
-      if(uploadedImages.length > 0){
+      if (uploadedImages.length > 0) {
         const data = {
           "name": form.name,
           "categoryId": Number(form.categoryId),
@@ -101,18 +96,17 @@ export default function ModalAdd_Edit_Product({
           "salePrice": form.salePrice,
           "variants": form.variants
         }
-        console.log(data);
-        
         const response = await CreateProduct_API(data, accessToken)
-        if(response.success){
+        if (response.status === 200) {
           toast.success("Thêm sản phẩm thành công")
           handleClose()
+          refetch()
         } else {
-          toast.error("Thêm sản phẩm thất bại")
+          toast.error(response.data.message)
         }
       }
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi thêm sản phẩm")
+      toast.error("Có lỗi xảy ra khi thêm sản phẩm, Tên sản phẩm đã tồn tại")
       console.error(error)
     } finally {
       setLoadingBtn(false)
@@ -124,8 +118,8 @@ export default function ModalAdd_Edit_Product({
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
       <div className="bg-white rounded-xl p-8 z-10 w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
-          <button 
+          <h2 className="text-2xl font-bold text-gray-800">Thêm sản phẩm</h2>
+          <button
             onClick={handleClose}
             className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
           >
@@ -135,47 +129,56 @@ export default function ModalAdd_Edit_Product({
 
         <InputTakeImg
           images={form.imageUrls}
-          setImages={(value) => setForm({...form, imageUrls: value})}
-          onChange={(value) => setForm({...form, imageUrls: value})}
+          setImages={(value) => handleInputChange('imageUrls', value)}
+          onChange={(value) => handleInputChange('imageUrls', value)}
           numberImg={10}
         />
+        {errors.imageUrls && <p className="text-red-500 text-sm mt-1">{errors.imageUrls}</p>}
 
-        <Divider className="my-4"/>
+        <Divider className="my-4" />
 
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-6">
-          <Input
-            label="Tên sản phẩm"
-            placeholder="Nhập tên sản phẩm..."
-            labelPlacement="outside"
-            type="text" 
-            value={form.name}
-            onChange={(e) => setForm({...form, name: e.target.value})}
-            variant="bordered"
-            size="lg"
-            classNames={{
-              label: "font-medium"
-            }}
-          />
-
-            <div className="grid grid-cols-2 gap-4">
+            <div>
               <Input
-                label="Giá"
+                label="Tên sản phẩm"
+                placeholder="Nhập tên sản phẩm..."
                 labelPlacement="outside"
-                type="number" 
-                value={form.price.toString()}
-                onChange={(e) => setForm({...form, price: Number(e.target.value)})}
+                type="text"
+                value={form.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 variant="bordered"
                 size="lg"
-                startContent={
-                  <div className="pointer-events-none flex items-center">
-                    <span className="text-gray-500">₫</span>
-                  </div>
-                }
+                isInvalid={!!errors.name}
+                errorMessage={errors.name}
                 classNames={{
                   label: "font-medium"
                 }}
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Input
+                  label="Giá"
+                  labelPlacement="outside"
+                  type="number"
+                  value={form.price.toString()}
+                  onChange={(e) => handleInputChange('price', Number(e.target.value))}
+                  variant="bordered"
+                  size="lg"
+                  isInvalid={!!errors.price}
+                  errorMessage={errors.price}
+                  startContent={
+                    <div className="pointer-events-none flex items-center">
+                      <span className="text-gray-500">₫</span>
+                    </div>
+                  }
+                  classNames={{
+                    label: "font-medium"
+                  }}
+                />
+              </div>
 
               <Input
                 label="Giá khuyến mãi"
@@ -183,7 +186,7 @@ export default function ModalAdd_Edit_Product({
                 type="number"
                 name="salePrice"
                 value={form.salePrice.toString()}
-                onChange={(e) => setForm({...form, salePrice: Number(e.target.value)})}
+                onChange={(e) => handleInputChange('salePrice', Number(e.target.value))}
                 variant="bordered"
                 size="lg"
                 startContent={
@@ -197,60 +200,78 @@ export default function ModalAdd_Edit_Product({
               />
             </div>
 
-            <InputCategory setCategory={(value) => setForm({...form, categoryId: value})} category={form.categoryId}/>
-
-            <Input
-              label="Mùa giải"
-              placeholder="Nhập mùa giải..."
-              labelPlacement="outside"
-              value={form.season}
-              onChange={(e) => setForm({...form, season: e.target.value})}
-              variant="bordered"
-              size="lg"
-              classNames={{
-                label: "font-medium"
-              }}
-            />
-             <InputMateria 
-              setMaterial={(value) => setForm({...form, materialId: value})}
-              material={form.materialId}
-            />
-            <Input
-              label="Loại áo"
-              placeholder="Nhập loại áo..."
-              labelPlacement="outside"
-              value={form.jerseyType}
-              onChange={(e) => setForm({...form, jerseyType: e.target.value})}
-              variant="bordered"
-              size="lg"
-              classNames={{
-                label: "font-medium"
-              }}
-            />
-           
+            <div>
+              <InputCategory
+                setCategory={(value) => handleInputChange('categoryId', value)}
+                category={form.categoryId.toString()}
+              />
+              {errors.categoryId && <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>}
             </div>
-            <Variants variants={form.variants} setVariants={(value) => setForm({...form, variants: value})} />
+
+            <div>
+              <Input
+                label="Mùa giải"
+                placeholder="Nhập mùa giải..."
+                labelPlacement="outside"
+                value={form.season}
+                onChange={(e) => handleInputChange('season', e.target.value)}
+                variant="bordered"
+                size="lg"
+                isInvalid={!!errors.season}
+                errorMessage={errors.season}
+                classNames={{
+                  label: "font-medium"
+                }}
+              />
+            </div>
+
+            <div>
+              <InputMateria
+                setMaterial={(value) => handleInputChange('materialId', value)}
+                material={form.materialId.toString()}
+              />
+              {errors.materialId && <p className="text-red-500 text-sm mt-1">{errors.materialId}</p>}
+            </div>
+
+            <div>
+              <Input
+                label="Loại áo"
+                placeholder="Nhập loại áo..."
+                labelPlacement="outside"
+                value={form.jerseyType}
+                onChange={(e) => handleInputChange('jerseyType', e.target.value)}
+                variant="bordered"
+                size="lg"
+                isInvalid={!!errors.jerseyType}
+                errorMessage={errors.jerseyType}
+                classNames={{
+                  label: "font-medium"
+                }}
+              />
+            </div>
+          </div>
 
           <div>
-            <Textarea
-              label="Mô tả sản phẩm"
-              labelPlacement="outside"
-              placeholder="Nhập mô tả sản phẩm..."
-              value={form.description}
-              onChange={(e) => setForm({...form, description: e.target.value})}
-              variant="bordered"
-              size="lg"
-              minRows={4}
-              classNames={{
-                label: "font-medium"
-              }}
+            <Variants
+              variants={form.variants}
+              setVariants={(value) => handleInputChange('variants', value)}
             />
+            {errors.variants && <p className="text-red-500 text-sm mt-1">{errors.variants}</p>}
+          </div>
+
+          <div>
+            <InputTextEditor
+              value={form.description}
+              onChange={(value) => handleInputChange('description', value)}
+              height={500}
+            />
+            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
           </div>
 
           <div>
             <Checkbox
               isSelected={form.isFeatured}
-              onChange={(e) => setForm({...form, isFeatured: e.target.checked})}
+              onChange={(e) => handleInputChange('isFeatured', e.target.checked)}
               color="primary"
               size="lg"
               className="text-sm"
@@ -260,7 +281,7 @@ export default function ModalAdd_Edit_Product({
           </div>
         </div>
 
-        <Divider className="my-6"/>
+        <Divider className="my-6" />
         <div className="flex justify-end gap-3">
           <Button
             onPress={handleClose}

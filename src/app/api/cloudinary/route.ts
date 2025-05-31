@@ -10,14 +10,14 @@ const handleFolder = (type: string) => {
       return 'kick-style';
     case 'category':
       return 'kick-style-avatar';
-  
+
   }
 }
 
 // Validate environment variables
 if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
-    !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_APIKEY ||
-    !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_RECRET) {
+  !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_APIKEY ||
+  !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_RECRET) {
   throw new Error('Missing required Cloudinary environment variables');
 }
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     if (!image) {
       return NextResponse.json(
-        { error: 'No image provided' }, 
+        { error: 'No image provided' },
         { status: 400 }
       );
     }
@@ -52,42 +52,55 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Cloudinary upload error:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to upload image', 
+      {
+        error: 'Failed to upload image',
         details: error instanceof Error ? error.message : 'Unknown error'
-      }, 
+      },
       { status: 500 }
     );
   }
-} 
+}
 
 
 export async function DELETE(request: Request) {
   try {
-    const body = await request.json() as { id: string };
-    const { id } = body; // đây là id của ảnh
+    const body = await request.json() as { id: string, folder: string };
+    const { id, folder } = body;
 
-    if (!id) {
+    if (!id || !folder) {
       return NextResponse.json(
-        { error: 'No image provided' }, 
+        { error: 'Missing required parameters (id or folder)' },
         { status: 400 }
       );
     }
 
-    const uploadResponse = await cloudinary.uploader.destroy(id);
+    // Construct the full public ID including the folder path
+    const fullPublicId = `${folder}/${id}`;
 
-    return NextResponse.json({
-      success: true,
-      data: uploadResponse
-    });
+    const deleteResponse = await cloudinary.uploader.destroy(fullPublicId);
+
+    if (deleteResponse.result === 'ok') {
+      return NextResponse.json({
+        success: true,
+        data: deleteResponse
+      });
+    } else {
+      return NextResponse.json(
+        {
+          error: 'Failed to delete image',
+          details: deleteResponse.result
+        },
+        { status: 400 }
+      );
+    }
 
   } catch (error) {
     console.error('Cloudinary delete error:', error);
     return NextResponse.json(
-      { 
-        error: 'Failed to delete image', 
+      {
+        error: 'Failed to delete image',
         details: error instanceof Error ? error.message : 'Unknown error'
-      }, 
+      },
       { status: 500 }
     );
   }

@@ -22,7 +22,7 @@ export const deleteProduct_API = async (id: number, token: string) => {
                 'Authorization': `Bearer ${token}`,
             },
         });
-        return response.data;
+        return response;
     } catch (error) {
         throw error;
     }
@@ -36,7 +36,7 @@ export const CreateProduct_API = async (data: any, token: string) => {
                 'Authorization': `Bearer ${token}`,
             },
         });
-        return response.data;
+        return response;
     } catch (error) {
         throw error;
     }
