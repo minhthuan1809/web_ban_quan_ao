@@ -1,50 +1,55 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Heart, Star, ShoppingCart, Filter, Grid, List } from 'lucide-react';
+import { Filter, Grid, List, Search } from 'lucide-react';
 import { getProducts_API } from '@/app/_service/products';
 import Loading from '@/app/_util/Loading';
+import { Input } from '@nextui-org/react';
+import CardProduct from '@/app/(admin)/_conponents/CardProduct';
 
-export default function ProductsPage() {
+export default function ProductsPage({filter} : {filter: any}) {
   const [products, setProducts] = useState<any[]>([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(16); // Increased for compact cards
-  const [sort, setSort] = useState("createdAt");
-  const [filter, setFilter] = useState("asc");
+  const [limit, setLimit] = useState(16);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [favorites, setFavorites] = useState(new Set());
+  const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const res = await getProducts_API("", page, limit, sort, filter);
-        setProducts(res.data.data);
-        setTotal(res.data.metadata.total_page);
+        // Ensure filter has default values if undefined
+        const defaultFilter = {
+          categories: [],
+          sizes: [],
+          priceRange: [0, 5000000]
+        };
+        
+        const currentFilter = {
+          ...defaultFilter,
+          ...filter
+        };
+
+        const res = await getProducts_API(searchTerm, page, limit, currentFilter);
+        console.log(res);
+        
+        if (res.status === 200) {
+          setProducts(res.data.data);
+          setTotal(res.data.metadata.total_page);
+        }
       } catch (error) {
         console.error('Error fetching products:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProducts();
-  }, [page, limit, sort, filter]);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
-  };
+    const timeout = setTimeout(() => {
+      fetchProducts();
+    }, 500);
 
-  const toggleFavorite = (productId: number) => {
-    setFavorites(prev => {
-      const newFavorites = new Set(prev);
-      if (newFavorites.has(productId)) {
-        newFavorites.delete(productId);
-      } else {
-        newFavorites.add(productId);
-      }
-      return newFavorites;
-    });
-  };
+    return () => clearTimeout(timeout);
+  }, [page, limit, filter, searchTerm]);
 
   if (loading) {
     return <Loading />;
@@ -55,14 +60,26 @@ export default function ProductsPage() {
       {/* Modern Header */}
       <div className="bg-white/80 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-end">
+          <div className="flex items-center justify-between">
+         <div>
+         <Input
+              placeholder="Tìm kiếm sản phẩm"
+              size="sm"
+              variant="bordered"
+              radius="sm"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              startContent={<Search size={16} />}
+              className="w-full sm:w-auto"
+            />
+         </div>
             {/* Right side - Sort options */}
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-gray-600 hidden sm:inline">Sắp xếp</span>
               <select 
                 className="px-2 sm:px-3 py-2 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 cursor-pointer shadow-sm w-full sm:w-auto"
-                value={sort}
-                onChange={(e) => setSort(e.target.value)}
+                // value={sort}
+                // onChange={(e) => setSort(e.target.value)}
               >
                 <option value="name">Phổ biến</option>
                 <option value="createdAt">Mới nhất</option>
@@ -86,91 +103,7 @@ export default function ProductsPage() {
         {/* Compact Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
           {products.map((product: any) => (
-            <div key={product.id} className="group bg-white rounded-lg hover:shadow-lg transition-all duration-300 overflow-hidden shadow-md">
-              {/* Compact Product Image */}
-              <div className="relative aspect-square overflow-hidden">
-                <img
-                  src={product.imageUrls?.[0] || '/api/placeholder/200/200'}
-                  alt={product.name}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-
-                {/* Compact Badges */}
-                <div className="absolute top-1 sm:top-2 left-1 sm:left-2 flex justify-between w-[95%] gap-1">
-                  {product.isFeatured && (
-                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shadow-sm">
-                      HOT
-                    </div>
-                  )}
-                  {product.price !== product.salePrice && (
-                    <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shadow-sm">
-                      {Math.round(((product.price - product.salePrice) / product.price) * 100)}%
-                    </div>
-                  )}
-                </div>
-
-                {/* Quick add to cart overlay */}
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                  <button className="bg-white text-gray-900 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                    Xem chi tiết
-                  </button>
-                </div>
-              </div>
-
-              {/* Compact Product Info */}
-              <div className="p-2 sm:p-3">
-                {/* Brand/Category */}
-                <div className="mb-1">
-                  <span className="text-[10px] sm:text-xs text-gray-500 font-medium">
-                    {product.team?.name || product.category?.name}
-                  </span>
-                </div>
-
-                {/* Product name */}
-                <h3 className="font-medium text-gray-900 text-sm sm:text-lg hover:underline cursor-pointer mb-1 sm:mb-2 line-clamp-2 leading-tight min-h-[2.5rem]">
-                  {product.name}
-                </h3>
-
-                {/* Price section */}
-                <div className="flex flex-col gap-0.5 sm:gap-1">
-                  {product.price !== product.salePrice ? (
-                    <>
-                      <span className="text-sm sm:text-base font-bold text-red-600">
-                        {formatPrice(product.salePrice)}
-                      </span>
-                      <span className="text-[10px] sm:text-xs text-gray-400 line-through">
-                        {formatPrice(product.price)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-sm sm:text-base font-bold text-red-600">
-                      {formatPrice(product.price)}
-                    </span>
-                  )}
-                </div>
-
-                {/* Bottom section with rating and cart button */}
-                <div className="flex items-center justify-between mt-1 sm:mt-2">
-                  {/* Rating stars */}
-                  <div className="flex items-center gap-0.5 sm:gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        size={8} 
-                        className={`${i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`}
-                      />
-                    ))}
-                    <span className="text-[10px] sm:text-xs text-gray-500 ml-0.5 sm:ml-1">(4.0)</span>
-                  </div>
-
-                  {/* Add to cart button */}
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-md text-[10px] sm:text-sm font-medium shadow-sm transition-colors duration-200 flex items-center gap-0.5 sm:gap-1">
-                    <ShoppingCart size={12} />
-                    Thêm
-                  </button>
-                </div>
-              </div>
-            </div>
+            <CardProduct key={product.id} product={product} />
           ))}
         </div>
 

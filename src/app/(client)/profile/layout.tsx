@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import React from "react";
-import UserProfile from "@/app/components/sidebarProfile";
+import UserProfile from "@/app/components/SidebarProfile";
 
 export const metadata: Metadata = {
   title: "Profile",

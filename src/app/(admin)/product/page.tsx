@@ -15,8 +15,6 @@ export default function ProductPage() {
 
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(30)
-  const [sort, setSort] = useState("createdAt")
-  const [filter, setFilter] = useState("all")
   const [isRefetch, setIsRefetch] = useState(false)
   const [edit, setEdit] = useState(false)
   const [searchTerm, setSearchTerm] = useState("")
@@ -27,7 +25,9 @@ export default function ProductPage() {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const response = await getProducts_API(searchTerm, page, limit, sort, filter)
+        const response = await getProducts_API(searchTerm, page, limit, {})
+        console.log("thuận", response);
+        
         if (response.status === 200) {
           setProducts(response.data.data.reverse())
           setTotalPage(response.data.metadata.total_page)
@@ -45,7 +45,7 @@ export default function ProductPage() {
     }, 500)
 
     return () => clearTimeout(timeout)
-  }, [page, limit, sort, filter, isRefetch, searchTerm])
+  }, [page, limit, isRefetch, searchTerm])
 
   const handleDeleteProduct = async (product: any) => {
     try {

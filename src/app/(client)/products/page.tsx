@@ -1,21 +1,20 @@
-import React from 'react'
+"use client"
+import React, { useState } from 'react'
 import FilterProduct from './FilterProduct'
 import ProductsPage from './ProductsPage'
-import { Metadata } from 'next'
 
-export const metadata: Metadata = {
-    title: 'Sản Phẩm',
-    description: 'Sản Phẩm',
-}   
 
 export default function page() {
+  const [filter, setFilter] = useState([])
+
+
   return (
     <div className='flex flex-col lg:flex-row max-w-full lg:max-w-[80%] md:gap-4 mx-auto min-h-screen mt-2 px-4 lg:px-0'>
           <div className='lg:mt-[5vh] w-full lg:w-auto'>
-            <FilterProduct />
+            <FilterProduct filter={filter} setFilter={setFilter} />
           </div>
           <div className='w-full flex-1'>
-            <ProductsPage />
+            <ProductsPage filter={filter} />
           </div>
     </div>
   )

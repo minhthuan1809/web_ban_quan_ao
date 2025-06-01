@@ -1,32 +1,40 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Card,
   CardBody,
   Checkbox,
   CheckboxGroup,
-  Chip,
-  Accordion,
-  AccordionItem,
   Slider,
   Divider,
 } from "@nextui-org/react"
 import { ChevronUp, ChevronDown } from "lucide-react"
+import { getCategory_API } from "@/app/_service/category"
 
-export default function FilterProduct() {
+export default function FilterProduct({filter, setFilter} : {filter: any, setFilter: any}) {
+
   const [selectedCategories, setSelectedCategories] = useState(["sports-clothing"])
   const [selectedSizes, setSelectedSizes] = useState(["L"])
   const [priceRange, setPriceRange] = useState([0, 4905500])
-  const [expandedKeys, setExpandedKeys] = useState(new Set(["categories", "sizes"]))
   const [isFilterExpanded, setIsFilterExpanded] = useState(true)
+  const [categories, setCategories] = useState([])
+ 
 
-  const categories = [
-    { key: "sports-clothing", label: "QUẦN ÁO THỂ THAO" },
-    { key: "shoes", label: "GIÀY" }, 
-    { key: "sandals", label: "SANDAL - DÉP - TÔNG" },
-    { key: "bentoni", label: "THƯƠNG HIỆU BENTONI" },
-  ]
+
+//debounce
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setFilter({
+        categories: selectedCategories,
+        sizes: selectedSizes,
+        priceRange: priceRange,
+      })
+    }, 1000)
+
+    return () => clearTimeout(timeout)
+  }, [selectedCategories, selectedSizes, priceRange])
+
 
   const sizes = [
     { key: "S", label: "S" },
@@ -44,6 +52,16 @@ export default function FilterProduct() {
   const formatPrice = (value: number) => {
     return new Intl.NumberFormat("vi-VN").format(value) + "đ"
   }
+
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const res = await getCategory_API("", 1, 100, "createdAt", "desc")
+      setCategories(res.data)
+    }
+    fetchCategories()
+  }, [selectedCategories])
+
 
   return (
     <Card className="w-full lg:w-[280px] h-fit shadow-sm overflow-hidden border border-gray-200 rounded-lg">
@@ -81,16 +99,16 @@ export default function FilterProduct() {
                 wrapper: "gap-2 sm:gap-3",
               }}
             >
-              {categories.map((category) => (
+              {categories.map((category : any) => (
                 <Checkbox
-                  key={category.key}
-                  value={category.key}
+                  key={category.slug}
+                  value={category.name}
                   classNames={{
                     label: "text-xs sm:text-sm text-gray-700",
                     wrapper: "before:border-gray-300",
                   }}
                 >
-                  {category.label}
+                  {category.name}
                 </Checkbox>
               ))}
             </CheckboxGroup>
