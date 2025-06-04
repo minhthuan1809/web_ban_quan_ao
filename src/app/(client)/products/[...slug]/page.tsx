@@ -1,5 +1,5 @@
 "use client";
-import { getProductDetail_API } from "@/app/_service/products";
+import { getProductDetail_API, getVariantDetail_API } from "@/app/_service/products";
 import React, { useEffect, useState } from "react";
 import {
   Star,
@@ -14,6 +14,7 @@ import {
   Phone,
   MapPin,
   MessageCircle,
+  ChevronDown
 } from "lucide-react";
 import RenderTextEditer from "@/app/_util/ui/RenderTextEditer";
 import GalleryImg from "@/app/components/GalleryImg";
@@ -21,38 +22,41 @@ import { toast } from "react-toastify";
 import ShareSocial from "@/app/components/ShareSocial ";
 import EvaluateComment from "@/app/components/EvaluateCommet";
 import ProductCarousel from "@/app/components/category/ProductCarousel";
+import InstructChooseSize from "@/app/(client)/_modal/InstructChooseSize";
+import { CreateCard_API } from "@/app/_service/Card";
+
 export default function ProductDetailPage({
   params,
 }: {
   params: { slug: string[] };
 }) {
   const id = params.slug[1];
-  const productName = params.slug[0];
   const [product, setProduct] = useState<any>(null);
   const [selectedSize, setSelectedSize] = useState("");
+  const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
-
-  // Mock data for sizes and colors (since not in original data)
-  const sizes = ["S", "M", "L", "XL", "2XL", "3XL"];
-  const colors = [
-    { name: "Xanh Forest Night", value: "#4a5d23" },
-    { name: "Nâu", value: "#8B4513" },
-    { name: "Xanh lá", value: "#228B22" },
-    { name: "Đỏ", value: "#DC143C" },
-    { name: "Tím", value: "#800080" },
-    { name: "Cam", value: "#FF4500" },
-    { name: "Xanh dương", value: "#1E90FF" },
-    { name: "Xám", value: "#808080" },
-  ];
+  const [isOpen, setIsOpen] = useState(false);
+  const [showTeamInfo, setShowTeamInfo] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const res = await getProductDetail_API(id);
-      setProduct(res.data);
-      if (sizes.length > 0) setSelectedSize(sizes[2]); // Default to L
+      const resVariant = await getVariantDetail_API(id);
+      setProduct(resVariant.data);
+      if (resVariant.data.variants.length > 0) {
+        const firstVariant = resVariant.data.variants[0];
+        setSelectedSize(firstVariant.size);
+        setSelectedVariant(firstVariant);
+      }
     };
     fetchProduct();
   }, [id]);
+
+  useEffect(() => {
+    if (product && selectedSize) {
+      const variant = product.variants.find((v: any) => v.size === selectedSize);
+      setSelectedVariant(variant);
+    }
+  }, [selectedSize, product]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price) + "đ";
@@ -66,6 +70,28 @@ export default function ProductDetailPage({
     }
     return 0;
   };
+
+  const handleAddToCard = async () => {
+    if (!selectedVariant) {
+      toast.error("Vui lòng chọn kích thước");
+      return;
+    }
+
+    const data = {
+      "cartId": Number(id),
+      "variantId": selectedVariant.id,
+      "quantity": quantity
+    }
+    
+    try {
+      const res = await CreateCard_API(data);
+      if (res.status === 200) {
+        toast.success("Thêm vào giỏ hàng thành công");
+      }
+    } catch (error) {
+      toast.error("Thêm vào giỏ hàng thất bại");
+    }
+  }
 
   if (!product) {
     return (
@@ -95,7 +121,9 @@ export default function ProductDetailPage({
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Image Gallery */}
           <div className="flex flex-col gap-2 shadow-lg rounded-lg p-4">
-            <GalleryImg productImageUrls={product.imageUrls} />
+            <div className="max-h-[500px] overflow-hidden">
+              <GalleryImg productImageUrls={product.imageUrls} />
+            </div>
             <div className="flex justify-between items-center">
               <p className="text-sm text-gray-500">Chia sẻ</p>
               <ShareSocial className="flex justify-end" size={20} />
@@ -103,6 +131,7 @@ export default function ProductDetailPage({
           </div>
           {/* Product Info */}
           <div className="space-y-6">
+         
             {/* Product title and rating */}
             <div>
               <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -150,51 +179,57 @@ export default function ProductDetailPage({
                 <span>Freeship đơn trên 200K</span>
               </div>
             </div>
-
-            {/* Colors */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">Màu sắc:</span>
-                <span className="text-sm text-gray-600">Xanh Forest Night</span>
+            {/* Team Info */}
+            <div 
+              className="cursor-pointer" 
+              onClick={() => setShowTeamInfo(!showTeamInfo)}
+            >
+              <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                <div className="flex items-center gap-2">
+                  <img src={product.team.logoUrl} alt={product.team.name} className="w-8 h-8"/>
+                  <span className="text-sm">{product.team.name} - {product.team.league}</span>
+                </div>
+                <ChevronDown 
+                  className={`transition-transform duration-200 ${showTeamInfo ? 'rotate-180' : ''}`}
+                />
               </div>
-              <div className="flex flex-wrap gap-2">
-                {colors.map((color, idx) => (
-                  <div
-                    key={idx}
-                    className={`w-8 h-8 rounded border-2 cursor-pointer ${
-                      idx === 0 ? "border-black" : "border-gray-300"
-                    }`}
-                    style={{ backgroundColor: color.value }}
-                    title={color.name}
-                  />
-                ))}
-              </div>
+              {showTeamInfo && (
+                <div className="mt-2 p-3 bg-gray-50 rounded">
+                  <p className="text-sm text-gray-700">Thông tin chi tiết về sản phẩm:</p>
+                  <ul className="mt-2 space-y-2 text-sm text-gray-600">
+                    <li>• Mùa giải: {product.season}</li>
+                    <li>• Loại áo: {product.jerseyType}</li>
+                    <li>• Chất liệu: {product.material.name}</li>
+                    <li>• Danh mục: {product.category.name}</li>
+                    <li>• Đội bóng: {product.team.name}</li>
+                    <li>• Giải đấu: {product.team.league}</li>
+                    <li>• Quốc gia: {product.team.country}</li>
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Size */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">
-                  Kích thước:{" "}
-                  <span className="font-normal">
-                    2XL (lm77 - lm83 | 78kg - 84kg)
-                  </span>
+                  Kích thước: <span className="font-normal">{selectedSize}</span>
                 </span>
-                <button className="text-sm text-blue-600 hover:underline">
+                <button className="text-sm text-blue-600 hover:underline" onClick={() => setIsOpen(true)}>
                   Hướng dẫn chọn size
                 </button>
               </div>
               <div className="flex gap-2">
-                {sizes.map((size) => (
+                {product.variants.map((variant: any) => (
                   <button
-                    key={size}
-                    onClick={() => setSelectedSize(size)}
+                    key={variant.size}
+                    onClick={() => setSelectedSize(variant.size)}
                     className={`px-4 py-2 border rounded text-sm font-medium ${
-                      selectedSize === size
+                      selectedSize === variant.size
                         ? "bg-black text-white border-black"
                         : "bg-white text-gray-700 border-gray-300 hover:border-gray-400"
                     }`}>
-                    {size}
+                    {variant.size}
                   </button>
                 ))}
               </div>
@@ -206,7 +241,8 @@ export default function ProductDetailPage({
                 <div className="flex items-center border border-gray-300 rounded">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 hover:bg-gray-100">
+                    disabled={!selectedVariant}
+                    className={`p-2 hover:bg-gray-100 ${!selectedVariant && 'opacity-50 cursor-not-allowed'}`}>
                     <Minus size={16} />
                   </button>
                   <span className="px-4 py-2 min-w-[60px] text-center">
@@ -214,11 +250,15 @@ export default function ProductDetailPage({
                   </span>
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 hover:bg-gray-100">
+                    disabled={!selectedVariant}
+                    className={`p-2 hover:bg-gray-100 ${!selectedVariant && 'opacity-50 cursor-not-allowed'}`}>
                     <Plus size={16} />
                   </button>
                 </div>
-                <button className="flex-1 bg-black text-white py-3 px-6 rounded font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+                <button 
+                  onClick={handleAddToCard}
+                  disabled={!selectedVariant}
+                  className={`flex-1 bg-black text-white py-3 px-6 rounded font-medium hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 ${!selectedVariant && 'opacity-50 cursor-not-allowed'}`}>
                   <ShoppingCart size={20} />
                   Thêm vào giỏ hàng
                 </button>
@@ -263,7 +303,6 @@ export default function ProductDetailPage({
         </div>
 
         {/* Product Description */}
-  
         <div className="mt-4">
           <div className="bg-white rounded-lg p-2 shadow-sm border border-gray-100">
             <RenderTextEditer value={product.description} type="sort" />
@@ -282,7 +321,7 @@ export default function ProductDetailPage({
             <ProductCarousel />
           </div>
         </div>
-        
+        <InstructChooseSize isOpen={isOpen} onClose={() => setIsOpen(false)} />
       </div>
     </div>
   );

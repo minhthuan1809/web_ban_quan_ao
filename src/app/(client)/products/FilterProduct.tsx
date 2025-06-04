@@ -14,7 +14,7 @@ import { getCategory_API } from "@/app/_service/category"
 
 export default function FilterProduct({filter, setFilter} : {filter: any, setFilter: any}) {
 
-  const [selectedCategories, setSelectedCategories] = useState(["sports-clothing"])
+  const [selectedCategories, setSelectedCategories] = useState([])
   const [selectedSizes, setSelectedSizes] = useState(["L"])
   const [priceRange, setPriceRange] = useState([0, 4905500])
   const [isFilterExpanded, setIsFilterExpanded] = useState(true)
@@ -94,7 +94,7 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
             <h3 className="text-xs sm:text-sm font-medium text-gray-800 mb-3">DANH MỤC SẢN PHẨM</h3>
             <CheckboxGroup
               value={selectedCategories}
-              onValueChange={setSelectedCategories}
+              onValueChange={(value : any) => setSelectedCategories(value)}
               classNames={{
                 wrapper: "gap-2 sm:gap-3",
               }}

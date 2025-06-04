@@ -7,7 +7,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export const getmaterial_API = async (
   search: string,
   page: number,
-  page_size: number,
+  page_size: number = 10,
   sort: string,
   filter: string
 ) => {
@@ -128,3 +128,59 @@ export const updateCategory_API = async (
   );
   return response;
 };
+
+
+// team
+export const getTeam_API = async (
+  search: string,
+  page: number,
+  page_size: number,
+  sort: string,
+  filter: string
+) => {
+  const response = await axios.get(
+    `${API_URL}/teams?search=${search}&page=${page}&page_size=${page_size}&sort=${sort}&filter=${filter}`,
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  return response.data;
+};
+
+// delete team
+export const deleteTeam_API = async (id: string, accessToken: string) => {
+  const response = await axios.delete(`${API_URL}/teams/${id}`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return response;
+};
+
+// add team
+export const addTeam_API = async (data: any, accessToken: string) => {
+  const response = await axios.post(`${API_URL}/teams`, data, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  });
+  return response;
+};
+
+// update team
+export const updateTeam_API = async (id: string, data: any, accessToken: string) => {
+  const response = await axios.put(`${API_URL}/teams/${id}`, data, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+
+      "Content-Type": "application/json",
+    },
+  });
+  return response;
+};
+
+

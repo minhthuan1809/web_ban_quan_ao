@@ -14,7 +14,7 @@ export default function Category() {
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchValue, setSearchValue] = useState("");
-    const rowsPerPage = 30;
+    const rowsPerPage = 10;
     const [refresh, setRefresh] = useState(false);
     const [editCategory, setEditCategory] = useState<any>(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -82,7 +82,6 @@ export default function Category() {
     }
 
     // sửa phân loại
-
     const handleEdit = async (item: any) => {
         setEditCategory(item);
         setIsOpen(true);
@@ -108,23 +107,33 @@ export default function Category() {
         }
     }
 
+    if (loading) {
+        return <Loading/>
+    }
+
     
     return (
         <div className="p-6 w-full">
             <div className="flex justify-between items-center mb-6">
                     <h1 className="text-2xl font-bold">Danh Mục</h1>
-                <Button className="bg-blue-500 text-white" startContent={<Plus size={20} />} onPress={() => setIsOpen(true)}>
+                <Button 
+                    className="bg-blue-500 text-white" 
+                    startContent={loadingBtn ? <Spinner size="sm" color="white" /> : <Plus size={20} />} 
+                    onPress={() => setIsOpen(true)}
+                    isDisabled={loadingBtn}
+                >
                     Thêm Danh Mục
                 </Button>
             </div>
 
             <div className="flex justify-between items-center mb-6">
-                <Input
-                    placeholder="Tìm kiếm phân loại..."
+                <Input  
+                    placeholder="Tìm kiếm phân loại..." 
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
-                    startContent={<Search size={20} />}
+                    startContent={loading ? <Spinner size="sm" /> : <Search size={20} />}
                     className="w-80"
+                    isDisabled={loading}
                 />
             </div>
 
@@ -137,7 +146,7 @@ export default function Category() {
                     setEditCategory(null);
                     setName("");
                 }}
-                title="Thêm danh mục"
+                title={editCategory ? "Sửa danh mục" : "Thêm danh mục"}
                 titleInput="Tên danh mục"
                 name={name}
                 setName={setName}

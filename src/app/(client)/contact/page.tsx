@@ -37,7 +37,7 @@ export default function ContactPage() {
             href="/"
             className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
           >
-            <GetIconComponent icon="House" size={20} />
+            <GetIconComponent icon="Home" size={20} />
             <span className="ml-1 text-sm font-medium">Trang chủ</span>
           </Link>
           <span className="text-gray-400">/</span>

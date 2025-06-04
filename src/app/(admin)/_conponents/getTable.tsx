@@ -28,8 +28,9 @@ export default function getTable(
         className="min-h-[400px]"
       >
         <TableHeader>
-          <TableColumn>TÊN</TableColumn>
-          <TableColumn>THAO TÁC</TableColumn>
+          <TableColumn className="text-center">STT</TableColumn>
+          <TableColumn className="text-center">TÊN</TableColumn>
+          <TableColumn className="text-center">THAO TÁC</TableColumn>
         </TableHeader>
         <TableBody
           items={data}
@@ -37,6 +38,7 @@ export default function getTable(
         >
           {(item: any) => (
             <TableRow key={item.id}>
+              <TableCell className="text-center">{data.indexOf(item) + 1}</TableCell>
               <TableCell className="text-center">{item.name}</TableCell>
               <TableCell className="flex justify-center">
                 <div className="flex gap-2">

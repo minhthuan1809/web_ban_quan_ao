@@ -14,7 +14,7 @@ export default function Material() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchValue, setSearchValue] = useState("");
-  const rowsPerPage = 30;
+  const limit = 10;
   const [isOpen, setIsOpen] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
   const[refresh, setRefresh] = useState(false);
@@ -25,14 +25,17 @@ export default function Material() {
   const { accessToken } = useAuthInfor();
 
 
+
+
   const fetchCategory = useCallback(async () => {
     if (!accessToken) return;
     try {
+      
       setLoading(true);
       const response = await getmaterial_API(
         searchValue,
         currentPage,
-        rowsPerPage,
+        limit,
         "",
         ""
       );
@@ -44,7 +47,7 @@ export default function Material() {
     } finally {
       setLoading(false);
     }
-  }, [accessToken, currentPage, rowsPerPage , refresh]);
+  }, [accessToken, currentPage, limit , refresh]);
   
 
   // debounce search

@@ -3,16 +3,12 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const getProducts_API = async (search: string, page: number, limit: number, filter: any) => {
     try {
-        // Handle price range sorting
-        const sort = {
-            ASC: filter?.priceRange?.[0] || 0,
-            DESC: filter?.priceRange?.[1] || 500000000
-        };
-
         // Handle other filters
         const filterParams = {
             category: filter?.categories || [],
-            sizes: filter?.sizes || []
+            sizes: filter?.sizes || [],
+            minPrice: filter?.priceRange?.[0] || 0,
+            maxPrice: filter?.priceRange?.[1] || 500000000
         };
 
         // Build query parameters
@@ -20,11 +16,9 @@ export const getProducts_API = async (search: string, page: number, limit: numbe
             search: search || '',
             page: page.toString(),
             page_size: limit.toString(),
-            sort: JSON.stringify(sort),
             filter: JSON.stringify(filterParams)
         });
-        // ?${queryParams.toString()}
-        const response = await axios.get(`${API_URL}/products`, {
+        const response = await axios.get(`${API_URL}/products?${queryParams.toString()}`, {
             headers: {
                 'Content-Type': 'application/json',
             },
@@ -83,6 +77,16 @@ export const UpdateProduct_API = async (id: number, data: any, token: string) =>
 export const getProductDetail_API = async (id: string) => {
     try {
         const response = await axios.get(`${API_URL}/products/${id}`)
+        return response
+    } catch (error) {
+        throw error;
+    }
+}
+
+// detail variant
+export const getVariantDetail_API = async (id: string) => {
+    try {
+        const response = await axios.get(`${API_URL}/products/detail/${id}`)
         return response
     } catch (error) {
         throw error;

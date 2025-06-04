@@ -122,9 +122,25 @@ export default function Layout({children}: {children: React.ReactNode}) {
           icon: "Users",
         },
         {
-          name: "Danh mục và Nguyên liệu",
-          href: "/category_material",
-          icon: "ChartBarStacked",
+          name: "Danh mục",
+          icon: "FolderMinus",
+          submenu: [
+                {
+                name: "Danh mục",
+                href: "/category",
+                icon: "LayoutGrid",
+                },
+                {
+                name: "Đội Bóng",
+                href: "/team",
+                icon: "Users",
+                },
+                {
+                name: "Chất liệu",
+                href: "/material",
+                icon: "AirVent",
+                },
+          ],
         },
         {
           name: "Liên Hệ",
@@ -294,8 +310,8 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                         onClick={() => toggleSubmenu(item.name)}
                                         className={cn(
                                             "w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group",
-                                            pathname.startsWith(item.href) ||
-                                            item.submenu.some((sub) => pathname.startsWith(sub.href))
+                                            item.href && (pathname.startsWith(item.href) ||
+                                            item.submenu.some((sub) => pathname.startsWith(sub.href)))
                                                 ? "bg-blue-50 text-blue-700 shadow-sm"
                                                 : "text-gray-700 hover:bg-gray-50"
                                         )}
@@ -304,8 +320,8 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                             <div
                                                 className={cn(
                                                     "flex-shrink-0 w-6 h-6 transition-colors",
-                                                    pathname.startsWith(item.href) ||
-                                                    item.submenu.some((sub) => pathname.startsWith(sub.href))
+                                                    item.href && (pathname.startsWith(item.href) ||
+                                                    item.submenu.some((sub) => pathname.startsWith(sub.href)))
                                                         ? "text-blue-600"
                                                         : "text-gray-500 group-hover:text-blue-600"
                                                 )}
@@ -409,7 +425,7 @@ export default function Layout({children}: {children: React.ReactNode}) {
                             <>
                                 {isLoadingBtnLogout ? (
                                     <div className="animate-spin">
-                                        <GetIconComponent icon="LoaderCircle" className="w-5 h-5" />
+                                        <GetIconComponent icon="Loader2" className="w-5 h-5" />
                                     </div>
                                 ) : (
                                     <GetIconComponent icon="LogOut" className="w-5 h-5" />
@@ -419,7 +435,7 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                 </span>
                             </>
                         ) : (
-                            <GetIconComponent icon={isLoadingBtnLogout ? "LoaderCircle" : "LogOut"} className={cn("w-5 h-5", isLoadingBtnLogout && "animate-spin")} />
+                            <GetIconComponent icon={isLoadingBtnLogout ? "Loader2" : "LogOut"} className={cn("w-5 h-5", isLoadingBtnLogout && "animate-spin")} />
                         )}
                     </button>
                 </div>
