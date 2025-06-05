@@ -12,6 +12,7 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { toast } from 'react-toastify';
 import InputTextEditor from '@/app/_util/ui/InputTextEditer';
 import { validateForm } from './js/validateFormAddProduct';
+import InputCategoryteam from '../_conponents/category/InputCategoryteam';
 
 interface FormData {
   name: string;
@@ -72,7 +73,7 @@ export default function ModalAdd_Edit_Product({
         name: edit.name || '',
         categoryId: edit.category?.id || '',
         imageUrls: edit.imageUrls || [],
-        teamId: edit.team?.id || '1',
+        teamId: edit.team?.id || "",
         materialId: edit.material?.id || '',
         season: edit.season || '',
         jerseyType: edit.jerseyType || '',
@@ -262,13 +263,14 @@ export default function ModalAdd_Edit_Product({
                 labelPlacement="outside"
                 type="number"
                 name="salePrice"
+                max={100}
+                min={0}
                 value={form.salePrice?.toString() || '0'}
                 onChange={(e) => handleInputChange('salePrice', Number(e.target.value))}
                 variant="bordered"
-                size="lg"
                 startContent={
                   <div className="pointer-events-none flex items-center">
-                    <span className="text-gray-500">₫</span>
+                    <span className="text-gray-500">%</span>
                   </div>
                 }
                 classNames={{
@@ -302,6 +304,7 @@ export default function ModalAdd_Edit_Product({
               />
             </div>
 
+            {/* chất liệu */}
             <div>
               <InputMateria
                 setMaterial={(value) => handleInputChange('materialId', value)}
@@ -309,7 +312,14 @@ export default function ModalAdd_Edit_Product({
               />
               {errors.materialId && <p className="text-red-500 text-sm mt-1">{errors.materialId}</p>}
             </div>
-
+            {/* đội bóng */}
+            <div>
+              <InputCategoryteam
+                setTeam={(value) => handleInputChange('teamId', value)}
+                team={form.teamId?.toString() || ''}
+              />
+            </div>
+            {/* loại áo */}
             <div>
               <Input
                 label="Loại áo"

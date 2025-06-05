@@ -214,10 +214,7 @@ export default function RenderProductTable({
                           <h4 className="font-semibold text-gray-900 mb-3">Thông tin chi tiết</h4>
 
                           <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <span className="text-gray-600">Mã sản phẩm:</span>
-                              <div className="font-medium text-gray-900">{product.code}</div>
-                            </div>
+                          
                             <div>
                               <span className="text-gray-600">Slug:</span>
                               <div className="font-medium text-gray-900">{product.slug}</div>

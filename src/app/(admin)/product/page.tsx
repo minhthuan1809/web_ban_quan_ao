@@ -26,7 +26,6 @@ export default function ProductPage() {
       setLoading(true);
       try {
         const response = await getProducts_API(searchTerm, page, limit, {})
-        console.log("thuận", response);
         
         if (response.status === 200) {
           setProducts(response.data.data.reverse())

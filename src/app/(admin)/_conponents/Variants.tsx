@@ -5,14 +5,12 @@ import { toast } from "react-toastify";
 interface Variant {
   size: string;
   priceAdjustment: number;
-  code: string;
   stockQuantity: number;
 }
 
 interface Errors {
   size?: string;
   priceAdjustment?: string;
-  code?: string;
   stockQuantity?: string;
 }
 
@@ -21,7 +19,6 @@ export default function Variants( {variants, setVariants}: {variants: Variant[],
   const [currentVariant, setCurrentVariant] = useState<Variant>({
     size: "",
     priceAdjustment: 0,
-    code: "",
     stockQuantity: 0,
   });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -34,9 +31,7 @@ export default function Variants( {variants, setVariants}: {variants: Variant[],
       newErrors.size = "Vui lòng chọn kích cỡ";
     }
 
-    if (!currentVariant.code) {
-      newErrors.code = "Vui lòng nhập mã sản phẩm";
-    }
+
 
     if (currentVariant.stockQuantity <= 0) {
       newErrors.stockQuantity = "Số lượng phải lớn hơn 0";
@@ -66,7 +61,6 @@ export default function Variants( {variants, setVariants}: {variants: Variant[],
     setCurrentVariant({
       size: "",
       priceAdjustment: 0,
-      code: "",
       stockQuantity: 0,
     });
     setErrors({});
@@ -100,7 +94,6 @@ export default function Variants( {variants, setVariants}: {variants: Variant[],
             setCurrentVariant({
               size: "",
               priceAdjustment: 0,
-              code: "",
               stockQuantity: 0,
             });
             setErrors({});
@@ -117,9 +110,7 @@ export default function Variants( {variants, setVariants}: {variants: Variant[],
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
                 Size
               </th>
-              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
-                Mã sản phẩm
-              </th>
+            
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
                 Điều chỉnh giá
               </th>
@@ -135,14 +126,7 @@ export default function Variants( {variants, setVariants}: {variants: Variant[],
             {variants.map((variant, index) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="px-4 py-3">{variant.size}</td>
-                <td
-                  className="px-4 py-3 cursor-pointer hover:underline hover:text-blue-500"
-                  onClick={() => {
-                    navigator.clipboard.writeText(variant.code);
-                    toast.success("Đã copy mã sản phẩm");
-                  }}>
-                  {variant.code}
-                </td>
+               
                 <td className="px-4 py-3">
                   <FormatPrice
                     price={variant.priceAdjustment}
@@ -263,27 +247,7 @@ export default function Variants( {variants, setVariants}: {variants: Variant[],
                 )}
               </div>
 
-              <div className="flex flex-col">
-                <label className="mb-2 font-medium">Mã sản phẩm</label>
-                <input
-                  type="text"
-                  className={`border rounded px-3 py-2 ${
-                    errors.code ? "border-red-500" : ""
-                  }`}
-                  placeholder="Nhập mã sản phẩm"
-                  value={currentVariant.code}
-                  onChange={(e) => {
-                    setCurrentVariant({
-                      ...currentVariant,
-                      code: e.target.value,
-                    });
-                    setErrors({ ...errors, code: undefined });
-                  }}
-                />
-                {errors.code && (
-                  <span className="text-red-500 text-sm">{errors.code}</span>
-                )}
-              </div>
+              
 
               <div className="flex flex-col">
                 <label className="mb-2 font-medium">Số lượng</label>

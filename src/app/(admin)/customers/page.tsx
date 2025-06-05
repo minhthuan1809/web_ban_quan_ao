@@ -69,6 +69,8 @@ export default function PageUser() {
     setLoading(true);
     try {
       const res = await getUserById_API(accessToken);
+      console.log(res.data , "minh thuận");
+      
       setUsers(res.data);
     } catch (error) {
       toast.error('Lỗi tải danh sách người dùng!');

@@ -85,11 +85,11 @@ export default function PageRegister() {
 
   return (
     <div className="min-h-screen w-full   bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Left side - Illustration */}
-        <div className="hidden md:flex items-center justify-center bg-blue-100 p-8">
+        <div className="hidden md:flex items-center justify-center bg-blue-100 p-4">
           <div
-            className="w-full h-full bg-cover bg-center rounded-2xl"
+            className="w-[300px] h-[300px] bg-cover bg-center rounded-2xl"
             style={{
               backgroundImage:
                 "url('https://images.unsplash.com/photo-1516321497487-e288fb19713f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')",

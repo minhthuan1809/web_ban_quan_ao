@@ -58,7 +58,9 @@ export default function ModalAddUse({
           </div>
         </ModalHeader>
         <ModalBody className="space-y-4">
-            <ImgUpload setPreview={setPreview} preview={preview} setFile={setFile} />
+           <div className="w-full flex justify-center items-center h-[200px]">
+           <ImgUpload setPreview={setPreview} preview={preview} setFile={setFile} />
+           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="Họ và tên"
