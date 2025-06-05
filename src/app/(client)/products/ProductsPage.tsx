@@ -107,56 +107,7 @@ export default function ProductsPage({filter} : {filter: any}) {
           ))}
         </div>
 
-        {/* Modern Pagination */}
-        {total > 1 && (
-          <div className="flex justify-center mt-6 sm:mt-8">
-            <div className="flex items-center gap-1 sm:gap-2 bg-white rounded-lg shadow-sm p-1">
-              <button
-                onClick={() => setPage(Math.max(1, page - 1))}
-                disabled={page === 1}
-                className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-              >
-                ← Trước
-              </button>
-              
-              <div className="flex items-center gap-0.5 sm:gap-1">
-                {Array.from({ length: Math.min(total, 5) }, (_, i) => {
-                  let pageNum;
-                  if (total <= 5) {
-                    pageNum = i + 1;
-                  } else if (page <= 3) {
-                    pageNum = i + 1;
-                  } else if (page >= total - 2) {
-                    pageNum = total - 4 + i;
-                  } else {
-                    pageNum = page - 2 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setPage(pageNum)}
-                      className={`w-6 h-6 sm:w-8 sm:h-8 text-xs sm:text-sm font-medium rounded-md transition-all duration-200
-                        ${page === pageNum 
-                          ? 'bg-blue-600 text-white shadow-lg' 
-                          : 'text-gray-700 hover:bg-gray-100'}`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-              
-              <button
-                onClick={() => setPage(Math.min(total, page + 1))}
-                disabled={page === total}
-                className="px-2 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-              >
-                Tiếp →
-              </button>
-            </div>
-          </div>
-        )}
+ 
       </div>
     </div>
   );

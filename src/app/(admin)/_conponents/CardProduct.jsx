@@ -2,6 +2,7 @@ import React from 'react';
 import { Star, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import formatVietNamese from '@/app/_util/FomatVietNamese';
+import { DiscountPrice } from '@/app/_util/DiscountPrice';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
@@ -28,7 +29,7 @@ const CardProduct = ({ product }) => {
             )}
             {product.price !== product.salePrice && (
               <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shadow-sm">
-                {Math.round(((product.price - product.salePrice) / product.price) * 100)}%
+                {product.salePrice}%
               </div>
             )}
           </div>
@@ -61,7 +62,7 @@ const CardProduct = ({ product }) => {
           {product.price !== product.salePrice ? (
             <>
               <span className="text-sm sm:text-base font-bold text-red-600">
-                {formatPrice(product.salePrice)}
+                {formatPrice(DiscountPrice(product.price, product.salePrice))}
               </span>
               <span className="text-[10px] sm:text-xs text-gray-400 line-through">
                 {formatPrice(product.price)}

@@ -146,12 +146,12 @@ export default function Navbar() {
             {/* Icons */}
             <div className="flex items-center space-x-4">
               {/* Shopping Cart */}
-              <button className="relative group text-gray-600 hover:text-blue-600 transition-colors">
+              <Link href="/cart" className="relative group text-gray-600 hover:text-blue-600 transition-colors">
                 <ShoppingCart size={24} />
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   0
                 </span>
-              </button>
+              </Link>
 
               {/* User/Auth Button */}
               <div className="relative group">

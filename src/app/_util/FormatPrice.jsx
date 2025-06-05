@@ -8,7 +8,10 @@ export default function FormatPrice({
   return (
     <div className={`${className} flex items-center gap-1`}>
       <span className="flex items-center gap-1">
-        {new Intl.NumberFormat("vi-VN").format(price)}
+        {new Intl.NumberFormat("vi-VN", {
+          maximumFractionDigits: 0,
+          minimumFractionDigits: 0
+        }).format(price)}
         <span className="text-md">{currency}</span>
       </span>
     </div>

@@ -3,12 +3,9 @@ import { getProductDetail_API, getVariantDetail_API } from "@/app/_service/produ
 import React, { useEffect, useState } from "react";
 import {
   Star,
-  ChevronLeft,
-  ChevronRight,
   Plus,
   Minus,
   ShoppingCart,
-  Share2,
   Truck,
   RotateCcw,
   Phone,
@@ -24,31 +21,60 @@ import EvaluateComment from "@/app/components/EvaluateCommet";
 import ProductCarousel from "@/app/components/category/ProductCarousel";
 import InstructChooseSize from "@/app/(client)/_modal/InstructChooseSize";
 import { CreateCard_API } from "@/app/_service/Card";
+import useAuthInfor from "@/app/customHooks/AuthInfor";
 
 export default function ProductDetailPage({
   params,
 }: {
   params: { slug: string[] };
 }) {
+  const { userInfo } = useAuthInfor();
   const id = params.slug[1];
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<any>({
+    name: '',
+    price: 0,
+    salePrice: 0,
+    imageUrls: [],
+    variants: [],
+    team: {
+      name: '',
+      league: '',
+      logoUrl: '',
+      country: ''
+    },
+    season: '',
+    jerseyType: '',
+    material: { name: '' },
+    category: { name: '' },
+    description: ''
+  });
   const [selectedSize, setSelectedSize] = useState("");
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
   const [showTeamInfo, setShowTeamInfo] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProduct = async () => {
-      const resVariant = await getVariantDetail_API(id);
-      setProduct(resVariant.data);
-      if (resVariant.data.variants.length > 0) {
-        const firstVariant = resVariant.data.variants[0];
-        setSelectedSize(firstVariant.size);
-        setSelectedVariant(firstVariant);
+      try {
+        setIsLoading(true);
+        const resVariant = await getVariantDetail_API(id);
+        setProduct(resVariant.data);
+        if (resVariant.data?.variants?.length > 0) {
+          const firstVariant = resVariant.data.variants[0];
+          setSelectedSize(firstVariant.size);
+          setSelectedVariant(firstVariant);
+        }
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchProduct();
+    if (id) {
+      fetchProduct();
+    }
   }, [id]);
 
   useEffect(() => {
@@ -78,7 +104,7 @@ export default function ProductDetailPage({
     }
 
     const data = {
-      "cartId": Number(id),
+      "cartId": userInfo.cartId,
       "variantId": selectedVariant.id,
       "quantity": quantity
     }
@@ -93,7 +119,7 @@ export default function ProductDetailPage({
     }
   }
 
-  if (!product) {
+  if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="animate-pulse grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -111,6 +137,14 @@ export default function ProductDetailPage({
             <div className="h-10 bg-gray-200 rounded w-1/3"></div>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  if (!product || !product.name) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <p className="text-center text-gray-600">Không tìm thấy sản phẩm</p>
       </div>
     );
   }

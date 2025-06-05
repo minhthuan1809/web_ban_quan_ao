@@ -1,23 +1,6 @@
 import { getCookie } from "cookies-next";
 
-interface AuthInfor {
-  accessToken: string;
-  userInfo: {
-    id: number;
-    fullName: string;
-    email: string;
-    phone: string;
-    address: string;
-    district: string;
-    ward: string;
-    roleName: string;
-    avatarUrl: string;
-    gender: string;
-    isVerify: boolean;
-    createdAt: number;
-    updatedAt: number;
-  };
-}
+
 
 const useAuthInfor = () => {
   try {
