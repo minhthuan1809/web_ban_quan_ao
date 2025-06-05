@@ -4,7 +4,7 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import React, { useEffect, useState } from 'react';
 import {
   Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-  Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, useDisclosure, Spinner, Chip
+  Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, useDisclosure, Spinner, Chip, Avatar
 } from "@nextui-org/react";
 
 import { User, UserPlus, Edit3, Trash2, Users, Mail, Phone, MapPin } from 'lucide-react';
@@ -182,12 +182,12 @@ export default function PageUser() {
               <TableHeader>
                 <TableColumn>
                   <div className="flex items-center gap-2">
-                    Họ tên
+                    STT
                   </div>
                 </TableColumn>
                 <TableColumn>
                   <div className="flex items-center gap-2">
-                    Email
+                    Họ tên
                   </div>
                 </TableColumn>
                 <TableColumn>
@@ -209,13 +209,23 @@ export default function PageUser() {
                   <p className="text-slate-400">Không có dữ liệu người dùng</p>
                 </div>
               }>
-                {(users?.data ?? []).map((user: User) => (
+                {(users?.data ?? []).map((user: User, index: number) => (
                   <TableRow key={user.id}>
                     <TableCell>
-                      <div className="font-medium text-slate-800">{user.fullName}</div>
+                      <div className="text-slate-600">{index + 1}</div>
                     </TableCell>
                     <TableCell>
-                      <div className="text-slate-600">{user.email}</div>
+                      <div className="flex items-center gap-3">
+                        <Avatar 
+                          src={user.avatarUrl || "https://i.pravatar.cc/150?u=a042581f4e29026024d"}
+                          size="sm"
+                          className="flex-shrink-0"
+                        />
+                        <div>
+                          <div className="font-medium text-slate-800">{user.fullName}</div>
+                          <div className="text-slate-500 text-xs">{user.email}</div>
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       <div className="text-slate-600">{user.phone}</div>

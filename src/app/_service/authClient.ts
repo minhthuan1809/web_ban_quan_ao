@@ -53,7 +53,7 @@ export const authGetUserInfo_API = async (accessToken: string) => {
 
 export const authLogout_API = async (accessToken: string) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/logout`, null, {
+    const response = await axios.post(`${API_URL}/auth/logout`, "",{
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,

@@ -50,6 +50,7 @@ export default function Navbar() {
   // hook
   const { accessToken } = useAuthInfor() || { accessToken: null }; // Add null check
   const router = useRouter();
+  
 
   useEffect(() => {
     if (!accessToken) {
@@ -75,16 +76,10 @@ export default function Navbar() {
 
   const handleLogout = () => {
     if (!accessToken) return;
-
+    router.push("/login");
+    deleteCookie("token");
     authLogout_API(accessToken).then((res: any) => {
-      if(res.status === 200){
-        deleteCookie("token");
-        router.push("/login");
-        toast.success("Đăng xuất thành công");
-      }
-      else {
-        toast.error("Đăng xuất thất bại");
-      }
+
     });
   };
 
