@@ -22,6 +22,7 @@ import { authGetUserInfo_API, authLogout_API } from "@/app/_service/authClient";
 import { useUserStore } from "@/app/_zustand/client/InForUser";
 import { deleteCookie } from "cookies-next";
 import { toast } from "react-toastify";
+import ThemeToggle from "@/app/components/ThemeToggle";
 
 type User = {
   user: {
@@ -84,7 +85,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50 transition-shadow duration-300 hover:shapadow-xl">
+    <nav className="bg-white dark:bg-gray-900 dark:text-white shadow-lg sticky top-0 z-50 transition-shadow duration-300 hover:shadow-xl">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-screen-xl">
         {/* Logo Section */}
         <Link href="/" className="flex items-center space-x-3 group">
@@ -135,13 +136,12 @@ export default function Navbar() {
 
           {/* Search and Icons */}
           <div className="flex items-center space-x-4">
-          
-            
+            <ThemeToggle />
 
             {/* Icons */}
             <div className="flex items-center space-x-4">
               {/* Shopping Cart */}
-              <Link href="/cart" className="relative group text-gray-600 hover:text-blue-600 transition-colors">
+              <Link href="/cart" className="relative group text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                 <ShoppingCart size={24} />
                 <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   0
@@ -150,13 +150,13 @@ export default function Navbar() {
 
               {/* User/Auth Button */}
               <div className="relative group">
-                <button className="text-gray-600 hover:text-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1">
+                <button className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1">
                   <User size={24} />
                 </button>
 
                 {/* Auth Dropdown */}
                 <div
-                  className="absolute right-0 mt-2 w-72 bg-white rounded-lg shadow-xl border border-blue-100 overflow-hidden z-50 
+                  className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-blue-100 dark:border-gray-700 overflow-hidden z-50 
                   opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
                 >
                   {user ? (
@@ -191,7 +191,7 @@ export default function Navbar() {
                       <div className="space-y-2">
                         <Link
                           href="/profile"
-                          className="flex items-center space-x-3 px-3 py-2 hover:bg-blue-50 rounded-md transition-colors"
+                          className="flex items-center space-x-3 px-3 py-2 hover:bg-blue-50 dark:bg-gray-800 rounded-md transition-colors"
                         >
                           <Settings size={20} className="text-blue-600" />
                           <span>Cài đặt tài khoản</span>
@@ -233,10 +233,10 @@ export default function Navbar() {
     {/* Mobile Menu Overlay */}
     {isMobileMenuOpen && (
         <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 md:hidden">
-          <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-white shadow-2xl animate-slideInRight">
+          <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-900 shadow-2xl animate-slideInRight">
             <div className="flex flex-col h-full">
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b bg-blue-50">
+              <div className="flex items-center justify-between p-6 border-b dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
                 <div className="flex items-center space-x-3">
                   <Image
                     className="rounded-full w-10 h-10 object-cover shadow-md"
