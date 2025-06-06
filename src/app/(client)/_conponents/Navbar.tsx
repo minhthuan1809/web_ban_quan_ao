@@ -20,8 +20,7 @@ import Image from "next/image";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { authGetUserInfo_API, authLogout_API } from "@/app/_service/authClient";
 import { useUserStore } from "@/app/_zustand/client/InForUser";
-import { deleteCookie } from "cookies-next";
-import { toast } from "react-toastify";
+import { deleteCookie, setCookie } from "cookies-next";
 
 type User = {
   user: {
@@ -63,6 +62,14 @@ export default function Navbar() {
     authGetUserInfo_API(accessToken).then((res: any) => {
       if (res) {
         setUser(res);
+        setCookie("token", JSON.stringify({"accessToken": accessToken, "userInfo": res}));
+        //đẩy về admin nếu là admin
+        if (res.role.name.trim().toLowerCase() === 'admin') {
+          router.push("/admin");
+        }
+        else {
+          router.push("/");
+        }
         setUser_Zustand(res);
       }
       else {

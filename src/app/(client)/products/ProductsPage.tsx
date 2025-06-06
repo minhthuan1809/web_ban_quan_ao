@@ -5,14 +5,23 @@ import { getProducts_API } from '@/app/_service/products';
 import Loading from '@/app/_util/Loading';
 import { Input } from '@nextui-org/react';
 import CardProduct from '@/app/(admin)/_conponents/CardProduct';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function ProductsPage({filter} : {filter: any}) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(16);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
+
+  useEffect(() => {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    params.set('search', searchTerm);
+    router.push(`/products?${params.toString()}`);
+  }, [searchTerm]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -31,7 +40,6 @@ export default function ProductsPage({filter} : {filter: any}) {
         };
 
         const res = await getProducts_API(searchTerm, page, limit, currentFilter);
-        console.log(res);
         
         if (res.status === 200) {
           setProducts(res.data.data);

@@ -5,6 +5,7 @@ import FormatPrice from '@/app/_util/FormatPrice';
 import RenderTextEditer from '@/app/_util/ui/RenderTextEditer';
 import { Pagination } from '@nextui-org/react';
 import Modadescription from '../_modal/Modadescription';
+import { DiscountPrice } from '@/app/_util/DiscountPrice';
 
 interface RenderProductTableProps {
   products: any[];
@@ -47,6 +48,8 @@ export default function RenderProductTable({
   const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString('vi-VN');
   };
+
+  
   return (
     <div className="mx-auto px-6 py-6">
       {/* Search Bar */}
@@ -65,10 +68,6 @@ export default function RenderProductTable({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <button className="inline-flex items-center gap-2 px-3 py-2 border border-gray-200 text-gray-700 text-sm rounded-lg hover:bg-gray-50 transition-colors">
-              <Filter className="w-4 h-4" />
-              Tất cả
-            </button>
             <span className="text-sm text-gray-600">
               Hiển thị {products.length} sản phẩm
             </span>
@@ -127,7 +126,7 @@ export default function RenderProductTable({
                         <span className="inline-flex items-center px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
                           {product?.category?.name}
                         </span>
-                        <span className="text-xs text-gray-500">ID: {product.id}</span>
+                        <span className="text-xs text-gray-500">Mã: {product.code}</span>
                       </div>
                       <h3 className="font-bold p-2 text-gray-900 mb-1 truncate">
                         {product?.name}
@@ -145,7 +144,10 @@ export default function RenderProductTable({
                             {product.price.toLocaleString()} đ
                           </div>
                           <div className="text-red-600 font-semibold">
-                            {product.salePrice.toLocaleString()} đ
+                            <FormatPrice
+                              price={DiscountPrice(product.price, product.salePrice)}
+                              className="text-red-600 font-semibold"
+                            />
                           </div>
                         </div>
                       ) : (

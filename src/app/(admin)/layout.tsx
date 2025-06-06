@@ -113,7 +113,7 @@ export default function Layout({children}: {children: React.ReactNode}) {
         },
         {
           name: "Sản Phẩm",
-          href: "/product",
+          href: "/productAdmin",
           icon: "ShoppingBag",
         },
         {
@@ -188,12 +188,10 @@ export default function Layout({children}: {children: React.ReactNode}) {
     const handleLogout = async () => {
         setIsLoadingBtnLogout(true);
         try {
-            const res = await authLogout_API(accessToken);
-            if (res.status === 200) {
-                setUser_Zustand(null);
-                deleteCookie("token");
-                router.push("/login");
-            }
+            router.push("/login");
+            deleteCookie("token");
+            setUser_Zustand(null);
+            await authLogout_API(accessToken);
         } catch (error) {
             console.error("Logout error:", error);
         } finally {

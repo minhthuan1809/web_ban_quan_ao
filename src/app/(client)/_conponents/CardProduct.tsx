@@ -10,6 +10,7 @@ import {
   Chip,
   Avatar
 } from "@nextui-org/react";
+import Link from 'next/link';
 
 type CardProductProps = {
   id: number;
@@ -62,87 +63,85 @@ export default function CardProduct({data = []} : {data: CardProductProps[]}) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
       {data?.map((item: CardProductProps, index: number) => (
-        <Card 
-          key={item.id || index} 
-          className="group transition-transform duration-300"
-          shadow="md"
-          isPressable
-          isHoverable
-        >
-          {/* Image Container */}
-          <CardBody className="p-0 relative">
-            <div className="relative overflow-hidden bg-gray-50 aspect-square">
-              <Image 
-                src={item.image} 
-                alt={item.name} 
-                fill
-                className="object-cover w-full h-full  transition-transform duration-300"
-              />
-              
-              {/* Status Badge */}
-              <div className="absolute top-3 right-3 z-10">
-                <Chip 
-                  color={getStatusColor(item.status)}
-                  size="sm"
-                  variant="flat"
-                >
-                  {item.status}
-                </Chip>
-              </div>
-              
-              {/* Quick Action Overlay */}
-              <div className="absolute inset-0 bg-black bg-opacity-0 transition-all duration-300 flex items-center justify-center z-5">
-                <Button 
-                  color="primary" 
-                  variant="solid"
-                  size="sm"
-                  className="opacity-0  transform translate-y-4 transition-all duration-300"
-                >
-                  Xem chi tiết
-                </Button>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-4">
-              {/* Product Name */}
-              <h3 className="font-semibold text-foreground text-lg mb-2 line-clamp-2 transition-colors duration-200">
-                {item.name}
-              </h3>
-              
-              {/* Description */}
-              <p className="text-default-500 text-sm mb-3 line-clamp-2 leading-relaxed">
-                {item.description}
-              </p>
-              
-              {/* Rating */}
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center">
-                    {renderStars(item.Evaluate)}
+        <Link href={`/products/${item.id}`} key={item.id || index}>
+          <Card 
+            className="group transition-transform duration-300"
+            shadow="md"
+            isPressable
+            isHoverable
+          >
+            {/* Image Container */}
+            <CardBody className="p-0 relative">
+              <div className="relative overflow-hidden bg-gray-50 aspect-square">
+                <Image 
+                  src={item.image} 
+                  alt={item.name} 
+                  fill
+                  className="object-cover w-full h-full  transition-transform duration-300"
+                />
+                
+                {/* Status Badge */}
+                <div className="absolute top-3 right-3 z-10">
+                  <Chip 
+                    color={getStatusColor(item.status)}
+                    size="sm"
+                    variant="flat"
+                  >
+                    {item.status}
+                  </Chip>
+                </div>
+                
+                {/* Quick Action Overlay */}
+                <div className="absolute inset-0 bg-black bg-opacity-0 transition-all duration-300 flex items-center justify-center z-5">
+                  <div 
+                    className="opacity-0 transform translate-y-4 transition-all duration-300 bg-primary text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
+                  >
+                    Xem chi tiết
                   </div>
-                  <span className="text-sm text-default-400">({item.Evaluate})</span>
-                </div>
-                <div className="flex flex-col">
-                  <FormatPrice price={item.price} className='text-danger  font-semibold'/>
                 </div>
               </div>
-            </div>
-          </CardBody>
-          
-          {/* Footer with Action Button */}
-          <CardFooter className="pt-0 px-4 pb-4">
-            <Button 
-              color="primary" 
-              variant="solid"
-              size="sm"
-              fullWidth
-              className="font-medium"
-            >
-              Thêm vào giỏ
-            </Button>
-          </CardFooter>
-        </Card>
+
+              {/* Content */}
+              <div className="p-4">
+                {/* Product Name */}
+                <h3 className="font-semibold text-foreground text-lg mb-2 line-clamp-2 transition-colors duration-200">
+                  {item.name}
+                </h3>
+                
+                {/* Description */}
+                <p className="text-default-500 text-sm mb-3 line-clamp-2 leading-relaxed">
+                  {item.description}
+                </p>
+                
+                {/* Rating */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center">
+                      {renderStars(item.Evaluate)}
+                    </div>
+                    <span className="text-sm text-default-400">({item.Evaluate})</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <FormatPrice price={item.price} className='text-danger  font-semibold'/>
+                  </div>
+                </div>
+              </div>
+            </CardBody>
+            
+            {/* Footer with Action Button */}
+            <CardFooter className="pt-0 px-4 pb-4">
+              <Button 
+                color="primary" 
+                variant="solid"
+                size="sm"
+                fullWidth
+                className="font-medium"
+              >
+                Thêm vào giỏ
+              </Button>
+            </CardFooter>
+          </Card>
+        </Link>
       ))}
     </div>
   )
