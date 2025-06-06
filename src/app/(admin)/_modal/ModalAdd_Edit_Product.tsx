@@ -105,7 +105,6 @@ export default function ModalAdd_Edit_Product({
   };
 
   const handleInputChange = (field: keyof FormData, value: any) => {
-    console.log("value", value)
     setForm(prev => ({
       ...prev,
       [field]: value
@@ -139,7 +138,8 @@ export default function ModalAdd_Edit_Product({
         "description": form.description,
         "price": form.price,
         "salePrice": form.salePrice,
-        "variants": form.variants
+        "variants": form.variants,
+        "size": form.size
       };
     } catch (error) {
       console.error("Error in callApiCloudinary:", error);
@@ -277,6 +277,7 @@ export default function ModalAdd_Edit_Product({
                 labelPlacement="outside"
                 type="number"
                 name="salePrice"
+                size="lg"
                 max={100}
                 min={0}
                 value={form.salePrice?.toString() || '0'}

@@ -58,10 +58,20 @@ export default function InputCategoryteam({
       setSelectedTeam(team);
       setTeam(team.id.toString());
       setShowDropdown(false);
+      setSearchValue("");
     }
 
     const toggleDropdown = () => {
       setShowDropdown(!showDropdown);
+    }
+
+    const handleBlur = () => {
+      setTimeout(() => {
+        if (!selectedTeam) {
+          setSearchValue("");
+        }
+        setShowDropdown(false);
+      }, 200);
     }
     
     return (
@@ -81,17 +91,18 @@ export default function InputCategoryteam({
             placeholder="Chọn đội bóng..."
             className="flex-1"
             onFocus={toggleDropdown}
-            endContent={!showDropdown ? <ChevronDown className="text-default-400" size={20} onClick={toggleDropdown} /> : <ChevronUp className="text-default-400" size={20} onClick={toggleDropdown} />}
+            onBlur={handleBlur}
+            endContent={!showDropdown ? <ChevronDown className="text-default-400 cursor-pointer" size={20} onClick={toggleDropdown} /> : <ChevronUp className="text-default-400 cursor-pointer" size={20} onClick={toggleDropdown} />}
           />
           
         </div>
         {showDropdown && (
-          <div className="absolute z-[9999] w-full mt-1 bg-white border rounded-md shadow-lg">
+          <div className="absolute z-[9999] w-full mt-1 bg-default-50 border rounded-md shadow-lg">
             <div className="max-h-[200px] overflow-y-auto">
               {teams.map((team: any) => (
                 <div 
                   key={team.id} 
-                  className="flex items-center gap-2 p-2 hover:bg-gray-100 cursor-pointer"
+                  className="flex items-center gap-2 p-2 hover:bg-default-100 cursor-pointer"
                   onClick={() => handleSelectTeam(team)}
                 >
                   <img src={team.logoUrl} alt={team.name} className="w-8 h-8 rounded-full" />

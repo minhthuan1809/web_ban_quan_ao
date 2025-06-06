@@ -69,13 +69,21 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
           onFocus={() => setShowDropdown(true)}
           onBlur={() => {
             setTimeout(() => {
+              if (!category) {
+                setSearchTerm("");
+              }
               setShowDropdown(false)
             }, 200)
           }}
-          endContent={!showDropdown ? <ChevronDownIcon className='w-4 h-4' /> : <ChevronUpIcon className='w-4 h-4' />}
+          endContent={!showDropdown ? <ChevronDownIcon className='w-4 h-4 text-default-400' /> : <ChevronUpIcon className='w-4 h-4 text-default-400' />}
           placeholder="Chọn danh mục"
           variant="bordered"
           size='lg'
+          classNames={{
+            label: "font-medium text-foreground",
+            input: "text-foreground",
+            inputWrapper: "bg-background"
+          }}
         />
         {loading && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -85,11 +93,11 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
       </div>
 
       {showDropdown && (
-        <div className="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto z-50">
+        <div className="absolute w-full mt-1 bg-background border border-border rounded-lg shadow-lg max-h-60 overflow-auto z-50">
           {categoryList.map((item) => (
             <div
               key={item.id}
-              className="px-4 py-2 cursor-pointer hover:bg-gray-100"
+              className="px-4 py-2 cursor-pointer hover:bg-default-100 text-foreground"
               onClick={() => {
                 setCategory(item.id.toString());
                 setSearchTerm(item.name);
@@ -100,7 +108,7 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
             </div>
           ))}
           {categoryList.length === 0 && !loading && (
-            <div className="px-4 py-2 text-gray-500">
+            <div className="px-4 py-2 text-default-500">
               Không tìm thấy kết quả
             </div>
           )}
