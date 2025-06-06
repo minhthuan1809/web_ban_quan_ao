@@ -4,6 +4,8 @@ import { getCategory_API } from '@/app/_service/category'
 import { toast } from 'react-toastify'
 import { Input } from '@nextui-org/react';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
+import { GetAllSize_API } from '@/app/_service/size';
+import useAuthInfor from '@/app/customHooks/AuthInfor';
 
 interface Material {
   id: number;
@@ -13,23 +15,22 @@ interface Material {
   updatedAt: number;
 }
 
-export default function InputCategory({ setCategory, category }: { setCategory: (category: string) => void, category: string }) {
+export default function InputSize({ setSize, size }: { setSize: (size: string) => void, size: string }) {
   const [loading, setLoading] = useState(false);
-  const [categoryList, setCategoryList] = useState<Material[]>([]);
+  const [sizeList, setSizeList] = useState<Material[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const { accessToken } = useAuthInfor();
 
-  const fetchCategory = useCallback(async () => {
+  const fetchSize = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getCategory_API(
+      const response = await GetAllSize_API(
         searchTerm,
         1,
-        10,
-        "",
-        ""
+        accessToken
       );
-      setCategoryList(response.data.reverse());
+      setSizeList(response.data.reverse());
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -39,30 +40,33 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      fetchCategory();
+      fetchSize();
     }, 500);
 
     return () => clearTimeout(debounceTimer);
-  }, [fetchCategory, searchTerm]);
+  }, [fetchSize, searchTerm]);
 
   useEffect(() => {
-    if (category) {
-      const selectedCategory = categoryList.find(item => item.id.toString() === category);
-      if (selectedCategory) {
-        setSearchTerm(selectedCategory.name);
+    if (size) {
+      const selectedSize = sizeList.find(item => item.id.toString() === size);
+      if (selectedSize) {
+        setSearchTerm(selectedSize.name);
       }
     }
-  }, [category, categoryList]);
+  }, [size, sizeList]);
 
   return (
     <div className="relative w-full">
       <div className="relative">
         <Input
-          label="Danh mục"
+          label="Kích thước"
           labelPlacement="outside"
           type="text"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setSize("");
+          }}
           onFocus={() => setShowDropdown(true)}
           onBlur={() => {
             setTimeout(() => {
@@ -70,7 +74,7 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
             }, 200)
           }}
           endContent={!showDropdown ? <ChevronDownIcon className='w-4 h-4' /> : <ChevronUpIcon className='w-4 h-4' />}
-          placeholder="Chọn danh mục"
+          placeholder="Chọn kích thước"
           variant="bordered"
           size='lg'
         />
@@ -83,12 +87,12 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
 
       {showDropdown && (
         <div className="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto z-50">
-          {categoryList.map((item) => (
+          {sizeList.map((item) => (
             <div
               key={item.id}
               className="px-4 py-2 cursor-pointer hover:bg-gray-100"
               onClick={() => {
-                setCategory(item.id.toString());
+                setSize(item.id.toString());
                 setSearchTerm(item.name);
                 setShowDropdown(false);
               }}
@@ -96,7 +100,7 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
               {item.name}
             </div>
           ))}
-          {categoryList.length === 0 && !loading && (
+          {sizeList.length === 0 && !loading && (
             <div className="px-4 py-2 text-gray-500">
               Không tìm thấy kết quả
             </div>

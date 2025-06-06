@@ -7,6 +7,7 @@ import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
 import ModalAddEditTeam from "./ModalAddEditTeam";
+import TitleSearchAdd from "@/app/components/ui/TitleSearchAdd";
 
 export default function Team() {
   const [teams, setTeams] = useState([]);
@@ -82,30 +83,27 @@ export default function Team() {
 
   return (
     <div className="p-6 w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Đội Bóng</h1>
-        <Button
-          className="bg-blue-500 text-white"
-          startContent={<Plus size={20} />}
-          onPress={() => setIsOpen(true)}
-        >
-          Thêm đội bóng
-        </Button>
-      </div>
-
-      <div className="flex justify-between items-center mb-6">
-        <Input
-          placeholder="Tìm kiếm đội bóng..."
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          startContent={<Search size={20} />}
-          className="w-80"
-        />
-      </div>
+      <TitleSearchAdd
+        title={{
+          title: "Đội Bóng",
+          search: "Tìm kiếm đội bóng...",
+          btn: "Thêm đội bóng"
+        }}
+        onSearch={(value) => setSearchValue(value)}
+        onAdd={() => {
+          setIsOpen(true)
+          setEditTeam(null)
+          setName("")
+        }}
+      />  
 
       {loading ? (
         <div className="flex justify-center items-center min-h-[400px]">
           <Loading/>
+        </div>
+      ) : teams.length === 0 ? (
+        <div className="flex justify-center items-center min-h-[400px]">
+          <p className="text-gray-500">Không có dữ liệu</p>
         </div>
       ) : (
         <Table aria-label="Bảng đội bóng" className="min-h-[400px]">

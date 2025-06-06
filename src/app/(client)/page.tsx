@@ -17,19 +17,17 @@ const data = [
 ];  
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Slide />
+    <main className="min-h-screen bg-background text-foreground">
+      <Slide />
       <ChooseCategoryHeader />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <section>
-        <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-blue-500 mb-2">Sản phẩm mới nhất</h2>
-        {/* underline */}
-        <div className="w-[3rem] mx-auto h-[2px] bg-blue-500"></div>
-
-        <CardProduct data={data} />
-      </div>
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-primary mb-2">Sản phẩm mới nhất</h2>
+            <div className="w-[3rem] mx-auto h-[2px] bg-primary/60"></div>
+            <CardProduct data={data} />
+          </div>
         </section>
       </div>
     </main>

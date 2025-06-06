@@ -3,6 +3,7 @@ import { Star, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import formatVietNamese from '@/app/_util/FomatVietNamese';
 import { DiscountPrice } from '@/app/_util/DiscountPrice';
+import { Button } from '@nextui-org/react';
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
@@ -10,7 +11,7 @@ const formatPrice = (price) => {
 
 const CardProduct = ({ product }) => {
   return (
-    <div className="group bg-white rounded-lg hover:shadow-lg transition-all duration-300 overflow-hidden shadow-md">
+    <div className="group bg-background rounded-lg hover:shadow-medium transition-all duration-300 overflow-hidden border border-border">
       {/* Product Image */}
       <Link href={`/products/${formatVietNamese(product.name)}/${product.id}`} className="relative aspect-square overflow-hidden">
         <div className="relative aspect-square overflow-hidden">
@@ -23,22 +24,26 @@ const CardProduct = ({ product }) => {
           {/* Badges */}
           <div className="absolute top-1 sm:top-2 left-1 sm:left-2 flex justify-between w-[95%] gap-1">
             {product.isFeatured && (
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shadow-sm">
+              <div className="bg-primary/90 text-primary-foreground px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shadow-sm backdrop-blur-sm">
                 HOT
               </div>
             )}
             {product.price !== product.salePrice && (
-              <div className="bg-gradient-to-r from-red-500 to-red-600 text-white px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shadow-sm">
+              <div className="bg-danger/90 text-danger-foreground px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shadow-sm backdrop-blur-sm">
                 {product.salePrice}%
               </div>
             )}
           </div>
 
           {/* Quick add to cart overlay */}
-          <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <button className="bg-white text-gray-900 px-2 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+          <div className="absolute inset-0 bg-background/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
+            <Button 
+              size="sm" 
+              variant="flat"
+              className="bg-background/70 text-foreground font-medium transform translate-y-2 group-hover:translate-y-0 transition-all duration-300"
+            >
               Xem chi tiết
-            </button>
+            </Button>
           </div>
         </div>
       </Link>
@@ -47,13 +52,13 @@ const CardProduct = ({ product }) => {
       <div className="p-2 sm:p-3">
         {/* Brand/Category */}
         <div className="mb-1">
-          <span className="text-[10px] sm:text-xs text-gray-500 font-medium">
+          <span className="text-[10px] sm:text-xs text-default-500 font-medium">
             {product.team?.name || product.category?.name}
           </span>
         </div>
 
         {/* Product name */}
-        <Link href={`/products/${formatVietNamese(product.name)}/${product.id}`} className="font-medium text-gray-900 text-sm sm:text-lg hover:underline cursor-pointer mb-1 sm:mb-2 line-clamp-2 leading-tight min-h-[2.5rem]">
+        <Link href={`/products/${formatVietNamese(product.name)}/${product.id}`} className="font-medium text-foreground text-sm sm:text-lg hover:text-primary transition-colors cursor-pointer mb-1 sm:mb-2 line-clamp-2 leading-tight min-h-[2.5rem]">
           {product.name}
         </Link>
 
@@ -61,15 +66,15 @@ const CardProduct = ({ product }) => {
         <div className="flex flex-col gap-0.5 sm:gap-1">
           {product.price !== product.salePrice ? (
             <>
-              <span className="text-sm sm:text-base font-bold text-red-600">
+              <span className="text-sm sm:text-base font-bold text-danger">
                 {formatPrice(DiscountPrice(product.price, product.salePrice))}
               </span>
-              <span className="text-[10px] sm:text-xs text-gray-400 line-through">
+              <span className="text-[10px] sm:text-xs text-default-400 line-through">
                 {formatPrice(product.price)}
               </span>
             </>
           ) : (
-            <span className="text-sm sm:text-base font-bold text-red-600">
+            <span className="text-sm sm:text-base font-bold text-danger">
               {formatPrice(product.price)}
             </span>
           )}
@@ -83,17 +88,22 @@ const CardProduct = ({ product }) => {
               <Star 
                 key={i} 
                 size={8} 
-                className={`${i < 4 ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200'}`}
+                className={`${i < 4 ? 'fill-warning text-warning' : 'text-default-200'}`}
               />
             ))}
-            <span className="text-[10px] sm:text-xs text-gray-500 ml-0.5 sm:ml-1">(4.0)</span>
+            <span className="text-[10px] sm:text-xs text-default-500 ml-0.5 sm:ml-1">(4.0)</span>
           </div>
 
           {/* Add to cart button */}
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-md text-[10px] sm:text-sm font-medium shadow-sm transition-colors duration-200 flex items-center gap-0.5 sm:gap-1">
-            <ShoppingCart size={12} />
+          <Button
+            size="sm"
+            color="primary"
+            variant="flat"
+            className="font-medium px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-sm"
+            startContent={<ShoppingCart size={12} />}
+          >
             Thêm
-          </button>
+          </Button>
         </div>
       </div>
     </div>

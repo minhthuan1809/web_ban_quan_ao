@@ -1,6 +1,4 @@
 "use client";
-import GetIconComponent from '@/app/_util/Icon';
-import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useUserStore } from '@/app/_zustand/client/InForUser';
@@ -9,6 +7,9 @@ import { deleteCookie } from 'cookies-next';
 import { authGetUserInfo_API, authLogout_API } from '@/app/_service/authClient';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import Loading from '@/app/_util/Loading';
+import { ThemeToggle } from './_conponents/ThemeToggle';
+import Link from 'next/link';
+import GetIconComponent from '@/app/_util/Icon';
 
 export default function Layout({children}: {children: React.ReactNode}) {
     const pathname = usePathname();
@@ -26,7 +27,6 @@ export default function Layout({children}: {children: React.ReactNode}) {
     useEffect(() => {
       const checkMobile = () => {
         setIsMobile(window.innerWidth < 768);
-        // Auto close mobile menu when switching to desktop
         if (window.innerWidth >= 768) {
           setIsMobileMenuOpen(false);
         }
@@ -125,21 +125,31 @@ export default function Layout({children}: {children: React.ReactNode}) {
           name: "Danh mục",
           icon: "FolderMinus",
           submenu: [
-                {
-                name: "Danh mục",
-                href: "/category",
-                icon: "LayoutGrid",
-                },
-                {
-                name: "Đội Bóng",
-                href: "/team",
-                icon: "Users",
-                },
-                {
-                name: "Chất liệu",
-                href: "/material",
-                icon: "AirVent",
-                },
+            {
+              name: "Danh mục",
+              href: "/category",
+              icon: "LayoutGrid",
+            },
+            {
+              name: "Đội Bóng",
+              href: "/team",
+              icon: "Users",
+            },
+            {
+              name: "Chất liệu",
+              href: "/material",
+              icon: "AirVent",
+            },
+            {
+              name: "Màu",
+              href: "/color",
+              icon: "Palette",
+            },
+            {
+              name: "Kích cỡ",
+              href: "/size",
+              icon: "Ruler",
+            },
           ],
         },
         {
@@ -199,39 +209,20 @@ export default function Layout({children}: {children: React.ReactNode}) {
         }
     };
 
-    if (isLoading) {
-        return <Loading />
-    }
-
     return (
-        <div className='min-h-screen bg-gray-50'>
+        <div className="min-h-screen bg-background">
             {/* Mobile overlay */}
             {isMobile && isMobileMenuOpen && (
                 <div
-                    className="fixed inset-0 bg-black bg-opacity-50 z-40"
+                    className="fixed inset-0 bg-black/50 z-40"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
-            )}
-
-            {/* Mobile menu button */}
-            {isMobile && (
-                <div className="fixed top-4 left-4 z-50">
-                    <button
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="p-2 bg-white rounded-lg shadow-lg hover:bg-gray-50 transition-colors"
-                    >
-                        <GetIconComponent 
-                            icon={isMobileMenuOpen ? "X" : "Menu"} 
-                            className="w-6 h-6 text-gray-600" 
-                        />
-                    </button>
-                </div>
             )}
 
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 bg-white shadow-lg transition-all duration-300 flex flex-col",
+                    "fixed inset-y-0 left-0 z-50 bg-card shadow-lg transition-all duration-300 flex flex-col",
                     isMobile
                         ? isMobileMenuOpen
                             ? "translate-x-0"
@@ -241,7 +232,7 @@ export default function Layout({children}: {children: React.ReactNode}) {
                 )}
             >
                 {/* Header */}
-                <div className="h-20 border-b border-gray-200 flex items-center justify-between px-6 bg-gradient-to-r from-blue-600 to-blue-700">
+                <div className="h-20 border-b border-border flex items-center justify-between px-6 bg-gradient-to-r from-primary to-primary-600">
                     {(!isCollapsed || isMobile) && (
                         <div
                             className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity"
@@ -262,10 +253,10 @@ export default function Layout({children}: {children: React.ReactNode}) {
                             )}
                             <div className="flex flex-col">
                                 <span className="text-sm font-semibold text-white">{user_Zustand?.fullName}</span>
-                                <span className="text-xs text-blue-100">
+                                <span className="text-xs text-primary-100">
                                     {user_Zustand?.roleName}
                                 </span>
-                                <span className="text-xs text-blue-200 truncate max-w-40">
+                                <span className="text-xs text-primary-200 truncate max-w-40">
                                     {user_Zustand?.email}
                                 </span>
                             </div>
@@ -297,7 +288,7 @@ export default function Layout({children}: {children: React.ReactNode}) {
                         </button>
                     )}
                 </div>
-
+                
                 {/* Navigation */}
                 <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
                     {menuItems.map((item) => (
@@ -310,8 +301,8 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                             "w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group",
                                             item.href && (pathname.startsWith(item.href) ||
                                             item.submenu.some((sub) => pathname.startsWith(sub.href)))
-                                                ? "bg-blue-50 text-blue-700 shadow-sm"
-                                                : "text-gray-700 hover:bg-gray-50"
+                                                ? "bg-primary/10 text-primary"
+                                                : "text-foreground hover:bg-primary/10 hover:text-primary"
                                         )}
                                     >
                                         <div className="flex items-center space-x-3">
@@ -320,8 +311,8 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                                     "flex-shrink-0 w-6 h-6 transition-colors",
                                                     item.href && (pathname.startsWith(item.href) ||
                                                     item.submenu.some((sub) => pathname.startsWith(sub.href)))
-                                                        ? "text-blue-600"
-                                                        : "text-gray-500 group-hover:text-blue-600"
+                                                        ? "text-primary"
+                                                        : "text-muted-foreground group-hover:text-primary"
                                                 )}
                                             >
                                                 <GetIconComponent icon={item.icon as any} />
@@ -341,14 +332,14 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                             >
                                                 <GetIconComponent
                                                     icon="ChevronDown"
-                                                    className="w-4 h-4 text-gray-400"
+                                                    className="w-4 h-4 text-muted-foreground"   
                                                 />
                                             </div>
                                         )}
                                     </button>
 
                                     {activeMenu === item.name && (!isCollapsed || isMobile) && (
-                                        <div className="ml-6 space-y-1 border-l-2 border-gray-100 pl-4">
+                                        <div className="ml-6 space-y-1 border-l-2 border-border pl-4">
                                             {item.submenu.map((subitem) => (
                                                 <Link
                                                     key={subitem.name}
@@ -356,8 +347,8 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                                     className={cn(
                                                         "flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 group",
                                                         pathname.startsWith(subitem.href)
-                                                            ? "bg-blue-50 text-blue-700 font-medium"
-                                                            : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                                                            ? "bg-primary/10 text-primary font-medium"
+                                                            : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
                                                     )}
                                                     onClick={() => setIsMobileMenuOpen(false)}
                                                 >
@@ -365,8 +356,8 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                                         className={cn(
                                                             "w-5 h-5 mr-3 transition-colors",
                                                             pathname.startsWith(subitem.href)
-                                                                ? "text-blue-600"
-                                                                : "text-gray-400 group-hover:text-blue-600"
+                                                                ? "text-primary"
+                                                                : "text-muted-foreground group-hover:text-primary"
                                                         )}
                                                     >
                                                         <GetIconComponent icon={subitem.icon as any} />
@@ -383,8 +374,8 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                     className={cn(
                                         "flex items-center px-4 py-3 rounded-lg transition-all duration-200 group",
                                         pathname === item.href || pathname.startsWith(item.href + "/")
-                                            ? "bg-blue-50 text-blue-700 shadow-sm font-medium"
-                                            : "text-gray-700 hover:bg-gray-50"
+                                            ? "bg-primary/10 text-primary font-medium"
+                                            : "text-foreground hover:bg-primary/10 hover:text-primary"
                                     )}
                                     onClick={() => setIsMobileMenuOpen(false)}
                                 >
@@ -392,8 +383,8 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                         className={cn(
                                             "flex-shrink-0 w-6 h-6 transition-colors",
                                             pathname === item.href || pathname.startsWith(item.href + "/")
-                                                ? "text-blue-600"
-                                                : "text-gray-500 group-hover:text-blue-600"
+                                                ? "text-primary"
+                                                : "text-muted-foreground group-hover:text-primary"
                                         )}
                                     >
                                         <GetIconComponent icon={item.icon as any} />
@@ -410,7 +401,13 @@ export default function Layout({children}: {children: React.ReactNode}) {
                 </nav>
 
                 {/* Logout Button */}
-                <div className="p-4 border-t border-gray-200">
+                <div className="p-4 border-t border-border">
+                    <div className="flex items-center gap-2 mb-3">
+                        <ThemeToggle />
+                        <span className="text-sm text-muted-foreground">
+                            {(!isCollapsed || isMobile) && "Giao diện"}
+                        </span>
+                    </div>
                     <button
                         onClick={handleLogout}
                         disabled={isLoadingBtnLogout}
@@ -444,10 +441,10 @@ export default function Layout({children}: {children: React.ReactNode}) {
                 "transition-all duration-300",
                 isMobile ? "ml-0" : isCollapsed ? "ml-20" : "ml-80"
             )}>
-                <div className="p-6">
-                    {children}
+                <div className="p-4">
+                    {isLoading ? <Loading /> : children}
                 </div>
             </main>
         </div>
-    )
+    );
 }

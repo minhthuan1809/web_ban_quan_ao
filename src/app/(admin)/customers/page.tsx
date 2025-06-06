@@ -4,10 +4,10 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import React, { useEffect, useState } from 'react';
 import {
   Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
-  Button, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input, useDisclosure, Spinner, Chip, Avatar
+  Button, useDisclosure, Avatar
 } from "@nextui-org/react";
 
-import { User, UserPlus, Edit3, Trash2, Users, Mail, Phone, MapPin } from 'lucide-react';
+import { User, UserPlus, Edit3, Trash2, Users } from 'lucide-react';
 import Loading from '@/app/_util/Loading';
 import { toast } from 'react-toastify';
 import ModalAddUse from './ModalAddUse';
@@ -69,8 +69,6 @@ export default function PageUser() {
     setLoading(true);
     try {
       const res = await getUserById_API(accessToken);
-      console.log(res.data , "minh thuận");
-      
       setUsers(res.data);
     } catch (error) {
       toast.error('Lỗi tải danh sách người dùng!');
@@ -80,7 +78,6 @@ export default function PageUser() {
   }
 
   const handleAdd = () => {
-    setModalMode('add');
     setFormData({
       fullName: '',
       email: '',
@@ -143,136 +140,120 @@ export default function PageUser() {
   }
 
   return (
-    <div className="bg-slate-50 min-h-screen ">
-      <div className="mx-auto">
-        {/* Header Section */}
-        <div className="bg-white rounded-xl shadow border border-slate-200 p-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-slate-100 rounded-lg">
-              <Users className="w-5 h-5 text-slate-500" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-slate-800">Quản lý người dùng</h1>
-              <p className="text-slate-500 text-sm">Tổng cộng {users?.metadata?.total || 0} người dùng</p>
-            </div>
+    <div className="p-6 space-y-6 bg-background min-h-screen">
+      {/* Header Section */}
+      <div className="bg-card rounded-lg border border-border p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-primary/10 rounded-lg">
+            <Users className="w-5 h-5 text-primary" />
           </div>
-          <Button 
-            color="primary"
-            onPress={handleAdd}
-            startContent={<UserPlus className="w-4 h-4" />}
-            className="font-semibold px-5"
-            size="md"
-            variant="flat"
-          >
-            Thêm người dùng
-          </Button>
+          <div>
+            <h1 className="text-xl font-semibold text-foreground">Quản lý người dùng</h1>
+            <p className="text-sm text-muted-foreground">Tổng cộng {users?.metadata?.total || 0} người dùng</p>
+          </div>
         </div>
+        <Button 
+          color="primary"
+          onPress={handleAdd}
+          startContent={<UserPlus className="w-4 h-4" />}
+          className="font-medium"
+          size="md"
+        >
+          Thêm người dùng
+        </Button>
+      </div>
 
-        {/* Table Section */}
-        <div className="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <Table
-              aria-label="Bảng người dùng"
-              removeWrapper
-              className="min-w-[800px]"
-              classNames={{
-                th: "bg-slate-50 text-slate-700 font-semibold text-xs py-3 border-b border-slate-100",
-                td: "py-3 text-slate-700 text-sm border-b border-slate-50",
-                tr: "hover:bg-slate-50/70 transition-colors"
-              }}
-            >
-              <TableHeader>
-                <TableColumn>
-                  <div className="flex items-center gap-2">
-                    STT
-                  </div>
-                </TableColumn>
-                <TableColumn>
-                  <div className="flex items-center gap-2">
-                    Họ tên
-                  </div>
-                </TableColumn>
-                <TableColumn>
-                  <div className="flex items-center gap-2">
-                    SĐT
-                  </div>
-                </TableColumn>
-                <TableColumn>
-                  <div className="flex items-center gap-2">
-                    Địa chỉ
-                  </div>
-                </TableColumn>
-                <TableColumn>Giới tính</TableColumn>
-                <TableColumn className="text-center">Hành động</TableColumn>
-              </TableHeader>
-              <TableBody emptyContent={
-                <div className="text-center py-8">
-                  <Users className="w-14 h-14 mx-auto text-slate-200 mb-3" />
-                  <p className="text-slate-400">Không có dữ liệu người dùng</p>
-                </div>
-              }>
-                {(users?.data ?? []).map((user: User, index: number) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="text-slate-600">{index + 1}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar 
-                          src={user.avatarUrl || "https://i.pravatar.cc/150?u=a042581f4e29026024d"}
-                          size="sm"
-                          className="flex-shrink-0"
-                        />
-                        <div>
-                          <div className="font-medium text-slate-800">{user.fullName}</div>
-                          <div className="text-slate-500 text-xs">{user.email}</div>
-                        </div>
+      {/* Table Section */}
+      <div className="bg-card rounded-lg border border-border overflow-hidden">
+        <div className="overflow-x-auto">
+          <Table
+            aria-label="Bảng người dùng"
+            removeWrapper
+            className="min-w-[800px]"
+            classNames={{
+              th: "bg-muted/50 text-muted-foreground font-medium text-xs py-3 border-b border-border",
+              td: "py-3 text-foreground text-sm border-b border-border",
+              tr: "hover:bg-muted/50 transition-colors"
+            }}
+          >
+            <TableHeader>
+              <TableColumn>STT</TableColumn>
+              <TableColumn>Họ tên</TableColumn>
+              <TableColumn>SĐT</TableColumn>
+              <TableColumn>Địa chỉ</TableColumn>
+              <TableColumn>Giới tính</TableColumn>
+              <TableColumn className="text-center">Hành động</TableColumn>
+            </TableHeader>
+            <TableBody emptyContent={
+              <div className="text-center py-8">
+                <Users className="w-14 h-14 mx-auto text-muted-foreground/20 mb-3" />
+                <p className="text-muted-foreground">Không có dữ liệu người dùng</p>
+              </div>
+            }>
+              {(users?.data ?? []).map((user: User, index: number) => (
+                <TableRow key={user.id}>
+                  <TableCell>
+                    <div className="text-foreground">{index + 1}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar 
+                        src={user.avatarUrl || "https://i.pravatar.cc/150?u=a042581f4e29026024d"}
+                        size="sm"
+                        className="flex-shrink-0"
+                      />
+                      <div>
+                        <div className="font-medium text-foreground">{user.fullName}</div>
+                        <div className="text-muted-foreground text-xs">{user.email}</div>
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-slate-600">{user.phone}</div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="text-slate-600 max-w-xs truncate">
-                        {`${user.address}, ${user.ward}, ${user.district}`}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="inline-block px-2 py-1 rounded bg-slate-100 text-xs text-slate-700">
-                        {user.gender === 'MALE' ? 'Nam' : user.gender === 'FEMALE' ? 'Nữ' : 'Khác'}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex justify-center gap-2">
-                        <Button
-                          size="sm"
-                          color="primary"
-                          variant="light"
-                          onPress={() => handleEdit(user)}
-                          startContent={<Edit3 className="w-3 h-3" />}
-                          className="min-w-0 px-3"
-                        >
-                          Sửa
-                        </Button>
-                        <Button
-                          size="sm"
-                          color="danger"
-                          variant="light"
-                          onPress={() => handleDelete(user.id)}
-                          startContent={<Trash2 className="w-3 h-3" />}
-                          className="min-w-0 px-3"
-                        >
-                          Xóa
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-foreground">{user.phone}</div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-foreground max-w-xs truncate">
+                      {`${user.address}, ${user.ward}, ${user.district}`}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium
+                      ${user.gender === 'MALE' ? 'bg-primary/10 text-primary' : 
+                        user.gender === 'FEMALE' ? 'bg-pink-100 text-pink-600' : 
+                        'bg-muted text-muted-foreground'}`}
+                    >
+                      {user.gender === 'MALE' ? 'Nam' : user.gender === 'FEMALE' ? 'Nữ' : 'Khác'}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex justify-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="light"
+                        onPress={() => handleEdit(user)}
+                        startContent={<Edit3 className="w-3 h-3" />}
+                        className="text-default-600 hover:text-primary"
+                      >
+                        Sửa
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="light"
+                        onPress={() => handleDelete(user.id)}
+                        startContent={<Trash2 className="w-3 h-3" />}
+                        className="text-default-600 hover:text-red-500"
+                      >
+                        Xóa
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
+
       <ModalAddUse
         isOpen={showModal}
         onClose={() => setShowModal(false)}
@@ -282,6 +263,7 @@ export default function PageUser() {
         onSubmit={handleModalSubmit}
         accessToken={accessToken}
       />
+      
       {loading && <Loading />}
     </div>
   )

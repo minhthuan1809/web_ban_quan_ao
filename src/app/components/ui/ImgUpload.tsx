@@ -12,21 +12,21 @@ import { Upload } from 'lucide-react'
 
   return (
     <div className="w-full h-full">
-      <label className="flex flex-col items-center justify-center w-full h-full border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+      <label className="flex flex-col items-center justify-center w-full h-full border-2 border-border border-dashed rounded-lg cursor-pointer bg-default-50 hover:bg-default-100 transition-colors">
         <div className="flex flex-col items-center justify-center w-full h-full">
           {preview ? (
             <img 
               src={preview instanceof File ? URL.createObjectURL(preview) : preview} 
               alt="Preview" 
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-lg"
             />
           ) : (
             <>
-              <Upload className="w-8 h-8 mb-4 text-gray-500" />
-              <p className="mb-2 text-sm text-gray-500">
+              <Upload className="w-8 h-8 mb-4 text-default-500" />
+              <p className="mb-2 text-sm text-default-600">
                 <span className="font-semibold">Click để tải ảnh lên</span>
               </p>
-              <p className="text-xs text-gray-500">SVG, PNG, JPG hoặc GIF</p>
+              <p className="text-xs text-default-500">SVG, PNG, JPG hoặc GIF</p>
             </>
           )}
         </div>

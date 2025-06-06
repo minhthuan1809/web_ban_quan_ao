@@ -1,7 +1,6 @@
-import { getCityVietnam } from "@/app/_service/addressVietnam";
-import { Input } from "@nextui-org/react";
 import React, { useEffect, useState } from 'react'
 import { MapPin, Map, Home } from "lucide-react";
+import { getCityVietnam } from '@/app/_service/addressVietnam';
 
 export default function InputAddress({
     onChange,

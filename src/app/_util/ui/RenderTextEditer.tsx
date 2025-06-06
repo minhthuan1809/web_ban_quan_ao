@@ -1,12 +1,20 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
+import { cn } from '@/lib/utils';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface RenderTextEditerProps {
     value: string;
     type?: 'all' | 'sort';
-    size?: string;
+    className?: string;
+    title?: string;
 }
 
-export default function RenderTextEditer({ value, type = 'all'}: RenderTextEditerProps) {
+export default function RenderTextEditer({ 
+    value, 
+    type = 'all',
+    className,
+    title = "CHI TIẾT SẢN PHẨM"
+}: RenderTextEditerProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
     // Sanitize and validate HTML content before rendering
@@ -23,47 +31,51 @@ export default function RenderTextEditer({ value, type = 'all'}: RenderTextEdite
     const sanitizedValue = sanitizeHTML(value);
 
     return (
-        <div className={`text-editor-container p-4ư`}>
-            <h2 className="text-lg font-medium mb-4 text-gray-900">CHI TIẾT SẢN PHẨM</h2>
+        <div className={cn(
+            'w-full rounded-lg border border-border bg-card text-card-foreground shadow-sm',
+            className
+        )}>
+            {title && (
+                <div className="px-6 py-4 border-b border-border">
+                    <h2 className="text-lg font-medium text-foreground">{title}</h2>
+                </div>
+            )}
+            
             {/* Content area */}
             <div className={type === 'sort' ? 'p-5' : 'p-4'}>
                 <div
-                    className={`text-content ${
-                        type === 'sort' 
-                            ? `${isExpanded ? 'max-h-none' : 'h-[30rem]'} overflow-hidden transition-all duration-300` 
-                            : 'h-full overflow-hidden'
-                    }`}
+                    className={cn(
+                        'prose prose-sm max-w-none text-foreground prose-headings:text-foreground prose-a:text-primary',
+                        type === 'sort' && !isExpanded && 'max-h-[30rem] overflow-hidden',
+                        'transition-all duration-300'
+                    )}
                     dangerouslySetInnerHTML={{ __html: sanitizedValue }}
                 />
 
                 {/* Fade overlay khi content bị cắt */}
                 {type === 'sort' && !isExpanded && sanitizedValue.length > 100 && (
                     <div className="relative">
-                        <div className="absolute -top-8 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+                        <div className="absolute -top-8 left-0 right-0 h-8 bg-gradient-to-t from-card to-transparent pointer-events-none"></div>
                     </div>
                 )}
             </div>
 
-            {/* Button đơn giản */}
+            {/* Expand/Collapse button */}
             {type === 'sort' && sanitizedValue.length > 100 && (
                 <div className="px-5 pb-5">
-                    <div className="flex justify-center pt-3 border-t border-gray-100">
+                    <div className="flex justify-center pt-3 border-t border-border">
                         <button
                             onClick={() => setIsExpanded(!isExpanded)}
-                            className="inline-flex items-center gap-2 px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium hover:bg-blue-50 rounded-md transition-colors duration-200"
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-primary hover:text-primary/80 hover:bg-primary/10 rounded-md transition-colors duration-200"
                         >
                             {isExpanded ? (
                                 <>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                                    </svg>
+                                    <ChevronUp className="w-4 h-4" />
                                     Thu gọn
                                 </>
                             ) : (
                                 <>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                    </svg>
+                                    <ChevronDown className="w-4 h-4" />
                                     Xem thêm
                                 </>
                             )}
@@ -72,5 +84,5 @@ export default function RenderTextEditer({ value, type = 'all'}: RenderTextEdite
                 </div>
             )}
         </div>
-    )
+    );
 }

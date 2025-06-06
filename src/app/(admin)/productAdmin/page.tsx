@@ -20,7 +20,6 @@ export default function ProductPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [totalPage, setTotalPage] = useState(0)
 
-
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
@@ -59,30 +58,30 @@ export default function ProductPage() {
       } else {
         toast.error("Xóa sản phẩm thất bại")
       }
-    // xóa ảnh trên severs
-    for (const imageUrl of product.imageUrls) {
-      if (typeof imageUrl === 'string') {
-        const matches = imageUrl.match(/\/v\d+\/(.*?)\/([^/]+)$/);
-        if (!matches) {
-          console.error("Invalid image URL format:", imageUrl);
-          continue;
-        }
-        const folder = matches[1];
-        const publicId = matches[2].split('.')[0];
-        const response = await fetch("/api/cloudinary", {
-          method: "DELETE",
-          body: JSON.stringify({ id: publicId, folder: folder }),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
+      // xóa ảnh trên severs
+      for (const imageUrl of product.imageUrls) {
+        if (typeof imageUrl === 'string') {
+          const matches = imageUrl.match(/\/v\d+\/(.*?)\/([^/]+)$/);
+          if (!matches) {
+            console.error("Invalid image URL format:", imageUrl);
+            continue;
+          }
+          const folder = matches[1];
+          const publicId = matches[2].split('.')[0];
+          const response = await fetch("/api/cloudinary", {
+            method: "DELETE",
+            body: JSON.stringify({ id: publicId, folder: folder }),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.details || 'Failed to delete image');
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.details || 'Failed to delete image');
+          }
         }
       }
-    }
     } catch (error) {
       console.error("Error deleting product:", error);
       toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa sản phẩm");
@@ -90,20 +89,20 @@ export default function ProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200">
+      <div className="bg-card border-b border-border">
         <div className="mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900 mb-1">
+              <h1 className="text-2xl font-semibold text-foreground mb-1">
                 Danh Sách Sản Phẩm
               </h1>
-              <p className="text-gray-600 text-sm">Quản lý sản phẩm của bạn</p>
+              <p className="text-muted-foreground text-sm">Quản lý sản phẩm của bạn</p>
             </div>
             <button
               onClick={() => setIsOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              className="btn-primary inline-flex items-center gap-2 px-4 py-2"
             >
               <Plus className="w-4 h-4" />
               Thêm Mới
@@ -111,7 +110,6 @@ export default function ProductPage() {
           </div>
         </div>
       </div>
-
 
       {/* Render Product Table */}
       <RenderProductTable

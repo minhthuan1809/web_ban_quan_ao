@@ -3,7 +3,7 @@ import { Input } from '@nextui-org/react';
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 export default function InputCategoryteam({
   setTeam,
@@ -59,25 +59,34 @@ export default function InputCategoryteam({
       setTeam(team.id.toString());
       setShowDropdown(false);
     }
+
+    const toggleDropdown = () => {
+      setShowDropdown(!showDropdown);
+    }
     
     return (
       <div className="relative">
-        <Input
-          label="Tên đội bóng"
-          labelPlacement="outside"
-          size="lg"
-          value={selectedTeam ? selectedTeam.name : searchValue}
-          variant="bordered"
-          endContent={<ChevronDown className="text-default-400" size={20} />}
-          onChange={(e) => {
-            setSearchValue(e.target.value);
-            setSelectedTeam(null);
-          }}
-          onFocus={() => setShowDropdown(true)}
-          placeholder="Chọn đội bóng..."
-        />
+        <div className="flex items-center">
+          <Input
+            label="Tên đội bóng"
+            labelPlacement="outside"
+            size="lg"
+            value={selectedTeam ? selectedTeam.name : searchValue}
+            variant="bordered"
+            onChange={(e) => {
+              setSearchValue(e.target.value);
+              setSelectedTeam(null);
+              setTeam("");
+            }}
+            placeholder="Chọn đội bóng..."
+            className="flex-1"
+            onFocus={toggleDropdown}
+            endContent={!showDropdown ? <ChevronDown className="text-default-400" size={20} onClick={toggleDropdown} /> : <ChevronUp className="text-default-400" size={20} onClick={toggleDropdown} />}
+          />
+          
+        </div>
         {showDropdown && (
-          <div className="absolute z-10 w-full mt-1 bg-white border rounded-md shadow-lg">
+          <div className="absolute z-[9999] w-full mt-1 bg-white border rounded-md shadow-lg">
             <div className="max-h-[200px] overflow-y-auto">
               {teams.map((team: any) => (
                 <div 

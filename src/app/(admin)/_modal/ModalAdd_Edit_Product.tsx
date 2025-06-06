@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useEffect, useState } from 'react'
-import { Input, Textarea, Button, Checkbox, Divider, Spinner } from "@nextui-org/react"
-import InputMateria from '../_conponents/category/InputMateria';
-import InputCategory from '../_conponents/category/InputCategory';
-import Variants from '../_conponents/Variants';
+import { Input, Button, Checkbox, Divider, Spinner } from "@nextui-org/react"
+
 import InputTakeImg from '@/app/_util/ui/InputTakeImg';
 import { uploadToCloudinary } from '@/app/_util/upload_img_cloudinary';
 import { CreateProduct_API, UpdateProduct_API } from '@/app/_service/products';
@@ -12,7 +10,12 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { toast } from 'react-toastify';
 import InputTextEditor from '@/app/_util/ui/InputTextEditer';
 import { validateForm } from './js/validateFormAddProduct';
-import InputCategoryteam from '../_conponents/category/InputCategoryteam';
+import InputCategoryteam from '../../components/ui/InputCategoryteam';
+import { X, Package, DollarSign, Percent } from 'lucide-react';
+import InputCategory from '@/app/components/ui/InputCategory';
+import InputMateria from '@/app/components/ui/InputMateria';
+import InputVariants from '@/app/components/ui/InputVariants';
+import InputSize from '@/app/components/ui/inputSize';
 
 interface FormData {
   name: string;
@@ -28,6 +31,7 @@ interface FormData {
   salePrice: number;
   variants: any[];
   materialList: any[];
+  size: string;
 }
 
 const initialFormState: FormData = {
@@ -44,6 +48,7 @@ const initialFormState: FormData = {
   salePrice: 0,
   variants: [],
   materialList: [],
+  size: '',
 };
 
 export default function ModalAdd_Edit_Product({
@@ -83,6 +88,7 @@ export default function ModalAdd_Edit_Product({
         salePrice: edit.salePrice || 0,
         variants: edit.variants || [],
         materialList: [],
+        size: '',
       });
     }
   }, [edit, isOpen]);
@@ -99,6 +105,7 @@ export default function ModalAdd_Edit_Product({
   };
 
   const handleInputChange = (field: keyof FormData, value: any) => {
+    console.log("value", value)
     setForm(prev => ({
       ...prev,
       [field]: value
@@ -140,7 +147,6 @@ export default function ModalAdd_Edit_Product({
     }
   };
 
-  // handle finish
   const handleFinish = async () => {
     if (!validateForm(form, setErrors)) {
       toast.error("Vui lòng điền đầy đủ thông tin bắt buộc!");
@@ -166,17 +172,16 @@ export default function ModalAdd_Edit_Product({
     }
   }
 
-  // edit
   const handleEdit = async () => {
     try {
       setLoadingBtn(true)
-    const data = await callApiCloudinary();
-    const response = await UpdateProduct_API(edit.id, data, accessToken);
-    if (response.status === 200) {
-      toast.success("Cập nhật sản phẩm thành công");
-      handleClose();
-      refetch();
-    } else {
+      const data = await callApiCloudinary();
+      const response = await UpdateProduct_API(edit.id, data, accessToken);
+      if (response.status === 200) {
+        toast.success("Cập nhật sản phẩm thành công");
+        handleClose();
+        refetch();
+      } else {
         toast.error(response.data.message);
       }
     } catch (error) {
@@ -190,20 +195,27 @@ export default function ModalAdd_Edit_Product({
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center ${isOpen ? '' : 'hidden'}`}>
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose}></div>
-      <div className="bg-white rounded-xl p-8 z-10 w-[800px] max-h-[90vh] overflow-y-auto shadow-2xl">
+      <div className="bg-card rounded-xl p-8 z-10 w-[800px] max-h-[90vh] overflow-y-auto custom-scrollbar shadow-2xl">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">{edit ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}</h2>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Package className="w-5 h-5 text-primary" />
+            </div>
+            <h2 className="text-xl font-semibold text-foreground">
+              {edit ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm'}
+            </h2>
+          </div>
           <button
             disabled={loadingBtn}
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
+            className="p-2 hover:bg-primary/10 rounded-full transition-colors duration-200 text-muted-foreground hover:text-primary disabled:opacity-50"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <X className="w-5 h-5" />
           </button>
         </div>
 
         <div className="mb-6">
-          <p className="font-medium mb-2">Hình ảnh sản phẩm</p>
+          <p className="font-medium mb-2 text-foreground">Hình ảnh sản phẩm</p>
           <InputTakeImg
             images={form.imageUrls || []}
             setImages={(value) => handleInputChange('imageUrls', value)}
@@ -213,51 +225,53 @@ export default function ModalAdd_Edit_Product({
           {errors.imageUrls && <p className="text-red-500 text-sm mt-1">{errors.imageUrls}</p>}
         </div>
 
-        <Divider className="my-4" />
+        <Divider className="my-6" />
 
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <Input
+              label="Tên sản phẩm"
+              placeholder="Nhập tên sản phẩm..."
+              labelPlacement="outside"
+              type="text"
+              value={form.name}
+              onChange={(e) => handleInputChange('name', e.target.value)}
+              variant="bordered"
+              size="lg"
+              isInvalid={!!errors.name}
+              errorMessage={errors.name}
+              classNames={{
+                label: "font-medium text-foreground",
+                input: "text-foreground",
+                inputWrapper: "bg-background"
+              }}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <Input
-                label="Tên sản phẩm"
-                placeholder="Nhập tên sản phẩm..."
+                label="Giá"
                 labelPlacement="outside"
-                type="text"
-                value={form.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                type="number"
+                value={form.price?.toString() || '0'}
+                onChange={(e) => handleInputChange('price', Number(e.target.value))}
                 variant="bordered"
                 size="lg"
-                isInvalid={!!errors.name}
-                errorMessage={errors.name}
+                isInvalid={!!errors.price}
+                errorMessage={errors.price}
+                startContent={
+                  <DollarSign className="w-4 h-4 text-default-400" />
+                }
                 classNames={{
-                  label: "font-medium"
+                  label: "font-medium text-foreground",
+                  input: "text-foreground",
+                  inputWrapper: "bg-background"
                 }}
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Input
-                  label="Giá"
-                  labelPlacement="outside"
-                  type="number"
-                  value={form.price?.toString() || '0'}
-                  onChange={(e) => handleInputChange('price', Number(e.target.value))}
-                  variant="bordered"
-                  size="lg"
-                  isInvalid={!!errors.price}
-                  errorMessage={errors.price}
-                  startContent={
-                    <div className="pointer-events-none flex items-center">
-                      <span className="text-gray-500">₫</span>
-                    </div>
-                  }
-                  classNames={{
-                    label: "font-medium"
-                  }}
-                />
-              </div>
-
+            <div>
               <Input
                 label="Giá khuyến mãi"
                 labelPlacement="outside"
@@ -269,112 +283,123 @@ export default function ModalAdd_Edit_Product({
                 onChange={(e) => handleInputChange('salePrice', Number(e.target.value))}
                 variant="bordered"
                 startContent={
-                  <div className="pointer-events-none flex items-center">
-                    <span className="text-gray-500">%</span>
-                  </div>
+                  <Percent className="w-4 h-4 text-default-400" />
                 }
                 classNames={{
-                  label: "font-medium"
-                }}
-              />
-            </div>
-
-            <div>
-              <InputCategory
-                setCategory={(value) => handleInputChange('categoryId', value)}
-                category={form.categoryId?.toString() || ''}
-              />
-              {errors.categoryId && <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>}
-            </div>
-
-            <div>
-              <Input
-                label="Mùa giải"
-                placeholder="Nhập mùa giải..."
-                labelPlacement="outside"
-                value={form.season}
-                onChange={(e) => handleInputChange('season', e.target.value)}
-                variant="bordered"
-                size="lg"
-                isInvalid={!!errors.season}
-                errorMessage={errors.season}
-                classNames={{
-                  label: "font-medium"
-                }}
-              />
-            </div>
-
-            {/* chất liệu */}
-            <div>
-              <InputMateria
-                setMaterial={(value) => handleInputChange('materialId', value)}
-                material={form.materialId?.toString() || ''}
-              />
-              {errors.materialId && <p className="text-red-500 text-sm mt-1">{errors.materialId}</p>}
-            </div>
-            {/* đội bóng */}
-            <div>
-              <InputCategoryteam
-                setTeam={(value) => handleInputChange('teamId', value)}
-                team={form.teamId?.toString() || ''}
-              />
-            </div>
-            {/* loại áo */}
-            <div>
-              <Input
-                label="Loại áo"
-                placeholder="Nhập loại áo..."
-                labelPlacement="outside"
-                value={form.jerseyType}
-                onChange={(e) => handleInputChange('jerseyType', e.target.value)}
-                variant="bordered"
-                size="lg"
-                isInvalid={!!errors.jerseyType}
-                errorMessage={errors.jerseyType}
-                classNames={{
-                  label: "font-medium"
+                  label: "font-medium text-foreground",
+                  input: "text-foreground",
+                  inputWrapper: "bg-background"
                 }}
               />
             </div>
           </div>
 
           <div>
-            <Variants
-              variants={form.variants}
-              setVariants={(value) => handleInputChange('variants', value)}
+            <InputCategory
+              setCategory={(value) => handleInputChange('categoryId', value)}
+              category={form.categoryId?.toString() || ''}
             />
-            {errors.variants && <p className="text-red-500 text-sm mt-1">{errors.variants}</p>}
+            {errors.categoryId && <p className="text-red-500 text-sm mt-1">{errors.categoryId}</p>}
           </div>
 
           <div>
-            <InputTextEditor
-              value={form.description}
-              onChange={(value) => handleInputChange('description', value)}
-              height={500}
-            />
-            {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-          </div>
-
-          <div>
-            <Checkbox
-              isSelected={form.isFeatured}
-              onChange={(e) => handleInputChange('isFeatured', e.target.checked)}
-              color="primary"
+            <Input
+              label="Mùa giải"
+              placeholder="Nhập mùa giải..."
+              labelPlacement="outside"
+              value={form.season}
+              onChange={(e) => handleInputChange('season', e.target.value)}
+              variant="bordered"
               size="lg"
-              className="text-sm"
-            >
-              Đánh dấu là sản phẩm nổi bật
-            </Checkbox>
+              isInvalid={!!errors.season}
+              errorMessage={errors.season}
+              classNames={{
+                label: "font-medium text-foreground",
+                input: "text-foreground",
+                inputWrapper: "bg-background"
+              }}
+            />
           </div>
+
+          <div>
+            <InputMateria
+              setMaterial={(value) => handleInputChange('materialId', value)}
+              material={form.materialId?.toString() || ''}
+            />
+            {errors.materialId && <p className="text-red-500 text-sm mt-1">{errors.materialId}</p>}
+          </div>
+
+          <div>
+            <InputCategoryteam
+              setTeam={(value) => handleInputChange('teamId', value)}
+              team={form.teamId?.toString() || ''}
+            />
+          </div>
+
+          <div>
+            <Input
+              label="Loại áo"
+              placeholder="Nhập loại áo..."
+              labelPlacement="outside"
+              value={form.jerseyType}
+              onChange={(e) => handleInputChange('jerseyType', e.target.value)}
+              variant="bordered"
+              size="lg"
+              isInvalid={!!errors.jerseyType}
+              errorMessage={errors.jerseyType}
+              classNames={{
+                label: "font-medium text-foreground",
+                input: "text-foreground",
+                inputWrapper: "bg-background"
+              }}
+            />
+          </div>
+          <InputSize
+            setSize={(value) => handleInputChange('size', value)}
+            size={form.size}
+          />
+        </div>
+
+        {/* <div className="mt-6">
+          <InputVariants
+            variants={form.variants}
+            setVariants={(value) => handleInputChange('variants', value)}
+          />
+          {errors.variants && <p className="text-red-500 text-sm mt-1">{errors.variants}</p>}
+        </div> */}
+
+        <div className="mt-6">
+          <InputTextEditor
+            value={form.description}
+            onChange={(value) => handleInputChange('description', value)}
+            height={500}
+          />
+          {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+        </div>
+       
+        <div className="mt-6">
+          <Checkbox
+            isSelected={form.isFeatured}
+            onChange={(e) => handleInputChange('isFeatured', e.target.checked)}
+            color="primary"
+            size="lg"
+            classNames={{
+              label: "text-foreground"
+            }}
+          >
+            Đánh dấu là sản phẩm nổi bật
+          </Checkbox>
         </div>
 
         <Divider className="my-6" />
+
         <div className="flex justify-end gap-3">
           <Button
             onPress={handleClose}
             variant="bordered"
             size="lg"
-            className="min-w-[120px]"
+            className="min-w-[120px] font-medium"
+            isDisabled={loadingBtn}
           >
             Hủy
           </Button>
@@ -383,12 +408,24 @@ export default function ModalAdd_Edit_Product({
             isLoading={loadingBtn}
             color="primary"
             size="lg"
-            className="min-w-[120px] bg-blue-500 text-white"
+            className="min-w-[120px] font-medium"
           >
             {loadingBtn ? <Spinner /> : edit ? 'Cập nhật' : 'Xác nhận'}
           </Button>
         </div>
       </div>
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          @apply bg-background rounded;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          @apply bg-border rounded hover:bg-muted transition-colors;
+        }
+      `}</style>
     </div>
   )
 }

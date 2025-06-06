@@ -1,6 +1,7 @@
-import RenderTextEditer from "@/app/_util/ui/RenderTextEditer";
+"use client";
+
 import { X } from "lucide-react";
-import React from "react";
+import RenderTextEditer from "@/app/_util/ui/RenderTextEditer";
 
 interface ModadescriptionProps {
   description: string;
@@ -14,31 +15,31 @@ export default function Modadescription({
   if (!description) return null;
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] transform transition-all duration-300 ease-in-out"
+        className="bg-card rounded-xl shadow-2xl max-w-4xl w-full max-h-[85vh] transform transition-all duration-300 ease-in-out"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="px-6 py-2 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-border">
           <div className="flex justify-between items-center">
-            <h4 className="text-xl font-semibold text-gray-800">
+            <h4 className="text-xl font-semibold text-foreground">
               Chi tiết mô tả sản phẩm
             </h4>
             <button
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors duration-200"
+              className="p-2 hover:bg-primary/10 rounded-full transition-colors duration-200 text-muted-foreground hover:text-primary"
               onClick={onClose}
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-5 h-5" />
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-2 overflow-y-auto custom-scrollbar" style={{maxHeight: "calc(85vh - 70px)"}}>
-          <div className="prose prose-sm max-w-none">
+        <div className="p-6 overflow-y-auto custom-scrollbar" style={{maxHeight: "calc(85vh - 70px)"}}>
+          <div className="prose prose-sm max-w-none dark:prose-invert">
             <RenderTextEditer value={description} />
           </div>
         </div>
@@ -49,15 +50,10 @@ export default function Modadescription({
           width: 8px;
         }
         .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f1f1;
-          border-radius: 4px;
+          @apply bg-background rounded;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #c1c1c1;
-          border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #a8a8a8;
+          @apply bg-border rounded hover:bg-muted transition-colors;
         }
       `}</style>
     </div>

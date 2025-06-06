@@ -3,11 +3,13 @@ import { addCategory_API, deleteCategory_API, getCategory_API, updateCategory_AP
 import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Input, Spinner } from "@nextui-org/react";
 import { Plus, Search } from 'lucide-react';
-import getTable from '../_conponents/getTable';
+
 import ModalAdd_Edit_Category_Material from '../_modal/ModalAdd_Edit_Category_Material';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { toast } from 'react-toastify';
 import Loading from '@/app/_util/Loading';
+import RenderTable from '../_conponents/RenderTable';
+import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 
 export default function Category() {
     const [category, setCategory] = useState([]);
@@ -114,30 +116,21 @@ export default function Category() {
     
     return (
         <div className="p-6 w-full">
-            <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-2xl font-bold">Danh Mục</h1>
-                <Button 
-                    className="bg-blue-500 text-white" 
-                    startContent={loadingBtn ? <Spinner size="sm" color="white" /> : <Plus size={20} />} 
-                    onPress={() => setIsOpen(true)}
-                    isDisabled={loadingBtn}
-                >
-                    Thêm Danh Mục
-                </Button>
-            </div>
+          <TitleSearchAdd
+            title={{
+              title: "Danh Mục",
+              search: "Tìm kiếm phân loại...",
+              btn: "Thêm Danh Mục"
+            }}
+            onSearch={(value) => setSearchValue(value)}
+            onAdd={() => {
+                setEditCategory(null)
+                setName("")
+                setIsOpen(true)
+            }}
+          />
 
-            <div className="flex justify-between items-center mb-6">
-                <Input  
-                    placeholder="Tìm kiếm phân loại..." 
-                    value={searchValue}
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    startContent={loading ? <Spinner size="sm" /> : <Search size={20} />}
-                    className="w-80"
-                    isDisabled={loading}
-                />
-            </div>
-
-            { loading ? <Loading/>: getTable(category, handleDelete, handleEdit, totalPage, currentPage, setCurrentPage, "danh mục")}
+            { loading ? <Loading/>: <RenderTable data={category} handleDelete={handleDelete} handleEdit={handleEdit} totalPage={totalPage} currentPage={currentPage} setCurrentPage={setCurrentPage} title="danh mục"/>}
             {/* modal thêm sửa danh mục */}
             <ModalAdd_Edit_Category_Material
                 isOpen={loading ? false : isOpen}

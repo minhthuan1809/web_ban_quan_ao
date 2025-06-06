@@ -4,7 +4,6 @@ import Link from "next/link";
 import {
   ShoppingCart,
   User,
-  Search,
   Menu,
   X,
   LogOut,
@@ -20,11 +19,9 @@ import Image from "next/image";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { authGetUserInfo_API, authLogout_API } from "@/app/_service/authClient";
 import { useUserStore } from "@/app/_zustand/client/InForUser";
-
-import { deleteCookie } from "cookies-next";
-import { toast } from "react-toastify";
+import { deleteCookie, setCookie } from "cookies-next";
 import ThemeToggle from "@/app/components/ThemeToggle";
-
+import { Button, Avatar } from "@nextui-org/react";
 
 type User = {
   user: {
@@ -40,7 +37,6 @@ export default function Navbar() {
     { label: "Trang chủ", href: "/", icon: Home },
     { label: "Sản phẩm", href: "/products", icon: Package },
     { label: "Khuyến mãi", href: "/promotions", icon: Tag },
-    { label: "Tin tức", href: "/news", icon: Newspaper },
     { label: "Liên hệ", href: "/contact", icon: Phone },
   ];
   const [user, setUser] = useState<any | null>();
@@ -95,7 +91,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-900 dark:text-white shadow-lg sticky top-0 z-50 transition-shadow duration-300 hover:shadow-xl">
+    <nav className="bg-background/80 backdrop-blur-md shadow-sm sticky top-0 z-50 transition-all duration-300 hover:shadow-lg border-b border-border">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between max-w-screen-xl">
         {/* Logo Section */}
         <Link href="/" className="flex items-center space-x-3 group">
@@ -106,19 +102,21 @@ export default function Navbar() {
             width={56}
             height={56}
           />
-          <span className="text-2xl font-bold text-blue-800 group-hover:text-blue-600 transition-colors duration-300">
+          <span className="text-2xl font-bold text-primary group-hover:text-primary/80 transition-colors duration-300">
             KICKSTYLE
           </span>
         </Link>
 
         {/* Mobile Menu Toggle */}
         <div className="md:hidden">
-          <button
-            onClick={toggleMobileMenu}
-            className="text-blue-600 hover:text-blue-800 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1"
+          <Button
+            isIconOnly
+            variant="light"
+            onPress={toggleMobileMenu}
+            className="text-primary hover:text-primary/80"
           >
             {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
-          </button>
+          </Button>
         </div>
 
         {/* Desktop Navigation */}
@@ -129,11 +127,11 @@ export default function Navbar() {
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`text-gray-700 font-medium hover:text-blue-600 transition-colors relative group`}
+                  className={`text-foreground/80 font-medium hover:text-primary transition-colors relative group`}
                 >
                   {link.label}
                   <span
-                    className={`absolute bottom-[-4px] left-0 h-0.5 bg-blue-600 transition-all duration-300 ${
+                    className={`absolute bottom-[-4px] left-0 h-0.5 bg-primary transition-all duration-300 ${
                       Urlparams === link.href
                         ? "w-full"
                         : "w-0 group-hover:w-full"
@@ -151,49 +149,51 @@ export default function Navbar() {
             {/* Icons */}
             <div className="flex items-center space-x-4">
               {/* Shopping Cart */}
-              <Link href="/cart" className="relative group text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+              <Link href="/cart" className="relative group text-muted-foreground hover:text-primary transition-colors">
                 <ShoppingCart size={24} />
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full px-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
                   0
                 </span>
               </Link>
 
               {/* User/Auth Button */}
               <div className="relative group">
-                <button className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full p-1">
+                <Button
+                  isIconOnly
+                  variant="light"
+                  className="text-muted-foreground hover:text-primary"
+                >
                   <User size={24} />
-                </button>
+                </Button>
 
                 {/* Auth Dropdown */}
                 <div
-                  className="absolute right-0 mt-2 w-72 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-blue-100 dark:border-gray-700 overflow-hidden z-50 
+                  className="absolute right-0 mt-2 w-72 bg-background rounded-lg shadow-xl border border-border overflow-hidden z-50 
                   opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
                 >
                   {user ? (
                     <div className="p-4">
                       {/* User Profile Section */}
-                      <div className="flex items-center space-x-4 border-b pb-3 mb-2">
+                      <div className="flex items-center space-x-4 border-b border-border pb-3 mb-2">
                         {user?.avatarUrl ? (
-                          <Image
+                          <Avatar
                             src={user.avatarUrl}
                             alt={`${user.fullName}'s avatar`}
-                            width={56}
-                            height={56}
-                            className="w-14 h-14 rounded-full border-2 border-blue-200 object-cover"
+                            className="w-14 h-14"
                           />
                         ) : (
-                          <div className="w-14 h-14 rounded-full border-2 border-blue-200 bg-blue-100 flex items-center justify-center text-blue-600 text-xl font-bold">
-                            {user?.fullName?.charAt(0).toUpperCase()}
-                          </div>
+                          <Avatar
+                            name={user?.fullName?.charAt(0).toUpperCase()}
+                            className="w-14 h-14 bg-primary/10 text-primary"
+                          />
                         )}
                         <div>
-                          <p className="font-semibold text-gray-800 text-lg">
+                          <p className="font-semibold text-foreground text-lg">
                             {user?.fullName}
                           </p>
-                          <p className="text-sm text-gray-500">
+                          <p className="text-sm text-default-500">
                             {user?.email}
                           </p>
-                         
                         </div>
                       </div>
 
@@ -201,35 +201,42 @@ export default function Navbar() {
                       <div className="space-y-2">
                         <Link
                           href="/profile"
-                          className="flex items-center space-x-3 px-3 py-2 hover:bg-blue-50 dark:bg-gray-800 rounded-md transition-colors"
+                          className="flex items-center space-x-3 px-3 py-2 hover:bg-default-100 rounded-md transition-colors text-foreground"
                         >
-                          <Settings size={20} className="text-blue-600" />
+                          <Settings size={20} className="text-primary" />
                           <span>Cài đặt tài khoản</span>
                         </Link>
-                        <button
-                  
-                          className="w-full flex items-center space-x-3 px-3 py-2 text-left hover:bg-red-50 rounded-md transition-colors text-red-600"
-                          onClick={handleLogout}
+                        <Button
+                          variant="light"
+                          color="danger"
+                          className="w-full justify-start"
+                          startContent={<LogOut size={20} />}
+                          onPress={handleLogout}
                         >
-                          <LogOut size={20} />
-                          <span>Đăng xuất</span>
-                        </button>
+                          Đăng xuất
+                        </Button>
                       </div>
                     </div>
                   ) : (
-                    <div className="p-2">
-                      <Link
+                    <div className="p-2 space-y-2">
+                      <Button
+                        as={Link}
                         href="/login"
-                        className="block px-4 py-2 hover:bg-blue-50 rounded-md transition-colors text-blue-600"
+                        color="primary"
+                        variant="flat"
+                        className="w-full justify-start"
                       >
                         Đăng nhập
-                      </Link>
-                      <Link
+                      </Button>
+                      <Button
+                        as={Link}
                         href="/register"
-                        className="block px-4 py-2 hover:bg-blue-50 rounded-md transition-colors text-blue-600"
+                        color="primary"
+                        variant="light"
+                        className="w-full justify-start"
                       >
                         Đăng ký
-                      </Link>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -239,95 +246,102 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
-    {/* Mobile Menu Overlay */}
-    {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-50 md:hidden">
-          <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-900 shadow-2xl animate-slideInRight">
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 md:hidden">
+          <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-background shadow-2xl animate-slideInRight">
             <div className="flex flex-col h-full">
               {/* Header */}
-              <div className="flex items-center justify-between p-6 border-b dark:border-gray-700 bg-blue-50 dark:bg-gray-800">
+              <div className="flex items-center justify-between p-6 border-b border-border">
                 <div className="flex items-center space-x-3">
                   <Image
-                    className="rounded-full w-10 h-10 object-cover shadow-md"
+                    className="rounded-full w-10 h-10 object-cover"
                     src="https://plus.unsplash.com/premium_photo-1687686676757-9d849a16e4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGVyc2lvbnxlbnwwfHwwfHx8MA%3D%3D"
                     alt="KICKSTYLE"
                     width={40}
                     height={40}
                   />
-                  <span className="text-lg font-bold text-blue-600">
+                  <span className="text-lg font-bold text-primary">
                     KICKSTYLE
                   </span>
                 </div>
-                <button
-                  onClick={toggleMobileMenu}
-                  className="p-2 rounded-lg hover:bg-white/50 transition-colors"
+                <Button
+                  isIconOnly
+                  variant="light"
+                  onPress={toggleMobileMenu}
                 >
-                  <X size={24} className="text-gray-600" />
-                </button>
+                  <X size={24} className="text-default-500" />
+                </Button>
               </div>
 
               {/* User Section */}
-              <div className="p-6 border-b">
+              <div className="p-6 border-b border-border">
                 {user ? (
                   <div className="space-y-4">
                     <div className="flex items-center space-x-4">
                       {user?.avatarUrl ? (
-                        <Image
+                        <Avatar
                           src={user.avatarUrl}
                           alt={`${user.fullName}'s avatar`}
-                          width={56}
-                          height={56}
-                          className="w-14 h-14 rounded-full border-2 border-blue-200 object-cover shadow-lg"
+                          className="w-14 h-14"
                         />
                       ) : (
-                        <div className="w-14 h-14 rounded-full bg-blue-500 flex items-center justify-center text-white text-xl font-bold shadow-lg">
-                          {user?.fullName?.charAt(0).toUpperCase()}
-                        </div>
+                        <Avatar
+                          name={user?.fullName?.charAt(0).toUpperCase()}
+                          className="w-14 h-14 bg-primary/10 text-primary"
+                        />
                       )}
                       <div>
-                        <p className="font-semibold text-gray-800 text-lg">{user?.fullName}</p>
-                        <p className="text-sm text-gray-500">{user?.email}</p>
+                        <p className="font-semibold text-foreground text-lg">{user?.fullName}</p>
+                        <p className="text-sm text-default-500">{user?.email}</p>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-3">
-                      <Link
+                      <Button
+                        as={Link}
                         href="/profile"
+                        variant="flat"
+                        color="primary"
+                        startContent={<Settings size={18} />}
                         onClick={toggleMobileMenu}
-                        className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl transition-colors hover:bg-blue-100"
                       >
-                        <Settings size={18} />
-                        <span className="font-medium">Cài đặt</span>
-                      </Link>
-                      <button
+                        Cài đặt
+                      </Button>
+                      <Button
+                        color="danger"
+                        variant="flat"
+                        startContent={<LogOut size={18} />}
                         onClick={() => {
                           handleLogout();
                           toggleMobileMenu();
                         }}
-                        className="flex items-center justify-center space-x-2 px-4 py-3 bg-red-50 text-red-600 rounded-xl transition-colors hover:bg-red-100"
                       >
-                        <LogOut size={18} />
-                        <span className="font-medium">Đăng xuất</span>
-                      </button>
+                        Đăng xuất
+                      </Button>
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <Link
+                    <Button
+                      as={Link}
                       href="/login"
+                      color="primary"
+                      className="w-full"
                       onClick={toggleMobileMenu}
-                      className="block w-full py-3 text-center bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all duration-300 font-medium shadow-lg"
                     >
                       Đăng nhập
-                    </Link>
-                    <Link
+                    </Button>
+                    <Button
+                      as={Link}
                       href="/register"
+                      variant="bordered"
+                      color="primary"
+                      className="w-full"
                       onClick={toggleMobileMenu}
-                      className="block w-full py-3 text-center border-2 border-blue-600 text-blue-600 rounded-xl hover:bg-blue-50 transition-colors font-medium"
                     >
                       Đăng ký mới
-                    </Link>
+                    </Button>
                   </div>
                 )}
               </div>
@@ -344,13 +358,13 @@ export default function Navbar() {
                         onClick={toggleMobileMenu}
                         className={`flex items-center space-x-4 px-4 py-4 rounded-xl transition-all duration-300 ${
                           isActive
-                            ? "bg-blue-50 text-blue-600 border-l-4 border-blue-500"
-                            : "text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                            ? "bg-primary/10 text-primary border-l-4 border-primary"
+                            : "text-foreground hover:bg-default-100 hover:text-primary"
                         }`}
                       >
                         <link.icon 
                           size={22} 
-                          className={`${isActive ? "text-blue-600" : "text-gray-500"} transition-colors`} 
+                          className={`${isActive ? "text-primary" : "text-default-500"} transition-colors`} 
                         />
                         <span className="font-medium text-lg">{link.label}</span>
                       </Link>

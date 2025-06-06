@@ -35,30 +35,33 @@ export default function ModalAddUse({
     }
 
     return (
-    <div>
+    <div className='h-[80vh] overflow-hidden'>
     <Modal 
       isOpen={isOpen} 
       onClose={onClose} 
       placement="center"
       size="2xl"
+      scrollBehavior="inside"
       classNames={{
-        base: "bg-white",
-        header: "border-b border-slate-200",
+        base: "bg-background",
+        header: "border-b border-border",
         body: "py-6",
-        footer: "border-t border-slate-200"
+        footer: "border-t border-border",
+        closeButton: "hover:bg-default-100",
+        backdrop: "bg-background/80 backdrop-blur-md"
       }}
     >
       <ModalContent>
-        <ModalHeader className="text-xl font-bold text-slate-800">
+        <ModalHeader className="text-xl font-bold">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              {modalMode === 'add' ? <UserPlus className="w-5 h-5 text-blue-600" /> : <Edit3 className="w-5 h-5 text-blue-600" />}
+            <div className="p-2 bg-primary/10 rounded-lg">
+              {modalMode === 'add' ? <UserPlus className="w-5 h-5 text-primary" /> : <Edit3 className="w-5 h-5 text-primary" />}
             </div>
             {modalMode === 'add' ? 'Thêm người dùng mới' : 'Chỉnh sửa thông tin người dùng'}
           </div>
         </ModalHeader>
         <ModalBody className="space-y-4">
-           <div className="w-full flex justify-center items-center h-[200px]">
+           <div className="w-full flex justify-center items-center h-[150px]">
            <ImgUpload setPreview={setPreview} preview={preview} setFile={setFile} />
            </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -71,10 +74,10 @@ export default function ModalAddUse({
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
               variant="bordered"
               isRequired
-              startContent={<User className="w-4 h-4 text-slate-400" />}
+              startContent={<User className="w-4 h-4 text-default-400" />}
               classNames={{
-                label: "text-slate-700 font-medium",
-                input: "text-slate-800"
+                label: "text-default-700 font-medium",
+                input: "text-default-800"
               }}
             />
             <InputGmail
@@ -102,7 +105,6 @@ export default function ModalAddUse({
           />
 
           <div className="space-y-2">
-            
             <InputAddress
               onChange={(e) => setFormData({ 
                 ...formData, 

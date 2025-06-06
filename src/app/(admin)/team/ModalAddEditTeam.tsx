@@ -1,5 +1,7 @@
+"use client";
+
 import { addTeam_API, updateTeam_API } from '@/app/_service/category';
-import { Button, Input, Modal, ModalBody, ModalContent, ModalHeader, ModalFooter } from '@nextui-org/react'
+import { Button, Input, Modal, ModalBody, ModalContent, ModalHeader, ModalFooter, Spinner } from '@nextui-org/react'
 import { Flag, Globe, Trophy, User, X } from 'lucide-react'
 import React from 'react'
 import useAuthInfor from '@/app/customHooks/AuthInfor';
@@ -26,9 +28,11 @@ interface ModalAddEditTeamProps {
 export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEditTeamProps) {
   const { accessToken } = useAuthInfor();
   const [logoFile, setLogoFile] = React.useState<File | null>(null);
+  const [loading, setLoading] = React.useState(false);
 
   const handleAddTeam = async (logoUrl: string) => {
     try {
+      setLoading(true);
       const response = await addTeam_API({...form, logoUrl}, accessToken);
       if (response.status === 200) {
         toast.success("Thêm đội bóng thành công!");
@@ -38,6 +42,8 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra khi thêm đội bóng!");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -54,6 +60,7 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
 
   const handleEditTeam = async () => {
     try {
+      setLoading(true);
       const res = await addImg(logoFile || form.logoUrl);
       const response = await updateTeam_API(id, {...form, logoUrl: res[0]}, accessToken);
       if (response.status === 200) {
@@ -62,8 +69,11 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
       }
     } catch (error) {
       toast.error("Có lỗi xảy ra khi cập nhật đội bóng!");
+    } finally {
+      setLoading(false);
     }
   }
+
   const handleFinish = async () => {  
     if (!form.name || !form.league || !form.country || !(logoFile || form.logoUrl)) {
       toast.error("Vui lòng điền đầy đủ thông tin!");
@@ -77,31 +87,42 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
     }
   }
 
-
-
   return (
     <Modal 
       isOpen={open} 
       onClose={onClose}
       placement="center"
       backdrop="blur"
+      classNames={{
+        base: "bg-card",
+        header: "border-b border-border",
+        body: "py-6",
+        footer: "border-t border-border",
+        closeButton: "hover:bg-primary/10 active:bg-primary/30 text-foreground"
+      }}
     >
       <ModalContent>
         <ModalHeader className="flex justify-between items-center">
-          <h1 className="text-xl font-bold">Thêm đội bóng</h1>
-          <Button 
-            isIconOnly 
-            color="danger" 
-            variant="light" 
-            onPress={onClose}
-            className="rounded-full"
-          >
-          </Button>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Trophy className="w-5 h-5 text-primary" />
+            </div>
+            <h1 className="text-xl font-semibold text-foreground">
+              {id ? 'Chỉnh sửa đội bóng' : 'Thêm đội bóng'}
+            </h1>
+          </div>
         </ModalHeader>
 
-        <ModalBody className="gap-4"> 
+        <ModalBody className="gap-6">
+          <div className="w-full flex justify-center">
+            <ImgUpload 
+              setPreview={form.setLogoUrl} 
+              preview={logoFile || form.logoUrl} 
+              setFile={setLogoFile}
+              className="w-32 h-32"
+            />
+          </div>
 
-        <ImgUpload setPreview={form.setLogoUrl} preview={logoFile || form.logoUrl} setFile={setLogoFile} />
           <Input
             label="Tên đội bóng"
             placeholder="Nhập tên đội bóng..." 
@@ -109,7 +130,13 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
             onChange={(e) => form.setName(e.target.value)}
             startContent={<User className="text-default-400" size={20} />}
             variant="bordered"
+            classNames={{
+              label: "text-foreground font-medium",
+              input: "text-foreground",
+              inputWrapper: "bg-background"
+            }}
           />
+
           <Input
             label="Giải đấu"
             placeholder="Nhập tên giải đấu..."
@@ -117,7 +144,13 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
             onChange={(e) => form.setLeague(e.target.value)}
             startContent={<Trophy className="text-default-400" size={20} />}
             variant="bordered"
+            classNames={{
+              label: "text-foreground font-medium",
+              input: "text-foreground",
+              inputWrapper: "bg-background"
+            }}
           />
+
           <Input
             label="Quốc gia"
             placeholder="Nhập tên quốc gia..."
@@ -125,8 +158,12 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
             onChange={(e) => form.setCountry(e.target.value)}
             startContent={<Flag className="text-default-400" size={20} />}
             variant="bordered"
+            classNames={{
+              label: "text-foreground font-medium",
+              input: "text-foreground",
+              inputWrapper: "bg-background"
+            }}
           />
-       
         </ModalBody>
 
         <ModalFooter>
@@ -134,12 +171,15 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
             color="danger"
             variant="light"
             onPress={onClose}
+            className="font-medium"
           >
             Hủy
           </Button>
           <Button
             color="primary"
-            onPress={id ? handleEditTeam :  handleFinish}  
+            onPress={id ? handleEditTeam : handleFinish}
+            isLoading={loading}
+            className="font-medium"
           >
             {id ? "Cập nhật" : "Thêm"}
           </Button>

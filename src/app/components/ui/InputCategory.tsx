@@ -1,6 +1,6 @@
 "use client"
 import React, { useCallback, useEffect, useState } from 'react'
-import { getmaterial_API } from '@/app/_service/category'
+import { getCategory_API } from '@/app/_service/category'
 import { toast } from 'react-toastify'
 import { Input } from '@nextui-org/react';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
@@ -13,23 +13,23 @@ interface Material {
   updatedAt: number;
 }
 
-export default function InputMateria({ setMaterial, material }: { setMaterial: (c: string) => void, material: string }) {
+export default function InputCategory({ setCategory, category }: { setCategory: (category: string) => void, category: string }) {
   const [loading, setLoading] = useState(false);
-  const [materialList, setMaterialList] = useState<Material[]>([]);
+  const [categoryList, setCategoryList] = useState<Material[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
 
-  const fetchMaterial = useCallback(async () => {
+  const fetchCategory = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getmaterial_API(
+      const response = await getCategory_API(
         searchTerm,
         1,
         10,
         "",
         ""
       );
-      setMaterialList(response.data.reverse());
+      setCategoryList(response.data.reverse());
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -39,30 +39,33 @@ export default function InputMateria({ setMaterial, material }: { setMaterial: (
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {
-      fetchMaterial();
+      fetchCategory();
     }, 500);
 
     return () => clearTimeout(debounceTimer);
-  }, [fetchMaterial, searchTerm]);
+  }, [fetchCategory, searchTerm]);
 
   useEffect(() => {
-    if (material) {
-      const selectedmaterial = materialList.find(item => item.id.toString() === material);
-      if (selectedmaterial) {
-        setSearchTerm(selectedmaterial.name);
+    if (category) {
+      const selectedCategory = categoryList.find(item => item.id.toString() === category);
+      if (selectedCategory) {
+        setSearchTerm(selectedCategory.name);
       }
     }
-  }, [material, materialList]);
+  }, [category, categoryList]);
 
   return (
     <div className="relative w-full">
       <div className="relative">
         <Input
-          label="Vật liệu"
+          label="Danh mục"
           labelPlacement="outside"
           type="text"
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setCategory("");
+          }}
           onFocus={() => setShowDropdown(true)}
           onBlur={() => {
             setTimeout(() => {
@@ -70,7 +73,7 @@ export default function InputMateria({ setMaterial, material }: { setMaterial: (
             }, 200)
           }}
           endContent={!showDropdown ? <ChevronDownIcon className='w-4 h-4' /> : <ChevronUpIcon className='w-4 h-4' />}
-          placeholder="Chọn vật liệu"
+          placeholder="Chọn danh mục"
           variant="bordered"
           size='lg'
         />
@@ -83,12 +86,12 @@ export default function InputMateria({ setMaterial, material }: { setMaterial: (
 
       {showDropdown && (
         <div className="absolute w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-auto z-50">
-          {materialList.map((item) => (
+          {categoryList.map((item) => (
             <div
               key={item.id}
               className="px-4 py-2 cursor-pointer hover:bg-gray-100"
               onClick={() => {
-                setMaterial(item.id.toString());
+                setCategory(item.id.toString());
                 setSearchTerm(item.name);
                 setShowDropdown(false);
               }}
@@ -96,7 +99,7 @@ export default function InputMateria({ setMaterial, material }: { setMaterial: (
               {item.name}
             </div>
           ))}
-          {materialList.length === 0 && !loading && (
+          {categoryList.length === 0 && !loading && (
             <div className="px-4 py-2 text-gray-500">
               Không tìm thấy kết quả
             </div>

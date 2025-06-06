@@ -11,6 +11,7 @@ import {
   Avatar
 } from "@nextui-org/react";
 import Link from 'next/link';
+import { formatCurrency } from "@/app/_util/formatCurrency";
 
 type CardProductProps = {
   id: number;
@@ -22,125 +23,77 @@ type CardProductProps = {
   Evaluate: number;
 };
 
-export default function CardProduct({data = []} : {data: CardProductProps[]}) {
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case 'available':
-      case 'có sẵn':
-        return 'success';
-      case 'out of stock':
-      case 'hết hàng':
-        return 'danger';
-      case 'limited':
-      case 'giới hạn':
-        return 'warning';
-      default:
-        return 'default';
-    }
-  };
+const getStatusColor = (status: string) => {
+  switch (status.toLowerCase()) {
+    case 'available':
+    case 'có sẵn':
+      return 'text-green-500 dark:text-green-400';
+    case 'out of stock':
+    case 'hết hàng':
+      return 'text-red-500 dark:text-red-400';
+    case 'limited':
+    case 'giới hạn':
+      return 'text-yellow-500 dark:text-yellow-400';
+    default:
+      return 'text-gray-500 dark:text-gray-400';
+  }
+};
 
+export default function CardProduct({data = []} : {data: CardProductProps[]}) {
   const renderStars = (rating: number) => {
     const stars = [];
     const fullStars = Math.floor(rating);
     const hasHalfStar = rating % 1 !== 0;
     
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<span key={i} className="text-yellow-400">★</span>);
+      stars.push(<span key={i} className="text-yellow-400 dark:text-yellow-300">★</span>);
     }
     
     if (hasHalfStar) {
-      stars.push(<span key="half" className="text-yellow-400">☆</span>);
+      stars.push(<span key="half" className="text-yellow-400 dark:text-yellow-300">☆</span>);
     }
     
     const remainingStars = 5 - Math.ceil(rating);
     for (let i = 0; i < remainingStars; i++) {
-      stars.push(<span key={`empty-${i}`} className="text-gray-300">★</span>);
+      stars.push(<span key={`empty-${i}`} className="text-gray-300 dark:text-gray-600">★</span>);
     }
     
     return stars;
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-4">
-      {data?.map((item: CardProductProps, index: number) => (
-        <Link href={`/products/${item.id}`} key={item.id || index}>
-          <Card 
-            className="group transition-transform duration-300"
-            shadow="md"
-            isPressable
-            isHoverable
-          >
-            {/* Image Container */}
-            <CardBody className="p-0 relative">
-              <div className="relative overflow-hidden bg-gray-50 aspect-square">
-                <Image 
-                  src={item.image} 
-                  alt={item.name} 
-                  fill
-                  className="object-cover w-full h-full  transition-transform duration-300"
-                />
-                
-                {/* Status Badge */}
-                <div className="absolute top-3 right-3 z-10">
-                  <Chip 
-                    color={getStatusColor(item.status)}
-                    size="sm"
-                    variant="flat"
-                  >
-                    {item.status}
-                  </Chip>
-                </div>
-                
-                {/* Quick Action Overlay */}
-                <div className="absolute inset-0 bg-black bg-opacity-0 transition-all duration-300 flex items-center justify-center z-5">
-                  <div 
-                    className="opacity-0 transform translate-y-4 transition-all duration-300 bg-primary text-white px-4 py-2 rounded-lg text-sm cursor-pointer"
-                  >
-                    Xem chi tiết
-                  </div>
-                </div>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-8">
+      {data.map((product) => (
+        <Link href={`/products/${product.id}`} key={product.id}>
+          <div className="group relative bg-card hover:shadow-xl transition-all duration-300 rounded-lg overflow-hidden border border-border/50">
+            <div className="aspect-square relative overflow-hidden">
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-cover group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+            <div className="p-4">
+              <h3 className="text-lg font-semibold text-card-foreground line-clamp-1 group-hover:text-primary transition-colors">
+                {product.name}
+              </h3>
+              <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
+                {product.description}
+              </p>
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-primary font-bold">
+                  {formatCurrency(product.price)}
+                </span>
+                <span className={`text-sm ${getStatusColor(product.status)}`}>
+                  {product.status}
+                </span>
               </div>
-
-              {/* Content */}
-              <div className="p-4">
-                {/* Product Name */}
-                <h3 className="font-semibold text-foreground text-lg mb-2 line-clamp-2 transition-colors duration-200">
-                  {item.name}
-                </h3>
-                
-                {/* Description */}
-                <p className="text-default-500 text-sm mb-3 line-clamp-2 leading-relaxed">
-                  {item.description}
-                </p>
-                
-                {/* Rating */}
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center">
-                      {renderStars(item.Evaluate)}
-                    </div>
-                    <span className="text-sm text-default-400">({item.Evaluate})</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <FormatPrice price={item.price} className='text-danger  font-semibold'/>
-                  </div>
-                </div>
+              <div className="mt-2 flex items-center space-x-1">
+                {renderStars(product.Evaluate)}
               </div>
-            </CardBody>
-            
-            {/* Footer with Action Button */}
-            <CardFooter className="pt-0 px-4 pb-4">
-              <Button 
-                color="primary" 
-                variant="solid"
-                size="sm"
-                fullWidth
-                className="font-medium"
-              >
-                Thêm vào giỏ
-              </Button>
-            </CardFooter>
-          </Card>
+            </div>
+          </div>
         </Link>
       ))}
     </div>

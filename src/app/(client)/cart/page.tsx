@@ -8,19 +8,33 @@ import { DiscountPrice } from '@/app/_util/DiscountPrice';
 import FormatPrice from '@/app/_util/FormatPrice';
 import CardPay from './cardPay';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Button } from '@nextui-org/react';
+import { ShoppingBag } from 'lucide-react';
 
 export default function Page() {
     const { userInfo } = useAuthInfor();
     const [cartItems, setCartItems] = useState<any[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
+    const router = useRouter();
     
     useEffect(() => {
         const fetchCard = async () => {
-            const res = await GetCard_API(userInfo.id);
-            setCartItems(res.data.cartItems);
+            try {
+                if (!userInfo) {
+                    router.push('/login');
+                    return;
+                }
+                const res = await GetCard_API(userInfo.id);
+                if (res.data?.cartItems) {
+                    setCartItems(res.data.cartItems);
+                }
+            } catch (error) {
+                console.error('Lỗi khi tải giỏ hàng:', error);
+            }
         }   
         fetchCard();
-    }, [userInfo?.id])
+    }, [userInfo, router])
 
     const handleQuantityChange = async (itemId: number, newQuantity: number, variantId: number, cartId: number) => {
         if (newQuantity < 1) return;
@@ -74,13 +88,19 @@ export default function Page() {
         }, 0);
     }
 
+    if (!userInfo) {
+        return null; // hoặc có thể return một component loading
+    }
+
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="container mx-auto px-4 py-8 ">
                 {/* Header */}
-                <div className="mb-6">
-                    <h1 className="text-2xl font-semibold text-gray-900">Giỏ hàng của bạn</h1>
-                    <p className="text-gray-600 mt-1">{cartItems.length} sản phẩm</p>
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                        <ShoppingBag className="w-5 h-5 text-primary" />
+                    </div>
+                    <h1 className="text-2xl font-bold">Giỏ hàng của bạn</h1>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

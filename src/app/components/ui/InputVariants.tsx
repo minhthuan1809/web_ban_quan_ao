@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { PlusIcon, PencilIcon, TrashIcon } from "lucide-react";
 import FormatPrice from "@/app/_util/FormatPrice";
-import { toast } from "react-toastify";
 interface Variant {
   size: string;
   priceAdjustment: number;
@@ -14,7 +13,7 @@ interface Errors {
   stockQuantity?: string;
 }
 
-export default function Variants( {variants, setVariants}: {variants: Variant[], setVariants: (variants: Variant[]) => void} ) {
+export default function InputVariants( {variants, setVariants}: {variants: Variant[], setVariants: (variants: Variant[]) => void} ) {
   const [showModal, setShowModal] = useState(false);
   const [currentVariant, setCurrentVariant] = useState<Variant>({
     size: "",

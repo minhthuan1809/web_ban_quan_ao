@@ -3,11 +3,12 @@ import { addMaterial_API, deleteMaterial_API, getmaterial_API, updateMaterial_AP
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Input, Spinner } from "@nextui-org/react";
 import { Plus, Search } from "lucide-react";
-import getTable from "../_conponents/getTable";
+import RenderTable from "../_conponents/RenderTable";
 import ModalAdd_Edit_Category_Material from "../_modal/ModalAdd_Edit_Category_Material";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
+import TitleSearchAdd from "@/app/components/ui/TitleSearchAdd";
 
 export default function Material() {
   const [material, setMaterial] = useState([]);
@@ -129,28 +130,21 @@ export default function Material() {
 
   return (
     <div className="p-6 w-full">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Chất liệu</h1>
-        <Button
-          className="bg-blue-500 text-white"
-          startContent={<Plus size={20} />}
-          onPress={() => setIsOpen(true)}
-        >
-          Thêm chất liệu
-        </Button>
-      </div>
-
-      <div className="flex justify-between items-center mb-6">
-        <Input
-          placeholder="Tìm kiếm chất liệu..."
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          startContent={<Search size={20} />}
-          className="w-80"
-        />
-      </div>
+     <TitleSearchAdd
+        title={{
+          title: "Chất liệu",
+          search: "Tìm kiếm chất liệu...",
+          btn: "Thêm chất liệu"
+        }}
+        onSearch={(value) => setSearchValue(value)}
+        onAdd={() => {
+          setIsOpen(true)
+          setEditMaterial(null)
+          setName("")
+        }}
+      />  
       {/* render bảng */}
-      {loading ? <div className="flex justify-center items-center min-h-[400px]"><Loading/></div> : getTable(material || [], handleDeleteMaterial ,    handleEditMaterial , totalPage, currentPage, setCurrentPage, "chất liệu" )}
+      {loading ? <div className="flex justify-center items-center min-h-[400px]"><Loading/></div> : <RenderTable data={material} handleDelete={handleDeleteMaterial} handleEdit={handleEditMaterial} totalPage={totalPage} currentPage={currentPage} setCurrentPage={setCurrentPage} title="chất liệu"/>}
       {/*  modal thêm vật liệu */}
       <ModalAdd_Edit_Category_Material
         isOpen={loading ? false : isOpen}

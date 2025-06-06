@@ -15,7 +15,7 @@ import { getCategory_API } from "@/app/_service/category"
 export default function FilterProduct({filter, setFilter} : {filter: any, setFilter: any}) {
 
   const [selectedCategories, setSelectedCategories] = useState([])
-  const [selectedSizes, setSelectedSizes] = useState(["L"])
+  const [selectedSizes, setSelectedSizes] = useState<string[]>([])
   const [priceRange, setPriceRange] = useState([0, 4905500])
   const [isFilterExpanded, setIsFilterExpanded] = useState(true)
   const [categories, setCategories] = useState([])
@@ -64,11 +64,11 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
 
 
   return (
-    <Card className="w-full lg:w-[280px] h-fit shadow-sm overflow-hidden border border-gray-200 rounded-lg">
+    <Card className="w-full lg:w-[280px] h-fit shadow-sm overflow-hidden border border-border rounded-lg bg-background">
       <CardBody className="p-0 overflow-hidden">
         {/* Header - Collapsible on mobile */}
         <div 
-          className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 cursor-pointer lg:cursor-default flex items-center justify-between"
+          className="px-4 sm:px-6 py-3 sm:py-4 border-b border-border cursor-pointer lg:cursor-default flex items-center justify-between"
           onClick={() => {
             // Only toggle on mobile/tablet (screen width < 1024px)
             if (window.innerWidth < 1024) {
@@ -76,9 +76,9 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
             }
           }}
         >
-          <h2 className="text-sm sm:text-base font-semibold text-gray-900">BỘ LỌC</h2>
+          <h2 className="text-sm sm:text-base font-semibold text-foreground">BỘ LỌC</h2>
           <ChevronDown 
-            className={`text-gray-500 transition-transform lg:hidden ${
+            className={`text-default-500 transition-transform lg:hidden ${
               isFilterExpanded ? 'rotate-180' : ''
             }`} 
             size={16} 
@@ -91,7 +91,7 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
         } overflow-hidden lg:overflow-visible`}>
           {/* Product Categories */}
           <div className="px-4 sm:px-6 py-3 sm:py-4">
-            <h3 className="text-xs sm:text-sm font-medium text-gray-800 mb-3">DANH MỤC SẢN PHẨM</h3>
+            <h3 className="text-xs sm:text-sm font-medium text-foreground mb-3">DANH MỤC SẢN PHẨM</h3>
             <CheckboxGroup
               value={selectedCategories}
               onValueChange={(value : any) => setSelectedCategories(value)}
@@ -104,8 +104,7 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
                   key={category.slug}
                   value={category.name}
                   classNames={{
-                    label: "text-xs sm:text-sm text-gray-700",
-                    wrapper: "before:border-gray-300",
+                    label: "text-xs sm:text-sm text-default-700",
                   }}
                 >
                   {category.name}
@@ -118,19 +117,19 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
 
           {/* Size Selection */}
           <div className="px-4 sm:px-6 py-3 sm:py-4">
-            <h3 className="text-xs sm:text-sm font-medium text-gray-800 mb-3">SIZE</h3>
+            <h3 className="text-xs sm:text-sm font-medium text-foreground mb-3">SIZE</h3>
             <div className="grid grid-cols-3 sm:grid-cols-2 gap-1.5 sm:gap-2">
-              {sizes.map((size) => (
+              {sizes.map((size : any) => (
                 <div
                   key={size.key}
                   className={`cursor-pointer h-7 sm:h-9 flex items-center justify-center rounded border transition-colors text-xs sm:text-sm ${
                     selectedSizes.includes(size.key)
-                      ? "bg-gray-900 text-white border-gray-900"
-                      : "border-gray-300 text-gray-700 hover:border-gray-400"
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "border-border text-default-700 hover:border-primary/50"
                   }`}
                   onClick={() => {
                     if (selectedSizes.includes(size.key)) {
-                      setSelectedSizes(selectedSizes.filter((s) => s !== size.key))
+                      setSelectedSizes(selectedSizes.filter((s : any) => s !== size.key))
                     } else {
                       setSelectedSizes([...selectedSizes, size.key])
                     }
@@ -146,9 +145,9 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
 
           {/* Price Range */}
           <div className="px-4 sm:px-6 py-3 sm:py-4">
-            <h3 className="text-xs sm:text-sm font-medium text-gray-800 mb-3 sm:mb-4">KHOẢNG GIÁ</h3>
+            <h3 className="text-xs sm:text-sm font-medium text-foreground mb-3 sm:mb-4">KHOẢNG GIÁ</h3>
             <div className="space-y-3 sm:space-y-4">
-              <div className="text-center text-xs sm:text-sm text-gray-700 font-medium">
+              <div className="text-center text-xs sm:text-sm text-default-700 font-medium">
                 {formatPrice(priceRange[0])} - {formatPrice(priceRange[1])}
               </div>
               <Slider
@@ -159,9 +158,8 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
                 onChange={(value) => setPriceRange(value as number[])}
                 size="sm"
                 classNames={{
-                  track: "bg-gray-200",
-                  filler: "bg-gray-800",
-                  thumb: "bg-gray-800 border-2 border-white shadow-md hover:scale-110 transition-transform",
+                  track: "bg-default-200",
+                  thumb: "bg-primary border-2 border-white shadow-md hover:scale-110 transition-transform",
                 }}
               />
             </div>

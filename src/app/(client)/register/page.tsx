@@ -11,6 +11,8 @@ import { authRegister_API } from "@/app/_service/authClient";
 import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
 import { useRouter } from "next/navigation";
+import { Button, Checkbox } from "@nextui-org/react";
+import { UserPlus } from "lucide-react";
 
 export default function PageRegister() {
   const [showConfirmPassword, setShowConfirmPassword] = useState("");
@@ -84,12 +86,12 @@ export default function PageRegister() {
   }
 
   return (
-    <div className="min-h-screen w-full   bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen w-full bg-background/40 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-background rounded-2xl shadow-large overflow-hidden">
         {/* Left side - Illustration */}
-        <div className="hidden md:flex items-center justify-center bg-blue-100 p-4">
+        <div className="hidden md:flex items-center justify-center bg-primary/5 p-4">
           <div
-            className="w-[300px] h-[300px] bg-cover bg-center rounded-2xl"
+            className="w-[300px] h-[300px] bg-cover bg-center rounded-2xl shadow-medium"
             style={{
               backgroundImage:
                 "url('https://images.unsplash.com/photo-1516321497487-e288fb19713f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')",
@@ -101,10 +103,15 @@ export default function PageRegister() {
         {/* Right side - Register form */}
         <div className="flex flex-col justify-center px-8 py-12">
           <div className="sm:mx-auto sm:w-full sm:max-w-md">
-            <h2 className="text-center text-4xl font-bold text-gray-800 mb-6 tracking-tight">
-              Đăng Ký
-            </h2>
-            <p className="text-center text-gray-500 mb-2">
+            <div className="flex items-center justify-center gap-2 mb-6">
+              <div className="p-2 bg-primary/10 rounded-lg">
+                <UserPlus className="w-6 h-6 text-primary" />
+              </div>
+              <h2 className="text-4xl font-bold text-foreground tracking-tight">
+                Đăng Ký
+              </h2>
+            </div>
+            <p className="text-center text-default-500 mb-6">
               Tạo tài khoản mới của bạn
             </p>
           </div>
@@ -118,7 +125,6 @@ export default function PageRegister() {
                 value={username}
                 onChange={(value) => setUsername(value)}
               />
-              {/* gmail */}
               <InputGmail
                 placeholder="xxx@gmail.com"
                 label="Nhập Gmail"
@@ -126,20 +132,17 @@ export default function PageRegister() {
                 onChange={(value) => setGmail(value)}
               />
             </div>
-            {/* phone */}
             <InputPhone
               placeholder="Nhập số điện thoại"
               label="Số điện thoại"
               value={phone}
               onChange={(value) => setPhone(value)}
             />
-            {/* address */}
             <InputAddress
               onChange={(value) => setAddress(value)}
               className="w-full"
             />
             <div className="flex flex-col gap-4">
-              {/* Mật khẩu */}
               <div className="flex gap-4">
                 <InputPassword
                   placeholder="Nhập mật khẩu"
@@ -155,10 +158,9 @@ export default function PageRegister() {
                 />
               </div>
               {passwordError && (
-                <p className="text-red-500 text-sm">{passwordError}</p>
+                <p className="text-danger text-sm">{passwordError}</p>
               )}
             </div>
-            {/* gender*/}
             <InputGender
               placeholder="Chọn giới tính"
               label="Giới tính"
@@ -166,47 +168,41 @@ export default function PageRegister() {
               onChange={(value) => setGender(value)}
             />
 
-            <div className="flex items-center">
-              <input
-                id="terms"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            <div className="flex items-center gap-2">
+              <Checkbox
+                size="sm"
                 onChange={(e) => setIsCheck(e.target.checked)}
-              />
-              <label
-                htmlFor="terms"
-                className="ml-2 block text-sm text-gray-900">
-                Tôi đồng ý với
-                <Link
-                  href="/terms"
-                  className="text-blue-600 hover:text-blue-500">
-                  Điều khoản dịch vụ
-                </Link>
-              </label>
+              >
+                <span className="text-default-700">
+                  Tôi đồng ý với{" "}
+                  <Link
+                    href="/terms"
+                    className="text-primary hover:text-primary-500 font-medium"
+                  >
+                    Điều khoản dịch vụ
+                  </Link>
+                </span>
+              </Checkbox>
             </div>
-            <div>
-              <button
-                type="submit"
-                disabled={IsSubmit || loading}
-                className={`w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 ease-in-out transform hover:scale-[1.02] ${
-                  IsSubmit || loading ? "opacity-50 cursor-not-allowed" : ""
-                }`}>
-                {loading ? (
-                  <div className="flex items-center">
-                    <div className="w-5 h-5 border-t-2 border-b-2 border-white rounded-full animate-spin mr-2"></div>
-                    Đang xử lý...
-                  </div>
-                ) : (
-                  "Đăng Ký"
-                )}
-              </button>
-            </div>
-            <div className="text-sm text-center mt-4">
-              <p className="text-gray-600">
+
+            <Button
+              type="submit"
+              disabled={IsSubmit || loading}
+              isLoading={loading}
+              color="primary"
+              className="w-full font-medium"
+              size="lg"
+            >
+              {loading ? "Đang xử lý..." : "Đăng Ký"}
+            </Button>
+
+            <div className="text-sm text-center">
+              <p className="text-default-500">
                 Bạn đã có tài khoản?{" "}
                 <Link
                   href="/login"
-                  className="font-semibold text-blue-600 hover:text-blue-500">
+                  className="font-medium text-primary hover:text-primary-500"
+                >
                   Đăng Nhập Ngay
                 </Link>
               </p>
