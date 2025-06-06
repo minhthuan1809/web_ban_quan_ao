@@ -18,6 +18,11 @@ export default function InputMateria({ setMaterial, material }: { setMaterial: (
   const [materialList, setMaterialList] = useState<Material[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchMaterial = useCallback(async () => {
     try {
@@ -38,21 +43,30 @@ export default function InputMateria({ setMaterial, material }: { setMaterial: (
   }, [searchTerm]);
 
   useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      fetchMaterial();
-    }, 500);
+    if (mounted) {
+      const debounceTimer = setTimeout(() => {
+        fetchMaterial();
+      }, 500);
 
-    return () => clearTimeout(debounceTimer);
-  }, [fetchMaterial, searchTerm]);
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [fetchMaterial, mounted]);
 
   useEffect(() => {
-    if (material) {
-      const selectedmaterial = materialList.find(item => item.id.toString() === material);
-      if (selectedmaterial) {
-        setSearchTerm(selectedmaterial.name);
+    if (mounted && material) {
+      const selectedMaterial = materialList.find(item => item.id.toString() === material);
+      if (selectedMaterial) {
+        setSearchTerm(selectedMaterial.name);
+      } else {
+        setSearchTerm('');
+        setMaterial('');
       }
     }
-  }, [material, materialList]);
+  }, [material, materialList, mounted]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="relative w-full">
@@ -117,3 +131,4 @@ export default function InputMateria({ setMaterial, material }: { setMaterial: (
     </div>
   )
 }
+

@@ -1,6 +1,5 @@
 "use client"
 import React, { useCallback, useEffect, useState } from 'react'
-import { getCategory_API } from '@/app/_service/category'
 import { toast } from 'react-toastify'
 import { Input } from '@nextui-org/react';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
@@ -21,6 +20,11 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
   const { accessToken } = useAuthInfor();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchSize = useCallback(async () => {
     try {
@@ -36,24 +40,33 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
     } finally {
       setLoading(false);
     }
-  }, [searchTerm]);
+  }, [searchTerm, accessToken]);
 
   useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      fetchSize();
-    }, 500);
+    if (mounted) {
+      const debounceTimer = setTimeout(() => {
+        fetchSize();
+      }, 500);
 
-    return () => clearTimeout(debounceTimer);
-  }, [fetchSize, searchTerm]);
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [fetchSize, mounted]);
 
   useEffect(() => {
-    if (size) {
+    if (mounted && size) {
       const selectedSize = sizeList.find(item => item.id.toString() === size);
       if (selectedSize) {
         setSearchTerm(selectedSize.name);
+      } else {
+        setSearchTerm('');
+        setSize('');
       }
     }
-  }, [size, sizeList]);
+  }, [size, sizeList, mounted]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="relative w-full">
@@ -118,3 +131,4 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
     </div>
   )
 }
+

@@ -18,6 +18,11 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
   const [categoryList, setCategoryList] = useState<Material[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [showDropdown, setShowDropdown] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const fetchCategory = useCallback(async () => {
     try {
@@ -38,21 +43,30 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
   }, [searchTerm]);
 
   useEffect(() => {
-    const debounceTimer = setTimeout(() => {
-      fetchCategory();
-    }, 500);
+    if (mounted) {
+      const debounceTimer = setTimeout(() => {
+        fetchCategory();
+      }, 500);
 
-    return () => clearTimeout(debounceTimer);
-  }, [fetchCategory, searchTerm]);
+      return () => clearTimeout(debounceTimer);
+    }
+  }, [fetchCategory, mounted]);
 
   useEffect(() => {
-    if (category) {
+    if (mounted && category) {
       const selectedCategory = categoryList.find(item => item.id.toString() === category);
       if (selectedCategory) {
         setSearchTerm(selectedCategory.name);
+      } else {
+        setSearchTerm('');
+        setCategory('');
       }
     }
-  }, [category, categoryList]);
+  }, [category, categoryList, mounted]);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="relative w-full">
@@ -117,3 +131,4 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
     </div>
   )
 }
+

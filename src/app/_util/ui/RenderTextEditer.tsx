@@ -6,14 +6,12 @@ interface RenderTextEditerProps {
     value: string;
     type?: 'all' | 'sort';
     className?: string;
-    title?: string;
 }
 
 export default function RenderTextEditer({ 
     value, 
     type = 'all',
     className,
-    title = "CHI TIẾT SẢN PHẨM"
 }: RenderTextEditerProps) {
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -35,11 +33,7 @@ export default function RenderTextEditer({
             'w-full rounded-lg border border-border bg-card text-card-foreground shadow-sm',
             className
         )}>
-            {title && (
-                <div className="px-6 py-4 border-b border-border">
-                    <h2 className="text-lg font-medium text-foreground">{title}</h2>
-                </div>
-            )}
+         
             
             {/* Content area */}
             <div className={type === 'sort' ? 'p-5' : 'p-4'}>
