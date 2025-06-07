@@ -89,7 +89,7 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
               setShowDropdown(false)
             }, 200)
           }}
-          endContent={!showDropdown ? <ChevronDownIcon className='w-4 h-4 text-default-400' /> : <ChevronUpIcon className='w-4 h-4 text-default-400' />}
+          endContent={mounted ? (!showDropdown ? <ChevronDownIcon className='w-4 h-4 text-default-400' /> : <ChevronUpIcon className='w-4 h-4 text-default-400' />) : null}
           placeholder="Chọn danh mục"
           variant="bordered"
           size='lg'

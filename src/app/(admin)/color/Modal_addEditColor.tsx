@@ -1,5 +1,5 @@
 import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter } from '@nextui-org/react'
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 export default function Modal_addEditColor({
   isOpen,
@@ -31,6 +31,7 @@ export default function Modal_addEditColor({
     setEditColor(null)
     setName("")
   }
+
 
   return (
     <Modal 

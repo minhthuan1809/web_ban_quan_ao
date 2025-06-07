@@ -17,18 +17,9 @@ export const GetAllColor_API = async (search: string = "", page: number = 1, acc
     return res.data;
 }
 
+// Xóa màu sắc
 export const DeleteColor_API = async (id: string, accessToken?: string) => {
     const res = await axios.delete(`${API_URL}/colors/${id}`, {
-        headers: {
-            'Content-Type': 'application/json',
-            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
-        },
-    });
-    return res.data;
-}
-
-export const addColor_API = async (name: string, accessToken?: string) => {
-    const res = await axios.post(`${API_URL}/colors`, { name }, {
         headers: {
             'Content-Type': 'application/json',
             ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -37,8 +28,21 @@ export const addColor_API = async (name: string, accessToken?: string) => {
     return res;
 }
 
-export const updateColor_API = async (id: string, name: string, accessToken?: string) => {
-    const res = await axios.put(`${API_URL}/colors/${id}`, { name }, {
+
+// Thêm màu sắc
+export const addColor_API = async (name: string, code: string, accessToken?: string) => {
+    const res = await axios.post(`${API_URL}/colors`, { name, hexColor : code }, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
+        },
+    });
+    return res;
+}
+
+// Sửa màu sắc
+export const updateColor_API = async (id: string, name: string, code: string, accessToken?: string) => {
+    const res = await axios.put(`${API_URL}/colors/${id}`, { name, hexColor : code }, {
         headers: {
             'Content-Type': 'application/json',
             ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })

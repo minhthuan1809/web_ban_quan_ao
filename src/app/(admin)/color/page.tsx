@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-    import { Button, Card, CardBody, code, Input, Modal, ModalContent, ModalFooter, ModalHeader } from "@nextui-org/react"
+import { Button, Card, CardBody, Pagination, Input, Modal, ModalContent, ModalFooter, ModalHeader } from "@nextui-org/react"
 import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd'
 import { ModalBody } from '@nextui-org/react'
 import useAuthInfor from '@/app/customHooks/AuthInfor'
@@ -8,12 +8,14 @@ import { toast } from 'react-toastify'
 import RenderTable from '../_conponents/RenderTable'
 import { addColor_API, DeleteColor_API, GetAllColor_API, updateColor_API } from '@/app/_service/color'
 import Modal_addEditColor from './Modal_addEditColor'
+import { EditIcon, PencilIcon, TrashIcon } from 'lucide-react'
 
 interface ColorData {
   id: number;
   name: string;
   createdAt: string;
   updatedAt: string;
+  hexColor: string;
   isDeleted: boolean;
 }
 
@@ -53,8 +55,8 @@ export default function page() {
   const fetchData = async () => {
     try {
       setLoading(true)
-            const res = await GetAllColor_API(searchQuery, currentPage, accessToken)
-        setColor
+      const res = await GetAllColor_API(searchQuery, currentPage, accessToken)
+      setColor(res.data)
       setMetadata(res.metadata)
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra')
@@ -75,33 +77,34 @@ export default function page() {
   const handleAddSize = async () => {
     try {
       setLoadingBtn(true)
-      const res = await addColor_API(name, accessToken)
+      const res = await addColor_API(name, code, accessToken)
       if (res.status === 200) {
-        toast.success('Thêm kích cỡ thành công')
+        toast.success('Thêm màu sắc thành công')
         setIsOpen(false)
         setName("")
+        setCode("")
         fetchData()
       }
     } catch (error: any) {
-      toast.error(error.message || 'Thêm kích cỡ thất bại')
+      toast.error(error.message || 'Thêm màu sắc thất bại')
     } finally {
       setLoadingBtn(false)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa kích cỡ này không?')) return
+    if (!confirm('Bạn có chắc chắn muốn xóa màu sắc này không?')) return
     try {
       setLoadingBtn(true)
       const res = await DeleteColor_API(id, accessToken)
       if (res.status === 204 ) {
-        toast.success('Xóa kích cỡ thành công')
+        toast.success('Xóa màu sắc thành công')
         fetchData()
       } else {
-        toast.error('Xóa kích cỡ thất bại')
+        toast.error('Xóa màu sắc thất bại')
       }
     } catch (error: any) {
-      toast.error(error.message || 'Xóa kích cỡ thất bại')
+      toast.error(error.message || 'Xóa màu sắc thất bại')
     } finally {
       setLoadingBtn(false)
     }
@@ -111,23 +114,25 @@ export default function page() {
     setEditColor(item)
     setIsOpen(true)
     setName(item.name)
+    setCode(item.hexColor)
   }
 
   const handleEditSize = async () => {
     try {
       setLoadingBtn(true)
-      const res = await updateColor_API(editColor?.id.toString() || "", name, accessToken)
+      const res = await updateColor_API(editColor?.id.toString() || "", name, code, accessToken)
       if (res.status === 200) {
-        toast.success('Sửa kích cỡ thành công')
+        toast.success('Sửa màu sắc thành công')
         setIsOpen(false)
         setName("")
+        setCode("")
         setEditColor(null)
         fetchData()
       } else {
-        toast.error('Sửa kích cỡ thất bại')
+        toast.error('Sửa màu sắc thất bại')
       }
     } catch (error: any) {
-      toast.error(error.message || 'Sửa kích cỡ thất bại')
+      toast.error(error.message || 'Sửa màu sắc thất bại')
     } finally {
       setLoadingBtn(false)
     }
@@ -146,6 +151,7 @@ export default function page() {
           onAdd={() => {
             setEditColor(null)
             setName("")
+            setCode("")
             setIsOpen(true)
           }}
         />
@@ -155,15 +161,71 @@ export default function page() {
               <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : (
-            <RenderTable 
-              data={color} 
-              handleDelete={handleDelete} 
-              handleEdit={handleEdit} 
-              totalPage={metadata.total_page} 
-              currentPage={currentPage} 
-              setCurrentPage={setCurrentPage} 
-              title="màu sắc"
-            />
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-center">ID</th>
+                    <th scope="col" className="px-6 py-3 text-center">Tên màu sắc</th>
+                    <th scope="col" className="px-6 py-3 text-center">Mã màu</th>
+                    <th scope="col" className="px-6 py-3 text-center">Màu sắc</th>
+                    <th scope="col" className="px-6 py-3 text-center">Ngày tạo</th>
+                    <th scope="col" className="px-6 py-3 text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {color.length > 0 ? (
+                    color.map((item) => (
+                      <tr key={item.id} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                        <td className="px-6 py-4 text-center">{item.id}</td>
+                        <td className="px-6 py-4 text-center">{item.name}</td>
+                        <td className="px-6 py-4 text-center">{item.hexColor}</td>
+                        <td className="px-6 py-4 flex justify-center">
+                          <div 
+                            className="w-8 h-8 rounded-full text-center" 
+                            style={{ backgroundColor: item.hexColor }}
+                          ></div>
+                        </td>
+                        <td className="px-6 py-4 text-center">{new Date(Number(item.createdAt)).toLocaleDateString('vi-VN')}</td>
+                        <td className="px-6 py-4 text-center flex gap-2 justify-center">
+                          <Button 
+                            color="primary" 
+                            size="sm" 
+                            onClick={() => handleEdit(item)}
+                          >
+                            <PencilIcon className="w-4 h-4 text-white" />
+                          </Button>
+                          <Button 
+                            color="danger" 
+                            size="sm" 
+                            onClick={() => handleDelete(item.id.toString())}
+                          >
+                            <TrashIcon className="w-4 h-4 text-white" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={6} className="px-6 py-4 text-center">Không có dữ liệu</td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              
+              {metadata.total_page > 1 && (
+                <div className="flex justify-center mt-4">
+                  <Pagination
+                    showControls
+                    total={metadata.total_page}
+                    initialPage={currentPage}
+                    page={currentPage}
+                    onChange={setCurrentPage}
+                    size="sm"
+                  />
+                </div>
+              )}
+            </div>
           )}
         </CardBody>
       </Card>
@@ -176,7 +238,7 @@ export default function page() {
         name={name}
         code={code}
         setCode={setCode}
-        handleAddSize={handleAddSize}
+        handleAddSize={editColor ? handleEditSize : handleAddSize}
         loadingBtn={loadingBtn}
         editColor={!!editColor}
       />

@@ -16,6 +16,7 @@ import InputCategory from '@/app/components/ui/InputCategory';
 import InputMateria from '@/app/components/ui/InputMateria';
 import InputVariants from '@/app/components/ui/InputVariants';
 import InputSize from '@/app/components/ui/inputSize';
+import InputColor from '@/app/components/ui/InputColor';
 
 interface FormData {
   name: string;
@@ -23,6 +24,7 @@ interface FormData {
   imageUrls: any[];
   teamId: string | number;
   materialId: string | number;
+  status: string;
   season: string;
   jerseyType: string;
   isFeatured: boolean;
@@ -32,6 +34,16 @@ interface FormData {
   variants: any[];
   materialList: any[];
   size: string;
+  color: string[];
+}
+
+interface Variant {
+  priceAdjustment: number;
+  code: string;
+  stockQuantity: number;
+  sizeId: number;
+  status: string;
+  colorId: number;
 }
 
 const initialFormState: FormData = {
@@ -40,6 +52,7 @@ const initialFormState: FormData = {
   imageUrls: [],
   teamId: '1',
   materialId: '',
+  status: 'ACTIVE',
   season: '',
   jerseyType: '',
   isFeatured: false,
@@ -49,6 +62,7 @@ const initialFormState: FormData = {
   variants: [],
   materialList: [],
   size: '',
+  color: [],  
 };
 
 export default function ModalAdd_Edit_Product({
@@ -80,6 +94,7 @@ export default function ModalAdd_Edit_Product({
         imageUrls: edit.imageUrls || [],
         teamId: edit.team?.id || "",
         materialId: edit.material?.id || '',
+        status: edit.status || 'ACTIVE',
         season: edit.season || '',
         jerseyType: edit.jerseyType || '',
         isFeatured: edit.isFeatured || false,
@@ -88,7 +103,12 @@ export default function ModalAdd_Edit_Product({
         salePrice: edit.salePrice || 0,
         variants: edit.variants || [],
         materialList: [],
-        size: '',
+        size: edit.variants && edit.variants.length > 0 ? (edit.variants[0].sizeId || '') : '',
+        color: edit.variants && edit.variants.length > 0 
+          ? edit.variants
+              .map((variant: any) => variant.colorId && variant.colorId.toString())
+              .filter((id: string | undefined) => id && id.trim() !== '')
+          : [],
       });
     }
   }, [edit, isOpen]);
@@ -126,20 +146,35 @@ export default function ModalAdd_Edit_Product({
         }
       }
 
+      // Tạo variants từ size và color
+      const variants: Variant[] = [];
+      if (form.size && form.color.length > 0) {
+        form.color.forEach(colorId => {
+          variants.push({
+            priceAdjustment: 0,
+            code: `${form.name}-${form.size}-${colorId}`.replace(/\s+/g, '-').toLowerCase(),
+            stockQuantity: 100, // Giá trị mặc định
+            sizeId: Number(form.size),
+            status: form.status,
+            colorId: Number(colorId)
+          });
+        });
+      }
+
       return {
         "name": form.name,
         "categoryId": Number(form.categoryId),
         "imageUrls": uploadedImages,
         "teamId": Number(form.teamId),
         "materialId": Number(form.materialId),
+        "status": form.status,
         "season": form.season,
         "jerseyType": form.jerseyType,
         "isFeatured": form.isFeatured,
         "description": form.description,
         "price": form.price,
         "salePrice": form.salePrice,
-        "variants": form.variants,
-        "size": form.size
+        "variants": variants.length > 0 ? variants : form.variants
       };
     } catch (error) {
       console.error("Error in callApiCloudinary:", error);
@@ -149,7 +184,22 @@ export default function ModalAdd_Edit_Product({
 
   const handleFinish = async () => {
     if (!validateForm(form, setErrors)) {
-      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc!");
+      const errorFields = Object.keys(errors).map(key => {
+        switch(key) {
+          case 'name': return 'Tên sản phẩm';
+          case 'categoryId': return 'Danh mục';
+          case 'imageUrls': return 'Hình ảnh';
+          case 'materialId': return 'Chất liệu';
+          case 'season': return 'Mùa giải';
+          case 'jerseyType': return 'Loại áo';
+          case 'description': return 'Mô tả';
+          case 'price': return 'Giá';
+          case 'size': return 'Kích thước';
+          case 'color': return 'Màu sắc';
+          default: return key;
+        }
+      });
+      toast.error(`Vui lòng điền đầy đủ thông tin: ${errorFields.join(', ')}`);
       return;
     }
     try {
@@ -173,6 +223,25 @@ export default function ModalAdd_Edit_Product({
   }
 
   const handleEdit = async () => {
+    if (!validateForm(form, setErrors)) {
+      const errorFields = Object.keys(errors).map(key => {
+        switch(key) {
+          case 'name': return 'Tên sản phẩm';
+          case 'categoryId': return 'Danh mục';
+          case 'imageUrls': return 'Hình ảnh';
+          case 'materialId': return 'Chất liệu';
+          case 'season': return 'Mùa giải';
+          case 'jerseyType': return 'Loại áo';
+          case 'description': return 'Mô tả';
+          case 'price': return 'Giá';
+          case 'size': return 'Kích thước';
+          case 'color': return 'Màu sắc';
+          default: return key;
+        }
+      });
+      toast.error(`Vui lòng điền đầy đủ thông tin: ${errorFields.join(', ')}`);
+      return;
+    }
     try {
       setLoadingBtn(true)
       const data = await callApiCloudinary();
@@ -359,16 +428,17 @@ export default function ModalAdd_Edit_Product({
             setSize={(value) => handleInputChange('size', value)}
             size={form.size}
           />
+          {errors.size && <p className="text-red-500 text-sm mt-1">{errors.size}</p>}
         </div>
 
-        {/* <div className="mt-6">
-          <InputVariants
-            variants={form.variants}
-            setVariants={(value) => handleInputChange('variants', value)}
-          />
-          {errors.variants && <p className="text-red-500 text-sm mt-1">{errors.variants}</p>}
-        </div> */}
-
+      
+      <div className='mt-4'>
+      <InputColor
+          setColor={(value) => handleInputChange('color', value)}
+          color={form.color}
+        />
+        {errors.color && <p className="text-red-500 text-sm mt-1">{errors.color}</p>}
+      </div>
         <div className="mt-6">
           <InputTextEditor
             value={form.description}
@@ -378,7 +448,7 @@ export default function ModalAdd_Edit_Product({
           {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
         </div>
        
-        <div className="mt-6">
+        <div className="mt-4 flex gap-4">
           <Checkbox
             isSelected={form.isFeatured}
             onChange={(e) => handleInputChange('isFeatured', e.target.checked)}
@@ -390,6 +460,17 @@ export default function ModalAdd_Edit_Product({
           >
             Đánh dấu là sản phẩm nổi bật
           </Checkbox>
+            <Checkbox
+              isSelected={form.status === 'ACTIVE'}
+              onChange={(e) => handleInputChange('status', e.target.checked ? 'ACTIVE' : 'INACTIVE')}
+              color="primary"
+              size="lg"
+              classNames={{
+                label: "text-foreground"
+              }}
+            >
+           {form.status === 'ACTIVE' ? 'Kích hoạt' : 'Không kích hoạt'}
+            </Checkbox>
         </div>
 
         <Divider className="my-6" />

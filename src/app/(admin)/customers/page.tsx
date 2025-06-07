@@ -229,21 +229,17 @@ export default function PageUser() {
                     <div className="flex justify-center gap-2">
                       <Button
                         size="sm"
-                        variant="light"
+                        className="bg-blue-500 text-white rounded-md min-w-10 h-10 flex items-center justify-center"
                         onPress={() => handleEdit(user)}
-                        startContent={<Edit3 className="w-3 h-3" />}
-                        className="text-default-600 hover:text-primary"
                       >
-                        Sửa
+                        <Edit3 className="w-4 h-4" />
                       </Button>
                       <Button
                         size="sm"
-                        variant="light"
+                        className="bg-red-500 text-white rounded-md min-w-10 h-10 flex items-center justify-center"
                         onPress={() => handleDelete(user.id)}
-                        startContent={<Trash2 className="w-3 h-3" />}
-                        className="text-default-600 hover:text-red-500"
                       >
-                        Xóa
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </TableCell>

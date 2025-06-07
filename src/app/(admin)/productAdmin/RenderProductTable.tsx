@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
-import { Eye, Trash2, Search, Plus, Edit, ChevronDown, ChevronRight, Filter, X } from 'lucide-react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { Eye, Trash2, Search, Plus, Edit, ChevronDown, ChevronRight, Filter, X, Pencil, Edit3 } from 'lucide-react';
 import Loading from '@/app/_util/Loading';
 import FormatPrice from '@/app/_util/FormatPrice';
 import RenderTextEditer from '@/app/_util/ui/RenderTextEditer';
@@ -34,6 +36,11 @@ export default function RenderProductTable({
 }: RenderProductTableProps) {
   const [expandedRows, setExpandedRows] = useState(new Set());
   const [description, setDescription] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const toggleRowExpansion = (productId: number) => {
     const newExpanded = new Set(expandedRows);
@@ -46,8 +53,25 @@ export default function RenderProductTable({
   };
 
   const formatDate = (timestamp: number) => {
+    if (!timestamp) return '';
     return new Date(timestamp).toLocaleDateString('vi-VN');
   };
+
+  // Function to safely get a property from an object or return a default value
+  const getSafeProperty = (obj: any, property: string, defaultValue: string = ''): string => {
+    if (!obj) return defaultValue;
+    return typeof obj[property] === 'string' ? obj[property] : defaultValue;
+  };
+
+  if (!mounted) {
+    return (
+      <div className="mx-auto px-6 py-6">
+        <div className="bg-card rounded-lg shadow-sm border border-border p-4 mb-6">
+          <Loading />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto px-6 py-6">
@@ -116,21 +140,23 @@ export default function RenderProductTable({
                   {/* Product Info */}
                   <div className="col-span-4 flex items-center gap-3">
                     <div className="w-16 h-16 relative flex-shrink-0 overflow-hidden rounded-lg border border-border">
-                      <img
-                        src={product.imageUrls[0]}
-                        alt={product.name}
-                        className="object-cover rounded-lg w-full h-full"
-                      />
+                      {product.imageUrls && product.imageUrls.length > 0 && (
+                        <img
+                          src={product.imageUrls[0]}
+                          alt={product.name || "Product Image"}
+                          className="object-cover rounded-lg w-full h-full"
+                        />
+                      )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <Badge variant="flat" color="primary" size="sm">
-                          {product?.category?.name}
+                          {product?.category ? getSafeProperty(product.category, 'name', 'Không có danh mục') : 'Không có danh mục'}
                         </Badge>
-                        <span className="text-xs text-muted-foreground">Mã: {product.code}</span>
+                        <span className="text-xs text-muted-foreground">Mã: {product.code || ''}</span>
                       </div>
                       <h3 className="font-bold p-2 text-foreground mb-1 truncate">
-                        {product?.name}
+                        {product?.name || "Không có tên"}
                       </h3>
                     </div>
                   </div>
@@ -141,18 +167,18 @@ export default function RenderProductTable({
                       {product?.salePrice ? (
                         <div>
                           <div className="line-through text-muted-foreground text-sm">
-                            {product.price.toLocaleString()} đ
+                            {(product.price || 0).toLocaleString()} đ
                           </div>
                           <div className="text-danger font-semibold">
                             <FormatPrice
-                              price={DiscountPrice(product.price, product.salePrice)}
+                              price={DiscountPrice(product.price || 0, product.salePrice || 0)}
                               className="text-danger font-semibold"
                             />
                           </div>
                         </div>
                       ) : (
                         <span className="font-semibold text-foreground">
-                          {product.price.toLocaleString()} đ
+                          {(product.price || 0).toLocaleString()} đ
                         </span>
                       )}
                     </div>
@@ -161,7 +187,7 @@ export default function RenderProductTable({
                   {/* Quantity */}
                   <div className="col-span-2 flex items-center justify-center">
                     <span className="font-medium text-foreground">
-                      {product.variants.reduce((total: number, variant: any) => total + variant.stockQuantity, 0)}
+                      {product.variants ? product.variants.reduce((total: number, variant: any) => total + (variant.stockQuantity || 0), 0) : 0}
                     </span>
                   </div>
 
@@ -180,22 +206,20 @@ export default function RenderProductTable({
                   <div className="col-span-1 flex items-center justify-center">
                     <div className="flex gap-1">
                       <Button
+                        className="bg-blue-500 text-white rounded-md min-w-10 h-10 flex items-center justify-center"
                         isIconOnly
-                        variant="light"
                         size="sm"
-                        color="primary"
                         onClick={() => {
                           setIsOpen(true)
                           setEdit(product)
                         }}
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit3 className="w-4 h-4" />
                       </Button>
                       <Button
+                        className="bg-red-500 text-white rounded-md min-w-10 h-10 flex items-center justify-center"
                         isIconOnly
-                        variant="light"
                         size="sm"
-                        color="danger"
                         onClick={() => handleDeleteProduct(product)}
                       >
                         <Trash2 className="w-4 h-4" />
@@ -214,25 +238,27 @@ export default function RenderProductTable({
                             <div className="grid grid-cols-2 gap-4 text-sm">
                               <div>
                                 <span className="text-muted-foreground">Slug:</span>
-                                <div className="font-medium text-foreground">{product.slug}</div>
+                                <div className="font-medium text-foreground">{product.slug || ''}</div>
                               </div>
                               <div>
                                 <span className="text-muted-foreground">Đội bóng:</span>
                                 <div className="font-medium text-foreground">
-                                  {product.team?.name} ({product.team?.league})
+                                  {product.team ? `${getSafeProperty(product.team, 'name')} (${getSafeProperty(product.team, 'league')})` : 'Không có'}
                                 </div>
                               </div>
                               <div>
                                 <span className="text-muted-foreground">Chất liệu:</span>
-                                <div className="font-medium text-foreground">{product.material?.name}</div>
+                                <div className="font-medium text-foreground">
+                                  {product.material ? getSafeProperty(product.material, 'name', 'Không có') : 'Không có'}
+                                </div>
                               </div>
                               <div>
                                 <span className="text-muted-foreground">Mùa giải:</span>
-                                <div className="font-medium text-foreground">{product.season}</div>
+                                <div className="font-medium text-foreground">{product.season || ''}</div>
                               </div>
                               <div>
                                 <span className="text-muted-foreground">Loại áo:</span>
-                                <div className="font-medium text-foreground">{product.jerseyType}</div>
+                                <div className="font-medium text-foreground">{product.jerseyType || ''}</div>
                               </div>
                               <div>
                                 <span className="text-muted-foreground">Sản phẩm nổi bật:</span>
@@ -258,69 +284,59 @@ export default function RenderProductTable({
                                   {formatDate(product.updatedAt)}
                                 </div>
                               </div>
-                              <div className="col-span-2">
-                                <span className="text-muted-foreground">Mô tả:</span>
-                                <Button
-                                  size="sm"
-                                  variant="flat"
-                                  color="primary"
-                                  className="ml-2"
-                                  onClick={() => setDescription(product)}
-                                >
-                                  Xem chi tiết
-                                </Button>
-                              </div>
                             </div>
                           </div>
 
-                          {/* Biến thể và hình ảnh */}
-                          <div className="space-y-4">
+                          {/* Biến thể và Mô tả */}
+                          <div className="space-y-6">
                             {/* Variants */}
                             <div>
                               <h4 className="font-semibold text-foreground mb-3">Biến thể sản phẩm</h4>
-                              <div className="space-y-2">
-                                {product.variants.map((variant: any) => (
-                                  <div key={variant.id} className="bg-content1 p-3 rounded-lg border border-border">
-                                    <div className="grid grid-cols-3 gap-4 text-sm">
-                                      <div>
-                                        <span className="text-muted-foreground">Size:</span>
-                                        <div className="font-medium text-foreground">{variant.size}</div>
-                                      </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Điều chỉnh giá:</span>
-                                        <div className="font-medium text-foreground">
-                                          <FormatPrice price={variant.priceAdjustment} />
+                              {product.variants && product.variants.length > 0 ? (
+                                <div className="border border-border rounded-lg overflow-hidden">
+                                  <div className="grid grid-cols-4 bg-muted p-2 text-xs font-medium text-foreground">
+                                    <div>Kích cỡ</div>
+                                    <div>Giá điều chỉnh</div>
+                                    <div className="text-center">Số lượng</div>
+                                    <div className="text-center">Trạng thái</div>
+                                  </div>
+                                  <div className="divide-y divide-border">
+                                    {product.variants.map((variant: any, idx: number) => (
+                                      <div key={idx} className="grid grid-cols-4 p-2 text-sm">
+                                        <div>{variant.size || variant.sizeId || ''}</div>
+                                        <div>
+                                          <FormatPrice price={variant.priceAdjustment || 0} />
+                                        </div>
+                                        <div className="text-center">{variant.stockQuantity || 0}</div>
+                                        <div className="text-center">
+                                          <Badge
+                                            color={variant.isDeleted ? "danger" : "success"}
+                                            variant="flat"
+                                            size="sm"
+                                          >
+                                            {variant.isDeleted ? "Ngừng bán" : "Còn hàng"}
+                                          </Badge>
                                         </div>
                                       </div>
-                                      <div>
-                                        <span className="text-muted-foreground">Tồn kho:</span>
-                                        <div className="font-medium text-foreground">{variant.stockQuantity}</div>
-                                      </div>
-                                    </div>
+                                    ))}
                                   </div>
-                                ))}
-                              </div>
+                                </div>
+                              ) : (
+                                <p className="text-muted-foreground text-sm">Chưa có biến thể</p>
+                              )}
                             </div>
 
-                            {/* Images */}
+                            {/* Description Button */}
                             <div>
-                              <h4 className="font-semibold text-foreground mb-3">
-                                Hình ảnh ({product.imageUrls.length})
-                              </h4>
-                              <div className="grid grid-cols-4 gap-2">
-                                {product.imageUrls.map((url: string, index: number) => (
-                                  <div
-                                    key={index}
-                                    className="aspect-square relative overflow-hidden rounded-lg border border-border"
-                                  >
-                                    <img
-                                      src={url}
-                                      alt={`${product.name} - ${index + 1}`}
-                                      className="object-cover w-full h-full"
-                                    />
-                                  </div>
-                                ))}
-                              </div>
+                              <h4 className="font-semibold text-foreground mb-3">Mô tả sản phẩm</h4>
+                              <Button
+                                variant="flat"
+                                color="primary"
+                                size="sm"
+                                onClick={() => setDescription(product)}
+                              >
+                                Xem mô tả
+                              </Button>
                             </div>
                           </div>
                         </div>
@@ -331,45 +347,31 @@ export default function RenderProductTable({
               </React.Fragment>
             ))
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <div className="mb-4">
-                <Search className="w-12 h-12 mx-auto text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-medium text-foreground mb-2">
-                Không tìm thấy sản phẩm nào
-              </h3>
-              <p className="text-muted-foreground mb-4">
-                Thử thay đổi từ khóa tìm kiếm hoặc thêm sản phẩm mới
-              </p>
-              <Button
-                color="primary"
-                onClick={() => setIsOpen(true)}
-                startContent={<Plus className="w-4 h-4" />}
-              >
-                Thêm Sản Phẩm
-              </Button>
+            <div className="p-8 text-center text-muted-foreground">
+              Không tìm thấy sản phẩm nào
             </div>
           )}
         </div>
-
-        {/* Pagination */}
-        {totalPage > 1 && (
-          <div className="flex justify-center py-4 border-t border-border">
-            <Pagination
-              total={totalPage}
-              initialPage={currentPage}
-              onChange={onChangePage}
-              showControls
-            />
-          </div>
-        )}
       </div>
+
+      {/* Pagination */}
+      {!loading && products.length > 0 && (
+        <div className="flex justify-center mt-6">
+          <Pagination
+            isCompact
+            showControls
+            total={totalPage}
+            initialPage={currentPage}
+            onChange={(page) => onChangePage(page)}
+          />
+        </div>
+      )}
 
       {/* Description Modal */}
       {description && (
         <Modadescription
           onClose={() => setDescription(null)}
-          description={description.description}
+          description={description.description || ''}
         />
       )}
     </div>
