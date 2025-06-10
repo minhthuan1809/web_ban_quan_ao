@@ -3,16 +3,22 @@ import FormatPrice from "@/app/_util/FormatPrice";
 import InputAddress from "@/app/components/ui/InputAddress";
 import { Input, Textarea } from "@nextui-org/react";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
-import { Gift, User, MapPin, CreditCard, Wallet } from "lucide-react";
+import { Gift, User, MapPin, CreditCard, Wallet, Phone, FileText } from "lucide-react";
+import { createOrder_API } from "@/app/_service/Oder";
+import { toast } from "react-toastify";
+import InputPhone from "@/app/components/ui/InputPhone";
+import router from "next/router";
 
 interface CardPayProps {
   selectedItems: number[];
   calculateTotal: () => number;
+  cartData: any;
 }
 
 export default function CardPay({
   selectedItems,
   calculateTotal,
+  cartData
 }: CardPayProps) {
   const [feeShip, setFeeShip] = useState<number>(
     Number(process.env.NEXT_PUBLIC_FEE_SHIP || 0)
@@ -34,13 +40,53 @@ export default function CardPay({
     detail: "",
   });
   const [name, setName] = useState<string>(userInfo?.fullName || "");
+  const [phone, setPhone] = useState<string>(userInfo?.phoneNumber || "");
+  const [note, setNote] = useState<string>("");
   const [discountCode, setDiscountCode] = useState<string>("");
   const [discount, setDiscount] = useState<number>(0);
-  const [paymentMethod, setPaymentMethod] = useState<string>("");
+  const [paymentMethod, setPaymentMethod] = useState<number>(1);
 
   const calculateTotalAfterDiscount = () => {
     return calculateTotal() + feeShip - discount;
   };
+
+const handlePayment = async () => {
+  
+  const orderItems = cartData.cartItems.filter((item: any) => 
+    selectedItems.includes(item.id)
+  ).map((item: any) => ({
+    "variantId": item.variant.id,
+    "quantity": item.quantity
+  }));
+
+  const orderData = {
+    "paymentMethodId": paymentMethod,
+    "customerName": name,
+    "customerEmail": userInfo?.email || "",
+    "customerPhone": phone,
+    "shippingAddress": address.detail,
+    "shippingDistrict": address.district.districtName,
+    "shippingWard": address.ward.wardName,
+    "shippingCity": address.city.cityName,
+    "note": note,
+    "couponCode": discountCode,
+    "items": orderItems
+  };
+
+  
+  try {
+    const res = await createOrder_API(orderData , userInfo?.id);
+    if (res.status === 200) {
+      toast.success("Đặt hàng thành công");
+      router.push("/history-order"); 
+    } else {
+      toast.error("Có lỗi xảy ra khi đặt hàng");
+    }
+  } catch (error) {
+    console.error("Lỗi đặt hàng:", error);
+    toast.error("Có lỗi xảy ra khi đặt hàng");
+  }
+}
 
   return (
     <div className="lg:col-span-1">
@@ -57,7 +103,7 @@ export default function CardPay({
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <User className="text-gray-600" size={18} />
-              <span className="font-medium text-gray-900">Thông tin người nhận</span>
+              <span className="font-medium text-gray-900">Tên người nhận</span>
             </div>
             <Input
               placeholder="Nhập họ tên người nhận"
@@ -71,6 +117,17 @@ export default function CardPay({
                 inputWrapper: "border-gray-200 hover:border-gray-300 focus-within:border-gray-900"
               }}
               onChange={(e) => setName(e.target.value)}
+            />
+            
+            <div className="flex items-center gap-2 mt-3">
+              <Phone className="text-gray-600" size={18} />
+              <span className="font-medium text-gray-900">Số điện thoại</span>
+            </div>
+
+            <InputPhone
+              placeholder="Nhập số điện thoại"
+              value={phone}
+              onChange={(e) => setPhone(e)}
             />
           </div>
 
@@ -97,6 +154,28 @@ export default function CardPay({
                 }}
               />
             </div>
+          </div>
+          
+          {/* Ghi chú */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <FileText className="text-gray-600" size={18} />
+              <span className="font-medium text-gray-900">Ghi chú đơn hàng</span>
+            </div>
+            <Textarea
+              placeholder="Nhập ghi chú cho đơn hàng (nếu có)"
+              variant="bordered"
+              className="w-full"
+              value={note}
+              size="lg"
+              radius="md"
+              minRows={2}
+              classNames={{
+                input: "text-gray-900 resize-none",
+                inputWrapper: "border-gray-200 hover:border-gray-300 focus-within:border-gray-900"
+              }}
+              onChange={(e) => setNote(e.target.value)}
+            />
           </div>
 
           {/* Mã giảm giá */}
@@ -166,40 +245,40 @@ export default function CardPay({
                 <input
                   type="radio"
                   name="payment"
-                  value="wallet"
-                  checked={paymentMethod === "wallet"}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  value="1"
+                  checked={paymentMethod === 1}
+                  onChange={() => setPaymentMethod(1)}
                   className="sr-only"
                 />
                 <div className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center ${
-                  paymentMethod === "wallet" ? "border-gray-900" : "border-gray-300"
+                  paymentMethod === 1 ? "border-gray-900" : "border-gray-300"
                 }`}>
-                  {paymentMethod === "wallet" && (
+                  {paymentMethod === 1 && (
                     <div className="w-2 h-2 rounded-full bg-gray-900"></div>
                   )}
                 </div>
                 <Wallet className="text-gray-600 mr-2" size={18} />
-                <span className="text-gray-900">Thanh toán qua ví</span>
+                <span className="text-gray-900">Thanh toán khi nhận hàng</span>
               </label>
 
               <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-300 transition-colors">
                 <input
                   type="radio"
                   name="payment"
-                  value="card"
-                  checked={paymentMethod === "card"}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  value="6"
+                  checked={paymentMethod === 6}
+                  onChange={() => setPaymentMethod(6)}
                   className="sr-only"
                 />
                 <div className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center ${
-                  paymentMethod === "card" ? "border-gray-900" : "border-gray-300"
+                    paymentMethod === 6 ? "border-gray-900" : "border-gray-300"
                 }`}>
-                  {paymentMethod === "card" && (
+                  {paymentMethod === 6 && (
                     <div className="w-2 h-2 rounded-full bg-gray-900"></div>
                   )}
                 </div>
                 <CreditCard className="text-gray-600 mr-2" size={18} />
-                <span className="text-gray-900">Thanh toán qua thẻ</span>
+                <span className="text-gray-900">Thanh toán qua ví</span>
               </label>
             </div>
           </div>
@@ -209,7 +288,8 @@ export default function CardPay({
             <button
               disabled={selectedItems.length === 0}
               className="w-full bg-gray-900 text-white py-3.5 px-6 rounded-lg font-medium hover:bg-gray-800 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 text-sm"
-            >
+              onClick={handlePayment}
+              >
               Thanh toán
             </button>
 

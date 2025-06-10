@@ -25,15 +25,37 @@ export default function ProductPage() {
       setLoading(true);
       try {
         const response = await getProducts_API(searchTerm, page, limit, {})
+        console.log("response", response)
         
         if (response.status === 200) {
-          setProducts(response.data.data.reverse())
+          // Đảm bảo dữ liệu được xử lý đúng cách trước khi hiển thị
+          const processedData = response.data.data.map((product: any) => {
+            // Đảm bảo tất cả các đối tượng phức tạp được chuyển đổi thành chuỗi khi cần hiển thị
+            return {
+              ...product,
+              // Xử lý các trường có thể gây lỗi React khi hiển thị
+              categoryName: product.category?.name || 'Không có',
+              materialName: product.material?.name || 'Không có',
+              teamName: product.team?.name || 'Không có',
+              // Đảm bảo biến thể được xử lý đúng
+              variants: Array.isArray(product.variants) ? product.variants.map((variant: any) => {
+                return {
+                  ...variant,
+                  size: variant.size || '',
+                  color: variant.color || ''
+                };
+              }) : []
+            };
+          });
+          
+          setProducts(processedData.reverse())
           setTotalPage(response.data.metadata.total_page)
         } else {
           toast.error("Đã có lỗi xảy ra !")
         }
       } catch (error) {
-        toast.error("Đã có lỗi xảy ra !")
+        console.error("Lỗi khi tải sản phẩm:", error);
+        toast.error("Đã có lỗi xảy ra khi tải dữ liệu!")
       } finally {
         setLoading(false);
       }

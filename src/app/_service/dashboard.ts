@@ -3,7 +3,7 @@ import axios from "axios";
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const getDashboardStats = async (accessToken?: string) => {
-    const res = await axios.get(`${API_URL}/dashboard/stats`, {
+    const res = await axios.get(`${API_URL}/statistics/dashboard`, {
         headers: {
             'Content-Type': 'application/json',
             ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })

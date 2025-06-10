@@ -16,6 +16,7 @@ export default function Page() {
     const { userInfo } = useAuthInfor();
     const [cartItems, setCartItems] = useState<any[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
+    const [cartData, setCartData] = useState<any>(null);
     const router = useRouter();
     
     useEffect(() => {
@@ -26,15 +27,18 @@ export default function Page() {
                     return;
                 }
                 const res = await GetCard_API(userInfo.id);
-                if (res.data?.cartItems) {
-                    setCartItems(res.data.cartItems);
+                if (res.data) {
+                    setCartData(res.data);
+                    if (res.data.cartItems) {
+                        setCartItems(res.data.cartItems);
+                    }
                 }
             } catch (error) {
                 console.error('Lỗi khi tải giỏ hàng:', error);
             }
         }   
         fetchCard();
-    }, [userInfo, router])
+    }, [])
 
     const handleQuantityChange = async (itemId: number, newQuantity: number, variantId: number, cartId: number) => {
         if (newQuantity < 1) return;
@@ -101,11 +105,14 @@ export default function Page() {
                         <ShoppingBag className="w-5 h-5 text-primary" />
                     </div>
                     <h1 className="text-2xl font-bold">Giỏ hàng của bạn</h1>
+                   
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                     {/* Cart Items */}
                     <div className="lg:col-span-3">
+                   
+
                         {/* Select All */}
                         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-4">
                             <label className="flex items-center gap-3">
@@ -149,16 +156,35 @@ export default function Page() {
 
                                             {/* Product Info */}
                                             <div className="flex-1 min-w-0">
-                                                <h3 className="font-medium text-gray-900 text-lg mb-2">
-                                                    {item.variant.product.name}
-                                                </h3>
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <h3 className="font-medium text-gray-900 text-lg">
+                                                        {item.variant.product.name}
+                                                    </h3>
+                                                    <span className="text-xs text-gray-500">
+                                                        ID: {item.id}
+                                                    </span>
+                                                </div>
+                                                <p className="text-sm text-gray-500 mb-3">
+                                                    Thêm vào: {new Date(item.createdAt).toLocaleDateString()}
+                                                </p>
+                                                
                                                 <div className="flex flex-col gap-2 mb-3">
                                                     <div className="flex items-center gap-2">
                                                         <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
-                                                            Size: {item.variant.size}
+                                                            Size: {item.variant.size.name}
                                                         </span>
+                                                        <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm flex items-center gap-1">
+                                                            <span>Màu:</span> 
+                                                            <span>{item.variant.color.name}</span>
+                                                            <div className="w-3 h-3 rounded-full" style={{backgroundColor: item.variant.color.hexColor}}></div>
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
                                                         <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
                                                             Mùa: {item.variant.product.season}
+                                                        </span>
+                                                        <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm">
+                                                            Danh mục: {item.variant.product.category.name}
                                                         </span>
                                                     </div>
                                                     <div className="flex items-center gap-2">
@@ -193,13 +219,18 @@ export default function Page() {
                                                             currency="₫" 
                                                         />
                                                     )}
+                                                    {item.variant.product.salePrice > 0 && (
+                                                        <span className="text-sm font-medium text-green-600">
+                                                            -{item.variant.product.salePrice}%
+                                                        </span>
+                                                    )}
                                                 </div>
 
                                                 {/* Quantity Controls */}
                                                 <div className="flex items-center justify-between">
                                                     <div className="flex items-center border border-gray-300 rounded">
                                                         <button 
-                                                            onClick={() => handleQuantityChange(item.id, item.quantity - 1, item.variant.id, userInfo.cartId)}
+                                                            onClick={() => handleQuantityChange(item.id, item.quantity - 1, item.variant.id, cartData.id)}
                                                             className="px-3 py-1 text-gray-600 hover:bg-gray-50"
                                                             disabled={item.quantity <= 1}
                                                         >
@@ -209,7 +240,7 @@ export default function Page() {
                                                             {item.quantity}
                                                         </span>
                                                         <button 
-                                                            onClick={() => handleQuantityChange(item.id, item.quantity + 1, item.variant.id, userInfo.cartId)}
+                                                            onClick={() => handleQuantityChange(item.id, item.quantity + 1, item.variant.id, cartData.id)}
                                                             className="px-3 py-1 text-gray-600 hover:bg-gray-50"
                                                             disabled={item.quantity >= item.variant.stockQuantity}
                                                         >
@@ -254,6 +285,7 @@ export default function Page() {
                     <CardPay 
                         selectedItems={selectedItems}
                         calculateTotal={calculateTotal}
+                        cartData={cartData}
                     />
                 </div>
             </div>

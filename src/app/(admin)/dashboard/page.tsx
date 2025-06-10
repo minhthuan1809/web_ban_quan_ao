@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import { getDashboardStats } from '@/app/_service/dashboard'
 import useAuthInfor from '@/app/customHooks/AuthInfor'
 import { Card, CardBody } from '@nextui-org/react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts'
-import { BadgeDelta, DeltaType, Grid, Metric, Text } from "@tremor/react"
+import { BadgeDelta, Metric, Text } from "@tremor/react"
+import CardItemRevenue from './component/CardItemRevenue';
 
 interface DashboardStats {
   todayRevenue: number;
@@ -81,126 +81,98 @@ export default function DashboardPage() {
   ]
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Today's Stats */}
-        <Card>
+    <div className="p-4 space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Tổng doanh thu */}
+        <CardItemRevenue stats={stats.todayRevenue} icon={{icon: "Calendar", className: "w-3 h-3 text-blue-500"}} title="Tổng doanh thu" description="Tính theo ngày" />
+
+        {/* Đơn hàng */}
+        <CardItemRevenue stats={stats.todayOrders} icon={{icon: "Calendar", className: "w-3 h-3 text-blue-500"}} title="Đơn hàng" description="Tính theo ngày" />
+
+        {/* Doanh thu tháng */}
+        <CardItemRevenue stats={stats.monthRevenue} icon={{icon: "Calendar", className: "w-3 h-3 text-blue-500"}} title="Doanh thu tháng" description="Tính theo tháng" />
+
+        {/* Đơn hàng tháng */}
+        <CardItemRevenue stats={stats.monthOrders} icon={{icon: "Calendar", className: "w-3 h-3 text-blue-500"}} title="Đơn hàng tháng" description="Tính theo tháng" />
+     
+        {/* Doanh thu theo năm */}
+        <CardItemRevenue stats={stats.yearRevenue} icon={{icon: "Calendar", className: "w-3 h-3 text-blue-500"}} title="Doanh thu theo năm" description="Tính theo năm" />
+
+        {/* Đơn hàng theo năm */}
+        <CardItemRevenue stats={stats.yearOrders} icon={{icon: "Calendar", className: "w-3 h-3 text-blue-500"}} title="Đơn hàng theo năm" description="Tính theo năm" />
+
+      </div>
+
+
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Top Products */}
+        <Card className="border border-gray-200 shadow-sm">
           <CardBody>
-            <div className="space-y-2">
-              <Text>Doanh thu hôm nay</Text>
-              <Metric>{formatCurrency(stats.todayRevenue)}</Metric>
-              <Text>Đơn hàng: {stats.todayOrders}</Text>
-            </div>
+            <Text className="mb-4 font-medium">Top sản phẩm bán chạy</Text>
+            {stats.topProducts.length > 0 ? (
+              <div className="space-y-4">
+                {stats.topProducts.map((product) => (
+                  <div key={product.productId} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <Text className="font-medium">{product.productName}</Text>
+                      <Text className="text-sm text-gray-500">
+                        Đã bán: {product.totalQuantitySold} | Doanh thu: {formatCurrency(product.totalRevenue)}
+                      </Text>
+                    </div>
+                    <BadgeDelta deltaType={product.totalQuantitySold > 0 ? "increase" : "unchanged"}>
+                      {product.totalQuantitySold}
+                    </BadgeDelta>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-40 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 mb-2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
+                </svg>
+                <Text>Chưa có dữ liệu</Text>
+              </div>
+            )}
           </CardBody>
         </Card>
 
-        {/* Month's Stats */}
-        <Card>
+        {/* Top Customers */}
+        <Card className="border border-gray-200 shadow-sm">
           <CardBody>
-            <div className="space-y-2">
-              <Text>Doanh thu tháng này</Text>
-              <Metric>{formatCurrency(stats.monthRevenue)}</Metric>
-              <Text>Đơn hàng: {stats.monthOrders}</Text>
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Year's Stats */}
-        <Card>
-          <CardBody>
-            <div className="space-y-2">
-              <Text>Doanh thu năm nay</Text>
-              <Metric>{formatCurrency(stats.yearRevenue)}</Metric>
-              <Text>Đơn hàng: {stats.yearOrders}</Text>
-            </div>
+            <Text className="mb-4 font-medium">Top khách hàng</Text>
+            {stats.topCustomers.length > 0 ? (
+              <div className="space-y-4">
+                {stats.topCustomers.map((customer) => (
+                  <div key={customer.userId} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                    <div>
+                      <Text className="font-medium">{customer.fullName}</Text>
+                      <Text className="text-sm text-gray-500">
+                        {customer.email}
+                      </Text>
+                      <Text className="text-sm text-gray-500">
+                        Tổng chi tiêu: {formatCurrency(customer.totalSpent)} | Số đơn hàng: {customer.totalOrders}
+                      </Text>
+                    </div>
+                    <BadgeDelta deltaType={customer.totalOrders > 0 ? "increase" : "unchanged"}>
+                      {customer.totalOrders}
+                    </BadgeDelta>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-40 text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-10 h-10 mb-2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                </svg>
+                <Text>Chưa có dữ liệu</Text>
+              </div>
+            )}
           </CardBody>
         </Card>
       </div>
 
-      {/* Revenue Chart */}
-      <Card>
-        <CardBody>
-          <Text className="mb-4">Biểu đồ doanh thu</Text>
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={revenueData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip formatter={(value) => formatCurrency(value as number)} />
-                <Legend />
-                <Bar dataKey="value" name="Doanh thu" fill="#0070F0" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </CardBody>
-      </Card>
 
-      {/* Orders Chart */}
-      <Card>
-        <CardBody>
-          <Text className="mb-4">Biểu đồ đơn hàng</Text>
-          <div className="h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={orderData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="value" name="Số đơn hàng" stroke="#0070F0" />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Top Products */}
-      <Card>
-        <CardBody>
-          <Text className="mb-4">Top sản phẩm bán chạy</Text>
-          <div className="space-y-4">
-            {stats.topProducts.map((product) => (
-              <div key={product.productId} className="flex justify-between items-center">
-                <div>
-                  <Text>{product.productName}</Text>
-                  <Text className="text-sm text-gray-500">
-                    Đã bán: {product.totalQuantitySold} | Doanh thu: {formatCurrency(product.totalRevenue)}
-                  </Text>
-                </div>
-                <BadgeDelta deltaType={product.totalQuantitySold > 0 ? "increase" : "unchanged"}>
-                  {product.totalQuantitySold}
-                </BadgeDelta>
-              </div>
-            ))}
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Top Customers */}
-      <Card>
-        <CardBody>
-          <Text className="mb-4">Top khách hàng</Text>
-          <div className="space-y-4">
-            {stats.topCustomers.map((customer) => (
-              <div key={customer.userId} className="flex justify-between items-center">
-                <div>
-                  <Text>{customer.fullName}</Text>
-                  <Text className="text-sm text-gray-500">
-                    {customer.email}
-                  </Text>
-                  <Text className="text-sm text-gray-500">
-                    Tổng chi tiêu: {formatCurrency(customer.totalSpent)} | Số đơn hàng: {customer.totalOrders}
-                  </Text>
-                </div>
-                <BadgeDelta deltaType={customer.totalOrders > 0 ? "increase" : "unchanged"}>
-                  {customer.totalOrders}
-                </BadgeDelta>
-              </div>
-            ))}
-          </div>
-        </CardBody>
-      </Card>
     </div>
   )
 }

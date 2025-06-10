@@ -424,21 +424,16 @@ export default function ModalAdd_Edit_Product({
               }}
             />
           </div>
-          <InputSize
-            setSize={(value) => handleInputChange('size', value)}
-            size={form.size}
-          />
-          {errors.size && <p className="text-red-500 text-sm mt-1">{errors.size}</p>}
         </div>
+       <div className='mt-4'>
+       <InputVariants
+            variants={form.variants}
+            setVariants={(value) => handleInputChange('variants', value)}
+          />
+       </div>
 
       
-      <div className='mt-4'>
-      <InputColor
-          setColor={(value) => handleInputChange('color', value)}
-          color={form.color}
-        />
-        {errors.color && <p className="text-red-500 text-sm mt-1">{errors.color}</p>}
-      </div>
+   
         <div className="mt-6">
           <InputTextEditor
             value={form.description}

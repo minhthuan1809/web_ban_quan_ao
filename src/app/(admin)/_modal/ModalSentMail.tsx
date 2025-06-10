@@ -2,6 +2,7 @@
 import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Textarea, Spinner } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
+import { sendMail_API } from '@/app/_service/contact';
 
 interface Contact {
   id: number;
@@ -36,38 +37,6 @@ export default function ModalSentMail({
     }
   }, [contactData, isOpen]);
 
-  const handleSendEmail = async () => {
-    if (!email.trim()) {
-      toast.error("Vui lòng nhập email người nhận");
-      return;
-    }
-    if (!subject.trim()) {
-      toast.error("Vui lòng nhập tiêu đề email");
-      return;
-    }
-    if (!content.trim()) {
-      toast.error("Vui lòng nhập nội dung email");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      // Gọi API gửi email ở đây
-      // const response = await sendEmail_API({ email, subject, content });
-      
-      // Mô phỏng gửi email thành công
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success("Gửi email thành công");
-      onOpenChange(false);
-      resetForm();
-    } catch (error) {
-      console.error("Lỗi khi gửi email:", error);
-      toast.error("Có lỗi xảy ra khi gửi email");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const resetForm = () => {
     setEmail("");
@@ -79,6 +48,21 @@ export default function ModalSentMail({
     onOpenChange(false);
     resetForm();
   };
+
+  const handleSendMail = async () => {
+    try {
+      const res = await sendMail_API(contactData?.id || 0, { email, subject, content });
+      if (res.status === 200) {
+        toast.success("Gửi email thành công");  
+        onOpenChange(false);
+        resetForm();
+      } else {
+        toast.error("Có lỗi xảy ra khi gửi email");
+      }
+    } catch (error) {
+      console.error("Lỗi khi gửi email:", error);
+    }
+  }
 
   return (
     <Modal
@@ -158,7 +142,7 @@ export default function ModalSentMail({
               </Button>
               <Button 
                 color="primary" 
-                onClick={handleSendEmail}
+                  onClick={handleSendMail}
                 className="font-medium"
                 isLoading={loading}
               >

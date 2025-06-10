@@ -7,10 +7,11 @@ import {
   CardBody,
   Button,
   Chip,
+  Divider,
 } from "@nextui-org/react";
 import React from "react";
 import { Contact } from "./typecontac";
-import { Send } from "lucide-react";
+import { Send, User, Calendar, MapPin } from "lucide-react";
 
 export default function ModalDetalMail({
   isDetailModalOpen,
@@ -31,6 +32,19 @@ export default function ModalDetalMail({
         return "success";
       case "REJECTED":
         return "danger";
+      default:
+        return "default";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch(priority) {
+      case "HIGH":
+        return "danger";
+      case "MEDIUM":
+        return "warning";
+      case "LOW":
+        return "success";
       default:
         return "default";
     }
@@ -92,6 +106,33 @@ export default function ModalDetalMail({
                       </div>
                       <div>
                         <h3 className="text-sm text-default-500 mb-1">
+                          Mức độ ưu tiên
+                        </h3>
+                        <Chip
+                          color={getPriorityColor(selectedContact.priority) as any}
+                          variant="flat">
+                          {selectedContact.priority === "HIGH"
+                            ? "Cao"
+                            : selectedContact.priority === "MEDIUM"
+                            ? "Trung bình"
+                            : "Thấp"}
+                        </Chip>
+                      </div>
+                      <div>
+                        <h3 className="text-sm text-default-500 mb-1">
+                          Người phụ trách
+                        </h3>
+                        {selectedContact.assignedToName ? (
+                          <div className="flex items-center gap-1">
+                            <User size={14} />
+                            <span>{selectedContact.assignedToName}</span>
+                          </div>
+                        ) : (
+                          <span className="text-gray-400 text-xs">Chưa phân công</span>
+                        )}
+                      </div>
+                      <div>
+                        <h3 className="text-sm text-default-500 mb-1">
                           Họ tên
                         </h3>
                         <p className="text-foreground">
@@ -114,12 +155,39 @@ export default function ModalDetalMail({
                       </div>
                       <div>
                         <h3 className="text-sm text-default-500 mb-1">
-                          Thời gian
+                          Địa chỉ
                         </h3>
-                        <p className="text-foreground">
-                          {formatDate(selectedContact.createdAt)}
-                        </p>
+                        <div className="flex items-center gap-1">
+                          <MapPin size={14} />
+                          <p className="text-foreground">
+                            {selectedContact.address || "Không có"}
+                          </p>
+                        </div>
                       </div>
+                      <div>
+                        <h3 className="text-sm text-default-500 mb-1">
+                          Thời gian tạo
+                        </h3>
+                        <div className="flex items-center gap-1">
+                          <Calendar size={14} />
+                          <p className="text-foreground">
+                            {formatDate(selectedContact.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                      {selectedContact.resolvedAt && (
+                        <div>
+                          <h3 className="text-sm text-default-500 mb-1">
+                            Thời gian xử lý
+                          </h3>
+                          <div className="flex items-center gap-1">
+                            <Calendar size={14} />
+                            <p className="text-foreground">
+                              {formatDate(selectedContact.resolvedAt)}
+                            </p>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div>
@@ -140,17 +208,38 @@ export default function ModalDetalMail({
                       </CardBody>
                     </Card>
 
-                    <div className="flex justify-end">
-                      <Button
-                        color="primary"
-                        endContent={<Send size={16} />}
-                        onClick={() => {
-                          onClose();
-                          setIsDetailModalOpen(true);
-                        }}>
-                        Phản hồi email
-                      </Button>
-                    </div>
+                    {selectedContact.replies && selectedContact.replies.length > 0 && (
+                      <div className="space-y-4">
+                        <Divider />
+                        <h3 className="text-medium font-semibold">Lịch sử phản hồi</h3>
+                        {selectedContact.replies.map((reply) => (
+                          <Card key={reply.id} className="bg-primary-50">
+                            <CardBody>
+                              <div className="flex justify-between items-center mb-2">
+                                <div className="flex items-center gap-1">
+                                  <User size={14} />
+                                  <span className="font-medium">{reply.adminName}</span>
+                                </div>
+                                <div className="text-xs text-default-500">
+                                  {formatDate(reply.createdAt)}
+                                </div>
+                              </div>
+                              <p className="whitespace-pre-wrap">
+                                {reply.replyMessage}
+                              </p>
+                              {reply.isEmailSent && (
+                                <div className="flex items-center gap-1 mt-2 text-xs text-success">
+                                  <Send size={12} />
+                                  <span>Email đã gửi lúc {formatDate(reply.emailSentAt)}</span>
+                                </div>
+                              )}
+                            </CardBody>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+
+                    
                   </div>
                 )}
               </ModalBody>

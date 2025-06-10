@@ -42,6 +42,9 @@ export default function RenderProductTable({
     setMounted(true);
   }, []);
 
+  console.log("products", products);
+  
+
   const toggleRowExpansion = (productId: number) => {
     const newExpanded = new Set(expandedRows);
     if (newExpanded.has(productId)) {
@@ -151,7 +154,11 @@ export default function RenderProductTable({
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <Badge variant="flat" color="primary" size="sm">
-                          {product?.category ? getSafeProperty(product.category, 'name', 'Không có danh mục') : 'Không có danh mục'}
+                          {product?.category ? (
+                            typeof product.category === 'object'
+                              ? getSafeProperty(product.category, 'name', 'Không có danh mục')
+                              : product.category
+                          ) : 'Không có danh mục'}
                         </Badge>
                         <span className="text-xs text-muted-foreground">Mã: {product.code || ''}</span>
                       </div>
@@ -243,13 +250,21 @@ export default function RenderProductTable({
                               <div>
                                 <span className="text-muted-foreground">Đội bóng:</span>
                                 <div className="font-medium text-foreground">
-                                  {product.team ? `${getSafeProperty(product.team, 'name')} (${getSafeProperty(product.team, 'league')})` : 'Không có'}
+                                  {product.team ? (
+                                    typeof product.team === 'object' 
+                                      ? `${getSafeProperty(product.team, 'name')} (${getSafeProperty(product.team, 'league')})`
+                                      : product.team
+                                  ) : 'Không có'}
                                 </div>
                               </div>
                               <div>
                                 <span className="text-muted-foreground">Chất liệu:</span>
                                 <div className="font-medium text-foreground">
-                                  {product.material ? getSafeProperty(product.material, 'name', 'Không có') : 'Không có'}
+                                  {product.material ? (
+                                    typeof product.material === 'object'
+                                      ? getSafeProperty(product.material, 'name', 'Không có')
+                                      : product.material
+                                  ) : 'Không có'}
                                 </div>
                               </div>
                               <div>
@@ -291,19 +306,37 @@ export default function RenderProductTable({
                           <div className="space-y-6">
                             {/* Variants */}
                             <div>
-                              <h4 className="font-semibold text-foreground mb-3">Biến thể sản phẩm</h4>
+                              <h4 className="font-semibold text-foreground mb-3">Kích thước và màu sắc của sản phẩm</h4>
                               {product.variants && product.variants.length > 0 ? (
                                 <div className="border border-border rounded-lg overflow-hidden">
-                                  <div className="grid grid-cols-4 bg-muted p-2 text-xs font-medium text-foreground">
+                                  <div className="grid grid-cols-5 bg-muted p-2 text-xs font-medium text-foreground">
                                     <div>Kích cỡ</div>
+                                    <div>Màu sắc</div>
                                     <div>Giá điều chỉnh</div>
                                     <div className="text-center">Số lượng</div>
                                     <div className="text-center">Trạng thái</div>
                                   </div>
                                   <div className="divide-y divide-border">
                                     {product.variants.map((variant: any, idx: number) => (
-                                      <div key={idx} className="grid grid-cols-4 p-2 text-sm">
-                                        <div>{variant.size || variant.sizeId || ''}</div>
+                                      <div key={idx} className="grid grid-cols-5 p-2 text-sm">
+                                        <div>{typeof variant.size === 'object' ? variant.size.name : variant.size || variant.sizeId || ''}</div>
+                                        <div className="flex items-center gap-2">
+                                          {variant.color && (
+                                            <>
+                                              {typeof variant.color === 'object' ? (
+                                                <>
+                                                  <div 
+                                                    className="w-4 h-4 rounded-full" 
+                                                    style={{ backgroundColor: variant.color.hexColor || '#ccc' }}
+                                                  ></div>
+                                                  <span>{variant.color.name}</span>
+                                                </>
+                                              ) : (
+                                                <span>{variant.color}</span>
+                                              )}
+                                            </>
+                                          )}
+                                        </div>
                                         <div>
                                           <FormatPrice price={variant.priceAdjustment || 0} />
                                         </div>
@@ -371,7 +404,7 @@ export default function RenderProductTable({
       {description && (
         <Modadescription
           onClose={() => setDescription(null)}
-          description={description.description || ''}
+          description={typeof description === 'object' ? description.description || '' : description || ''}
         />
       )}
     </div>

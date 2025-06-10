@@ -7,6 +7,8 @@ interface FormErrors {
     jerseyType?: string;
     description?: string;
     price?: string;
+    status?: string;
+    salePrice?: string;
     variants?: string;
     size?: string;
     color?: string;
@@ -47,6 +49,16 @@ export const validateForm = (form: any, setErrors: (errors: any) => void) => {
     if (form.price <= 0) {
         newErrors.price = 'Giá phải lớn hơn 0';
         missingFields.push('Giá');
+    }
+    
+    if (!form.status) {
+        newErrors.status = 'Vui lòng chọn trạng thái';
+        missingFields.push('Trạng thái');
+    }
+    
+    if (form.salePrice < 0) {
+        newErrors.salePrice = 'Giá khuyến mãi không được nhỏ hơn 0';
+        missingFields.push('Giá khuyến mãi');
     }
     
     // Kiểm tra size và color thay vì variants

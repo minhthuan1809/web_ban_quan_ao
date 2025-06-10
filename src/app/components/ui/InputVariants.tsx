@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { PlusIcon, PencilIcon, TrashIcon } from "lucide-react";
 import FormatPrice from "@/app/_util/FormatPrice";
+import InputSize from "./inputSize";
+import { Input } from "@nextui-org/react";
+import { NumberInput } from "@tremor/react";
 interface Variant {
   size: string;
   priceAdjustment: number;
@@ -13,7 +16,13 @@ interface Errors {
   stockQuantity?: string;
 }
 
-export default function InputVariants( {variants, setVariants}: {variants: Variant[], setVariants: (variants: Variant[]) => void} ) {
+export default function InputVariants({
+  variants,
+  setVariants,
+}: {
+  variants: Variant[];
+  setVariants: (variants: Variant[]) => void;
+}) {
   const [showModal, setShowModal] = useState(false);
   const [currentVariant, setCurrentVariant] = useState<Variant>({
     size: "",
@@ -29,8 +38,6 @@ export default function InputVariants( {variants, setVariants}: {variants: Varia
     if (!currentVariant.size) {
       newErrors.size = "Vui lòng chọn kích cỡ";
     }
-
-
 
     if (currentVariant.stockQuantity <= 0) {
       newErrors.stockQuantity = "Số lượng phải lớn hơn 0";
@@ -109,7 +116,7 @@ export default function InputVariants( {variants, setVariants}: {variants: Varia
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
                 Size
               </th>
-            
+
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
                 Điều chỉnh giá
               </th>
@@ -125,7 +132,7 @@ export default function InputVariants( {variants, setVariants}: {variants: Varia
             {variants.map((variant, index) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="px-4 py-3">{variant.size}</td>
-               
+
                 <td className="px-4 py-3">
                   <FormatPrice
                     price={variant.priceAdjustment}
@@ -165,7 +172,9 @@ export default function InputVariants( {variants, setVariants}: {variants: Varia
           <div className="bg-white rounded-lg p-6 w-[800px]">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-md font-semibold">
-                {editingIndex !== null ? "Sửa kích cỡ" : "Thêm kích cỡ mới"}
+                {editingIndex !== null
+                  ? "Sửa kích cỡ"
+                  : "Thêm kích cỡ mới và màu "}
               </h3>
               <button
                 onClick={() => {
@@ -180,73 +189,42 @@ export default function InputVariants( {variants, setVariants}: {variants: Varia
 
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="flex flex-col">
-                <label className="mb-2 font-medium">Size</label>
-                <input
-                  type="text"
-                  className={`border rounded px-3 py-2 mb-2 ${
-                    errors.size ? "border-red-500" : ""
-                  }`}
-                  placeholder="Nhập size"
-                  value={currentVariant.size}
-                  onChange={(e) => {
-                    setCurrentVariant({
-                      ...currentVariant,
-                      size: e.target.value,
-                    });
-                    setErrors({ ...errors, size: undefined });
-                  }}
+                <InputSize
+                  setSize={(value) => handleSelectSize(value)}
+                  size={currentVariant.size}
                 />
                 {errors.size && (
                   <span className="text-red-500 text-sm">{errors.size}</span>
                 )}
-
-                <div className="flex flex-wrap gap-2 mt-2 ">
-                  {["S", "M", "L", "XL", "XXL", "3XL", "4XL", "5XL"].map(
-                    (size) => (
-                      <button
-                        key={size}
-                        className={`border rounded px-4 text-sm py-2 ${
-                          currentVariant.size === size
-                            ? "bg-blue-500 text-white"
-                            : "hover:bg-gray-50"
-                        }`}
-                        onClick={() => handleSelectSize(size)}>
-                        {size}
-                      </button>
-                    )
-                  )}
-                </div>
               </div>
 
               <div className="flex flex-col">
-                <label className="mb-2 font-medium">Điều chỉnh giá</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-2 text-gray-500">₫</span>
-                  <input
-                    type="number"
-                    className={`border rounded px-7 py-2 w-full ${
-                      errors.priceAdjustment ? "border-red-500" : ""
-                    }`}
-                    placeholder="Nhập điều chỉnh giá"
-                    value={currentVariant.priceAdjustment}
-                    onChange={(e) => {
-                      setCurrentVariant({
-                        ...currentVariant,
-                        priceAdjustment: Number(e.target.value),
-                      });
-                      setErrors({ ...errors, priceAdjustment: undefined });
-                    }}
-                    min="0"
-                  />
-                </div>
+                <Input
+                  type="number"
+                  placeholder="Nhập giá điều chỉnh"
+                  value={currentVariant.priceAdjustment.toString()}
+                  variant="bordered"
+                  isInvalid={!!errors.priceAdjustment}
+                  errorMessage={errors.priceAdjustment}
+                  classNames={{
+                    label: "font-medium text-foreground",
+                    input: "text-foreground",
+                    inputWrapper: "bg-background"
+                  }}
+                  onChange={(e) => {
+                    setCurrentVariant({
+                      ...currentVariant,
+                      priceAdjustment: Number(e.target.value),
+                    });
+                    setErrors({ ...errors, priceAdjustment: undefined });
+                  }}
+                />
                 {errors.priceAdjustment && (
                   <span className="text-red-500 text-sm">
                     {errors.priceAdjustment}
                   </span>
                 )}
               </div>
-
-              
 
               <div className="flex flex-col">
                 <label className="mb-2 font-medium">Số lượng</label>

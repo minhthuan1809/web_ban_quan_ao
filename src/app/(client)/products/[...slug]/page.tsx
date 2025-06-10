@@ -22,7 +22,7 @@ import ProductCarousel from "@/app/components/category/ProductCarousel";
 import InstructChooseSize from "@/app/(client)/_modal/InstructChooseSize";
 import { CreateCard_API } from "@/app/_service/Card";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
-import { Button, Card, CardBody } from "@nextui-org/react";
+import { Button, Card, CardBody, Chip } from "@nextui-org/react";
 
 export default function ProductDetailPage({
   params,
@@ -50,10 +50,11 @@ export default function ProductDetailPage({
     description: ''
   });
   const [selectedSize, setSelectedSize] = useState("");
+  const [selectedColor, setSelectedColor] = useState<any>(null);
   const [selectedVariant, setSelectedVariant] = useState<any>(null);
   const [quantity, setQuantity] = useState(1);
   const [isOpen, setIsOpen] = useState(false);
-  const [showTeamInfo, setShowTeamInfo] = useState(false);
+  const [showProductInfo, setShowProductInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -64,7 +65,8 @@ export default function ProductDetailPage({
         setProduct(resVariant.data);
         if (resVariant.data?.variants?.length > 0) {
           const firstVariant = resVariant.data.variants[0];
-          setSelectedSize(firstVariant.size);
+          setSelectedSize(firstVariant.size.name);
+          setSelectedColor(firstVariant.color);
           setSelectedVariant(firstVariant);
         }
       } catch (error) {
@@ -78,12 +80,49 @@ export default function ProductDetailPage({
     }
   }, [id]);
 
+  // Group variants by size and color
+  const sizes = React.useMemo(() => {
+    if (!product.variants) return [];
+    const uniqueSizes = new Set();
+    return product.variants
+      .filter((v: any) => {
+        const sizeId = v.size.id;
+        if (uniqueSizes.has(sizeId)) return false;
+        uniqueSizes.add(sizeId);
+        return true;
+      })
+      .map((v: any) => v.size);
+  }, [product.variants]);
+
+  const colors = React.useMemo(() => {
+    if (!product.variants) return [];
+    const uniqueColors = new Set();
+    return product.variants
+      .filter((v: any) => {
+        if (selectedSize && v.size.name !== selectedSize) return false;
+        const colorId = v.color.id;
+        if (uniqueColors.has(colorId)) return false;
+        uniqueColors.add(colorId);
+        return true;
+      })
+      .map((v: any) => v.color);
+  }, [product.variants, selectedSize]);
+
   useEffect(() => {
-    if (product && selectedSize) {
-      const variant = product.variants.find((v: any) => v.size === selectedSize);
+    if (product.variants && selectedSize && selectedColor) {
+      const variant = product.variants.find((v: any) => 
+        v.size.name === selectedSize && v.color.id === selectedColor.id
+      );
       setSelectedVariant(variant);
     }
-  }, [selectedSize, product]);
+  }, [selectedSize, selectedColor, product.variants]);
+
+  // When size changes, update color selection
+  useEffect(() => {
+    if (colors.length > 0 && (!selectedColor || !colors.some((c: any) => c.id === selectedColor.id))) {
+      setSelectedColor(colors[0]);
+    }
+  }, [colors, selectedColor]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price) + "đ";
@@ -100,7 +139,7 @@ export default function ProductDetailPage({
 
   const handleAddToCard = async () => {
     if (!selectedVariant) {
-      toast.error("Vui lòng chọn kích thước");
+      toast.error("Vui lòng chọn kích thước và màu sắc");
       return;
     }
 
@@ -171,6 +210,12 @@ export default function ProductDetailPage({
           <div className="space-y-6">
             {/* Product title and rating */}
             <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Chip color="primary" size="sm" variant="flat">
+                  {product.code}
+                </Chip>
+                <span className="text-sm text-default-500">{product.category.name}</span>
+              </div>
               <h1 className="text-3xl font-bold text-foreground mb-2">
                 {product.name}
               </h1>
@@ -217,11 +262,11 @@ export default function ProductDetailPage({
               </div>
             </div>
 
-            {/* Team Info */}
+            {/* Team/Product Info */}
             <Card 
               className="cursor-pointer" 
               isPressable
-              onPress={() => setShowTeamInfo(!showTeamInfo)}
+              onPress={() => setShowProductInfo(!showProductInfo)}
             >
               <CardBody className="p-3">
                 <div className="flex items-center justify-between">
@@ -230,15 +275,15 @@ export default function ProductDetailPage({
                     <span className="text-sm text-foreground">{product.team.name} - {product.team.league}</span>
                   </div>
                   <ChevronDown 
-                    className={`transition-transform duration-200 text-default-500 ${showTeamInfo ? 'rotate-180' : ''}`}
+                    className={`transition-transform duration-200 text-default-500 ${showProductInfo ? 'rotate-180' : ''}`}
                   />
                 </div>
-                {showTeamInfo && (
+                {showProductInfo && (
                   <div className="mt-4 space-y-2 text-sm text-default-600">
                     <p className="text-foreground font-medium">Thông tin chi tiết về sản phẩm:</p>
                     <ul className="space-y-2">
                       <li>• Mùa giải: {product.season}</li>
-                      <li>• Loại áo: {product.jerseyType}</li>
+                      <li>• Loại sản phẩm: {product.jerseyType}</li>
                       <li>• Chất liệu: {product.material.name}</li>
                       <li>• Danh mục: {product.category.name}</li>
                       <li>• Đội bóng: {product.team.name}</li>
@@ -250,11 +295,11 @@ export default function ProductDetailPage({
               </CardBody>
             </Card>
 
-            {/* Size */}
+            {/* Size Selection */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium text-foreground">
-                  Kích thước: <span className="font-normal">{selectedSize}</span>
+                  Kích thước
                 </span>
                 <Button 
                   size="sm" 
@@ -265,20 +310,58 @@ export default function ProductDetailPage({
                   Hướng dẫn chọn size
                 </Button>
               </div>
-              <div className="flex gap-2">
-                {product.variants.map((variant: any) => (
+              <div className="flex flex-wrap gap-2">
+                {sizes.map((size: any) => (
                   <Button
-                    key={variant.size}
+                    key={size.id}
                     size="sm"
-                    variant={selectedSize === variant.size ? "solid" : "bordered"}
-                    color={selectedSize === variant.size ? "primary" : "default"}
-                    onPress={() => setSelectedSize(variant.size)}
+                    variant={selectedSize === size.name ? "solid" : "bordered"}
+                    color={selectedSize === size.name ? "primary" : "default"}
+                    onPress={() => setSelectedSize(size.name)}
                   >
-                    {variant.size}
+                    {size.name}
                   </Button>
                 ))}
               </div>
             </div>
+
+            {/* Color Selection */}
+            {colors.length > 0 && (
+              <div className="space-y-3">
+                <span className="text-sm font-medium text-foreground">
+                  Màu sắc
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {colors.map((color: any) => (
+                    <Button
+                      key={color.id}
+                      isIconOnly
+                      className={`w-10 h-10 rounded-full p-0.5 ${selectedColor?.id === color.id ? 'ring-2 ring-primary' : ''}`}
+                      style={{ background: color.hexColor }}
+                      onPress={() => setSelectedColor(color)}
+                    >
+                      {selectedColor?.id === color.id && (
+                        <div className="bg-white/30 rounded-full p-1">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M5 12L10 17L20 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </div>
+                      )}
+                    </Button>
+                  ))}
+                </div>
+                {selectedColor && (
+                  <p className="text-sm text-default-600">Đã chọn: {selectedColor.name}</p>
+                )}
+              </div>
+            )}
+
+            {/* Stock Info */}
+            {selectedVariant && (
+              <div className="text-sm text-default-600">
+                <span>Còn lại: <span className="font-medium">{selectedVariant.stockQuantity}</span> sản phẩm</span>
+              </div>
+            )}
 
             {/* Quantity and Add to Cart */}
             <div className="space-y-4">
@@ -301,7 +384,7 @@ export default function ProductDetailPage({
                     size="sm"
                     variant="light"
                     onPress={() => setQuantity(quantity + 1)}
-                    isDisabled={!selectedVariant}
+                    isDisabled={!selectedVariant || quantity >= selectedVariant?.stockQuantity}
                   >
                     <Plus size={16} />
                   </Button>
@@ -330,7 +413,7 @@ export default function ProductDetailPage({
 
               <div className="flex items-center gap-3 text-sm text-default-600">
                 <MessageCircle size={16} className="text-primary" />
-                <span>Chat để được Coolmate tư vấn ngay (8:30 - 22:00)</span>
+                <span>Chat để được tư vấn ngay (8:30 - 22:00)</span>
               </div>
 
               <div className="flex items-center gap-3 text-sm text-default-600">

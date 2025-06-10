@@ -19,7 +19,7 @@ export function middleware(request: NextRequest) {
     }
   }
   const pathAdmin = ['/admin', '/dashboard', '/productAdmin', '/category', '/team', '/material', '/contacts', '/customers'];
-  const pathUser = ['/profile', '/orders', '/wishlist', '/cart', '/checkout', '/payment', '/order-success', '/order-detail'];
+  const pathUser = ['/profile', '/orders', '/wishlist', '/cart', '/checkout', '/payment', '/order-success', '/order-detail', '/history-order'];
   // Nếu không phải admin mà truy cập vào đường dẫn admin thì chuyển đến trang UnauthorizedPage
 
   if (!isAdmin && pathAdmin.some(adminPath => path.includes(adminPath))) {

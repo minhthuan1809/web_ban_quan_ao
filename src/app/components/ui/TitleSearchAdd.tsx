@@ -22,14 +22,16 @@ export default function TitleSearchAdd({ title , onSearch, onAdd }: TitleSearchA
             onChange={(e) => onSearch?.(e.target.value)}
           />
         </div>
+        {title.btn && (
         <Button
           color="primary"
           className="h-[40px] font-medium"
           startContent={<Plus size={18} />}
           onClick={onAdd}
-        >
-          {title.btn}
-        </Button>
+          >
+            {title.btn}
+          </Button>
+        )}
       </div>
     </div>
   )

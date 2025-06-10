@@ -3,7 +3,7 @@
 import { getContacts_API } from '@/app/_service/contact';
 import React, { useEffect, useState } from 'react';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Chip, Tooltip, Button, Modal, ModalContent, ModalHeader, ModalBody, Card, CardBody } from "@nextui-org/react";
-import { Eye, Mail, Send } from "lucide-react";
+import { Eye, Mail, Send, User } from "lucide-react";
 import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 import ModalSentMail from '../_modal/ModalSentMail';
 import { Contact } from './typecontac'; 
@@ -29,8 +29,8 @@ export default function ContactsPage() {
           size: rowsPerPage,
           search: searchValue
           });
-        setContacts(res.data.content);
-        setTotalPages(res.data.totalPages);
+        setContacts(res.content);
+        setTotalPages(res.totalPages);
       } catch (error) { 
         console.error("Lỗi khi tải danh sách liên hệ:", error);
       } finally {
@@ -51,6 +51,19 @@ export default function ContactsPage() {
         return "success";
       case "REJECTED":
         return "danger";
+      default:
+        return "default";
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch(priority) {
+      case "HIGH":
+        return "danger";
+      case "MEDIUM":
+        return "warning";
+      case "LOW":
+        return "success";
       default:
         return "default";
     }
@@ -111,8 +124,11 @@ export default function ContactsPage() {
           <TableColumn>Họ tên</TableColumn>
           <TableColumn>Email</TableColumn>
           <TableColumn>SĐT</TableColumn>
+          <TableColumn>Địa chỉ</TableColumn>
           <TableColumn>Tiêu đề</TableColumn>
+          <TableColumn>Mức độ</TableColumn>
           <TableColumn>Trạng thái</TableColumn>
+          <TableColumn>Người xử lý</TableColumn>
           <TableColumn>Thời gian</TableColumn>
           <TableColumn>Thao tác</TableColumn>
         </TableHeader>
@@ -127,13 +143,30 @@ export default function ContactsPage() {
               <TableCell>{contact.fullName}</TableCell>
               <TableCell>{contact.email}</TableCell>
               <TableCell>{contact.phoneNumber}</TableCell>
-              <TableCell className="max-w-[200px] truncate">{contact.subject}</TableCell>
+              <TableCell className="max-w-[150px] truncate">{contact.address}</TableCell>
+              <TableCell className="max-w-[150px] truncate">{contact.subject}</TableCell>
               <TableCell>
-                <Chip color={getStatusColor(contact.status) as any} variant="flat">
+                <Chip color={getPriorityColor(contact.priority) as any} variant="flat" size="sm">
+                  {contact.priority === "HIGH" ? "Cao" : 
+                   contact.priority === "MEDIUM" ? "Trung bình" : "Thấp"}
+                </Chip>
+              </TableCell>
+              <TableCell>
+                <Chip color={getStatusColor(contact.status) as any} variant="flat" size="sm">
                   {contact.status === "PENDING" ? "Chờ xử lý" : 
                    contact.status === "PROCESSING" ? "Đang xử lý" :
                    contact.status === "RESOLVED" ? "Đã xử lý" : "Từ chối"}
                 </Chip>
+              </TableCell>
+              <TableCell>
+                {contact.assignedToName ? (
+                  <div className="flex items-center gap-1">
+                    <User size={14} />
+                    <span>{contact.assignedToName}</span>
+                  </div>
+                ) : (
+                  <span className="text-gray-400 text-xs">Chưa phân công</span>
+                )}
               </TableCell>
               <TableCell>{formatDate(contact.createdAt)}</TableCell>
               <TableCell>

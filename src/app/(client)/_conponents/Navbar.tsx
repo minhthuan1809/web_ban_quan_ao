@@ -12,7 +12,8 @@ import {
   Package,
   Tag,
   Newspaper,
-  Phone
+  Phone,
+  History
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
@@ -205,6 +206,13 @@ export default function Navbar() {
                         >
                           <Settings size={20} className="text-primary" />
                           <span>Cài đặt tài khoản</span>
+                        </Link>
+                        <Link
+                          href="/history-order"
+                          className="flex items-center space-x-3 px-3 py-2 hover:bg-default-100 rounded-md transition-colors text-foreground"
+                        >
+                          <History size={20} className="text-primary" />
+                          <span>Lịch sử đơn hàng</span>
                         </Link>
                         <Button
                           variant="light"
