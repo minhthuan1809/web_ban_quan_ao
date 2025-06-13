@@ -5,9 +5,9 @@ import React, { useEffect, useState } from 'react';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Chip, Tooltip, Button, Modal, ModalContent, ModalHeader, ModalBody, Card, CardBody } from "@nextui-org/react";
 import { Eye, Mail, Send, User } from "lucide-react";
 import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
-import ModalSentMail from '../_modal/ModalSentMail';
-import { Contact } from './typecontac'; 
-import ModalDetalMail from './ModalDetalMail';
+import ModalSentMail from '../../_modal/ModalSentMail';
+import { Contact } from '../typecontac'; 
+import ModalDetalMail from '../../_modal/ModalDetalMail';
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -106,17 +106,15 @@ export default function ContactsPage() {
       <Table
         aria-label="Bảng danh sách liên hệ"
         bottomContent={
-          <div className="flex w-full justify-center">
-            <Pagination
-              isCompact
-              showControls
-              showShadow
-              color="primary"
-              page={page}
-              total={totalPages}
-              onChange={(page) => setPage(page)}
-            />
-          </div>
+         totalPages < 1 &&   
+         (<div className='flex justify-center mt-4'>
+          <Pagination
+               color="primary"
+               page={page}
+               total={totalPages}
+               onChange={(page) => setPage(page)}
+             />
+          </div>)
         }
       >
         <TableHeader>
@@ -155,7 +153,7 @@ export default function ContactsPage() {
                 <Chip color={getStatusColor(contact.status) as any} variant="flat" size="sm">
                   {contact.status === "PENDING" ? "Chờ xử lý" : 
                    contact.status === "PROCESSING" ? "Đang xử lý" :
-                   contact.status === "RESOLVED" ? "Đã xử lý" : "Từ chối"}
+                   contact.status === "COMPLETED" ? "Đã xử lý" : "Đã đóng"}
                 </Chip>
               </TableCell>
               <TableCell>
@@ -200,7 +198,7 @@ export default function ContactsPage() {
         isOpen={isMailModalOpen}
         onOpenChange={setIsMailModalOpen}
         contactData={selectedContact}
-      />
+      />  
     </div>
   );
 }

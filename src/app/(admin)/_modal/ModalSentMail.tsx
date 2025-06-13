@@ -1,5 +1,5 @@
 'use client';
-import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Textarea, Spinner } from '@nextui-org/react';
+import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Textarea, Spinner, Select, SelectItem } from '@nextui-org/react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { sendMail_API } from '@/app/_service/contact';
@@ -17,8 +17,8 @@ interface Contact {
 
 export default function ModalSentMail({
   isOpen,
-  onOpenChange,
-  contactData
+  onOpenChange, 
+  contactData ,
 }: {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -28,6 +28,7 @@ export default function ModalSentMail({
   const [subject, setSubject] = useState("");
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState("PENDING");
 
   useEffect(() => {
     if (contactData && isOpen) {
@@ -42,6 +43,7 @@ export default function ModalSentMail({
     setEmail("");
     setSubject("");
     setContent("");
+    setStatus("PENDING");
   };
 
   const handleCancel = () => {
@@ -51,7 +53,12 @@ export default function ModalSentMail({
 
   const handleSendMail = async () => {
     try {
-      const res = await sendMail_API(contactData?.id || 0, { email, subject, content });
+      setLoading(true);
+      const res = await sendMail_API(contactData?.id || 0,{
+        "replyMessage": content,  // nội dung email
+        "newStatus": status, // trạng thái mới
+        "sendEmail": true // gửi email
+      });
       if (res.status === 200) {
         toast.success("Gửi email thành công");  
         onOpenChange(false);
@@ -61,6 +68,8 @@ export default function ModalSentMail({
       }
     } catch (error) {
       console.error("Lỗi khi gửi email:", error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -84,20 +93,25 @@ export default function ModalSentMail({
             </ModalHeader>
             <ModalBody>
               <div className="flex flex-col gap-4">
-                <Input
-                  label="Email người nhận"
-                  placeholder="Nhập email người nhận"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                <Select
+                  label="Trạng thái"
+                  placeholder="Chọn trạng thái"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
                   variant="bordered"
                   labelPlacement="outside"
                   classNames={{
                     label: "text-foreground font-medium",
-                    input: "text-foreground",
-                    inputWrapper: "bg-background"
+                    trigger: "bg-background",
+                    value: "text-foreground"
                   }}
                   isRequired
-                />
+                >
+                  <SelectItem key="PENDING" value="PENDING">Chờ xử lý</SelectItem>
+                  <SelectItem key="IN_PROGRESS" value="IN_PROGRESS">Đang xử lý</SelectItem>
+                  <SelectItem key="RESOLVED" value="RESOLVED">Đã giải quyết</SelectItem>
+                  <SelectItem key="CLOSED" value="CLOSED">Đã đóng</SelectItem>
+                </Select>
                 <Input
                   label="Tiêu đề"
                   placeholder="Nhập tiêu đề email"
@@ -142,7 +156,7 @@ export default function ModalSentMail({
               </Button>
               <Button 
                 color="primary" 
-                  onClick={handleSendMail}
+                onClick={handleSendMail}
                 className="font-medium"
                 isLoading={loading}
               >

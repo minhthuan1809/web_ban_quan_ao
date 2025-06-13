@@ -36,3 +36,12 @@ export const updateCoupon_API = async (id: string, data: any) => {
     });
     return res;
 }
+
+export const deleteCoupon_API = async (id: number) => {
+    const res = await axios.delete(`${API_URL}/coupons/${id}`, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+    return res;
+}

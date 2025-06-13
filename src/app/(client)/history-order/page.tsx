@@ -66,9 +66,9 @@ export default function HistoryOrderPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchOrders = async (loading: boolean) => {
       try {
-        setLoading(true);
+        setLoading(loading );
         if (userInfo.id) {
           const res = await getOrderById_API(userInfo.id);
           if (res?.data) {
@@ -82,10 +82,19 @@ export default function HistoryOrderPage() {
         console.error("Lỗi khi lấy dữ liệu đơn hàng:", error);
         setOrders([]);
       } finally {
-        setLoading(false);
+        setLoading(loading );
       }
     };
-    fetchOrders();
+    
+    fetchOrders(true);
+    
+    // Thiết lập interval để gọi API mỗi 2 giây
+    const intervalId = setInterval(() => {
+      fetchOrders(false);
+    }, 2000);
+    
+    // Xóa interval khi component unmount
+    return () => clearInterval(intervalId);
   }, [userInfo.id]);
 
   // Lọc đơn hàng theo trạng thái

@@ -55,3 +55,22 @@ export const getOrderById_API = async (userId: number) => {
     });
     return res;
 }
+
+
+// create order with payment method 6
+export const createOrderWithPaymentMethod6_API = async (amount: number, orderId: number) => {
+    // Lấy token chỉ khi hàm được gọi
+    const { accessToken } = useAuthInfor() || { accessToken: null };
+    
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/vnpay/create-payment?amount=${amount}&orderId=${orderId}`, {
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'          
+        }
+    });
+    return res;
+}
+
+
+
+

@@ -156,6 +156,18 @@ export default function Layout({children}: {children: React.ReactNode}) {
           name: "Liên Hệ",
           href: "/contacts",
           icon: "PhoneCall",
+          submenu: [
+            {
+              name: "Liên Hệ",
+              href: "/contacts/contacts",
+              icon: "PhoneCall",
+            },
+            {
+              name: "Lịch Sử Liên Hệ",
+              href: "/contacts/history",
+              icon: "History",
+            },
+          ],
         },
         {
           name: "Phân Quyền",

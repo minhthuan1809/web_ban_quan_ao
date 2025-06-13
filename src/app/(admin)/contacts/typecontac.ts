@@ -17,14 +17,23 @@ export interface ContactReply {
     address: string;
     subject: string;
     message: string;
-    status: string;
+    status: 'PENDING' | 'PROCESSING' | 'COMPLETED';
     priority: string;
     assignedTo: number;
     assignedToName: string;
     resolvedAt: string;
     createdAt: string;
     updatedAt: string;
-    replies: ContactReply[];
+    histories?: ContactHistory[];
+  }
+  
+  export interface ContactHistory {
+    id: number;
+    contactId: number;
+    status: 'PENDING' | 'PROCESSING' | 'COMPLETED';
+    note: string;
+    createdAt: string;
+    updatedAt: string;
   }
   
   export interface ContactResponse {

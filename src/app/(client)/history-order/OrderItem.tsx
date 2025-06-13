@@ -1,7 +1,8 @@
 "use client"
 import Link from 'next/link';
-import React from 'react';
+import React, { useState } from 'react';
 import { format } from 'date-fns';
+import ModalEvaluate from '../_modal/ModalEvaluate';
 
 interface OrderItemProps {
   order: any;
@@ -9,8 +10,10 @@ interface OrderItemProps {
 }
 
 export default function OrderItem({ order, statusMap }: OrderItemProps) {
+
   const formatDate = (timestamp: number) => format(new Date(timestamp), 'dd/MM/yyyy HH:mm');
   const formatCurrency = (amount: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200">
@@ -99,18 +102,19 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
         </div>
         {order.status === 'DELIVERED' && (
           <div className="mt-4 flex justify-end">
-            <Link 
-              href={`/review?orderId=${order.id}`} 
+            <button 
+              onClick={() => setIsOpen(true)}
               className="inline-flex items-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg transition-colors duration-200"
             >
               <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
               </svg>
               Đánh giá đơn hàng
-            </Link>
+            </button>
           </div>
         )}
       </div>
+        <ModalEvaluate isOpen={isOpen} onClose={() => setIsOpen(false)} orderId={order.id} />
     </div>
   );
 } 

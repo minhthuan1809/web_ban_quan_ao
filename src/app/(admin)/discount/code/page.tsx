@@ -1,5 +1,5 @@
 'use client'
-import { GetAllCode_API } from '@/app/_service/discount';
+import { deleteCoupon_API, GetAllCode_API } from '@/app/_service/discount';
 import React, { useEffect, useState } from 'react'
 import { Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip, Pagination, Spinner } from "@nextui-org/react";
 import { format } from 'date-fns';
@@ -33,17 +33,7 @@ interface Coupon {
   updatedAt: string;
 }
 
-interface PaginatedResponse {
-  content: Coupon[];
-  totalPages: number;
-  totalElements: number;
-  numberOfElements: number;
-  size: number;
-  number: number;
-  first: boolean;
-  last: boolean;
-  empty: boolean;
-}
+
 
 export default function Code() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -53,6 +43,7 @@ export default function Code() {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null);  
+  const [reload, setReload] = useState<boolean>(false);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -70,7 +61,7 @@ export default function Code() {
       }
     };
     fetchData();
-  }, []);
+  }, [reload]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
@@ -84,6 +75,19 @@ export default function Code() {
   const formatDiscountValue = (type: string, value: number) => {
     return type === 'PERCENTAGE' ? `${value}%` : `${value.toLocaleString('vi-VN')}đ`;
   };
+
+  const handleDelete = async (id: number) => {
+    if  (!confirm("bạn có chắc chắn muốn xóa mã giảm giá này không?")) return;
+    try {
+      const res = await deleteCoupon_API(id);
+      if (res.status === 200) {
+        toast.success("Xóa mã giảm giá thành công");
+        setReload(!reload);
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa mã giảm giá:", error);
+    }
+  }
 
   return (
     <div className="p-6">
@@ -169,6 +173,7 @@ export default function Code() {
                         size="sm" 
                         isIconOnly 
                         className="bg-red-500 text-white rounded-md"
+                        onPress={() => handleDelete(coupon.id)}
                       >
                         <Trash size={18} />
                       </Button>
@@ -197,6 +202,7 @@ export default function Code() {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         initialData={editCoupon}
+        onSuccess={() => setReload(!reload)}
       />
     </div>
   )

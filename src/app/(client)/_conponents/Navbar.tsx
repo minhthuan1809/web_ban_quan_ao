@@ -68,9 +68,7 @@ export default function Navbar() {
         if (res.role.name.trim().toLowerCase() === 'admin') {
           router.push("/admin");
         }
-        else {
-          router.push("/");
-        }
+      
         setUser_Zustand(res);
       }
       else {

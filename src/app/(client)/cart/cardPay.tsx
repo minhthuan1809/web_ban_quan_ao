@@ -4,10 +4,10 @@ import InputAddress from "@/app/components/ui/InputAddress";
 import { Input, Textarea } from "@nextui-org/react";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { Gift, User, MapPin, CreditCard, Wallet, Phone, FileText } from "lucide-react";
-import { createOrder_API } from "@/app/_service/Oder";
+import { createOrder_API, createOrderWithPaymentMethod6_API } from "@/app/_service/Oder";
 import { toast } from "react-toastify";
 import InputPhone from "@/app/components/ui/InputPhone";
-import router from "next/router";
+import { useRouter } from "next/navigation";
 
 interface CardPayProps {
   selectedItems: number[];
@@ -50,6 +50,8 @@ export default function CardPay({
     return calculateTotal() + feeShip - discount;
   };
 
+  const router = useRouter();
+
 const handlePayment = async () => {
   
   const orderItems = cartData.cartItems.filter((item: any) => 
@@ -73,19 +75,47 @@ const handlePayment = async () => {
     "items": orderItems
   };
 
-  
-  try {
-    const res = await createOrder_API(orderData , userInfo?.id);
-    if (res.status === 200) {
-      toast.success("Đặt hàng thành công");
-      router.push("/history-order"); 
+
+  if(paymentMethod === 6 ) {
+    const res = await createOrderWithPaymentMethod6_API(calculateTotalAfterDiscount(), userInfo?.id);
+    console.log(res);
+    if(res.status === 200) {
+      try {
+        const res = await createOrder_API(orderData , userInfo?.id);
+        if (res.status === 200) {
+          router.push(res.data); 
+        } else {
+          toast.error("Có lỗi xảy ra khi đặt hàng");
+        }
+      } catch (error) {
+        console.error("Lỗi đặt hàng:", error);
+        toast.error("Có lỗi xảy ra khi đặt hàng");
+      }
     } else {
       toast.error("Có lỗi xảy ra khi đặt hàng");
     }
-  } catch (error) {
-    console.error("Lỗi đặt hàng:", error);
-    toast.error("Có lỗi xảy ra khi đặt hàng");
+  } else {
+    try {
+      const res = await createOrder_API(orderData , userInfo?.id);
+      if (res.status === 200) {
+        toast.success("Đặt hàng thành công");
+        router.push("/history-order"); 
+      } else {
+        toast.error("Có lỗi xảy ra khi đặt hàng");
+      }
+    } catch (error) {
+      console.error("Lỗi đặt hàng:", error);
+      toast.error("Có lỗi xảy ra khi đặt hàng");
+    }
   }
+
+
+
+
+  
+
+  
+  
 }
 
   return (
