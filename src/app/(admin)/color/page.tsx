@@ -9,6 +9,7 @@ import RenderTable from '../_conponents/RenderTable'
 import { addColor_API, DeleteColor_API, GetAllColor_API, updateColor_API } from '@/app/_service/color'
 import Modal_addEditColor from './Modal_addEditColor'
 import { EditIcon, PencilIcon, TrashIcon } from 'lucide-react'
+import showConfirmDialog from '@/app/_util/Sweetalert2'
 
 interface ColorData {
   id: number;
@@ -93,21 +94,31 @@ export default function page() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa màu sắc này không?')) return
-    try {
-      setLoadingBtn(true)
-      const res = await DeleteColor_API(id, accessToken)
-      if (res.status === 204 ) {
-        toast.success('Xóa màu sắc thành công')
-        fetchData()
-      } else {
-        toast.error('Xóa màu sắc thất bại')
+    const result = await showConfirmDialog({
+      title: 'Xác nhận xóa?',
+      text: `Bạn có chắc chắn muốn xóa màu sắc này?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy'
+    })
+    if (result.isConfirmed) {
+            try {
+        setLoadingBtn(true)
+        const res = await DeleteColor_API(id, accessToken)
+        if (res.status === 204 ) {
+          toast.success('Xóa màu sắc thành công')
+          fetchData()
+        } else {
+          toast.error('Xóa màu sắc thất bại')
+        }
+      } catch (error: any) {
+        toast.error(error.message || 'Xóa màu sắc thất bại')
+      } finally {
+        setLoadingBtn(false)
       }
-    } catch (error: any) {
-      toast.error(error.message || 'Xóa màu sắc thất bại')
-    } finally {
-      setLoadingBtn(false)
     }
+   
   }     
 
   const handleEdit = async (item: ColorData) => {

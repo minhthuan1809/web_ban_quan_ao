@@ -9,6 +9,7 @@ import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 import Loading from '@/app/_util/Loading';
 import { toast } from 'react-toastify';
 import ModalAddEditDiscount from './ModalAddEditDiscount';
+import showConfirmDialog from '@/app/_util/Sweetalert2';
   
 interface Coupon {
   id: number;
@@ -77,7 +78,15 @@ export default function Code() {
   };
 
   const handleDelete = async (id: number) => {
-    if  (!confirm("bạn có chắc chắn muốn xóa mã giảm giá này không?")) return;
+    const result = await showConfirmDialog({
+      title: 'Xác nhận xóa?',
+      text: `Bạn có chắc chắn muốn xóa mã giảm giá này?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy'
+    })  
+    if (result.isConfirmed) {
     try {
       const res = await deleteCoupon_API(id);
       if (res.status === 200) {
@@ -85,7 +94,8 @@ export default function Code() {
         setReload(!reload);
       }
     } catch (error) {
-      console.error("Lỗi khi xóa mã giảm giá:", error);
+        console.error("Lỗi khi xóa mã giảm giá:", error);
+      }
     }
   }
 

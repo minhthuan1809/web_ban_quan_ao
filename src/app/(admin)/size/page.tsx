@@ -7,6 +7,7 @@ import ModalAdd_Edit_Category_Material from '../_modal/ModalAdd_Edit_Category_Ma
 import useAuthInfor from '@/app/customHooks/AuthInfor'
 import { toast } from 'react-toastify'
 import RenderTable from '../_conponents/RenderTable'
+import showConfirmDialog from '@/app/_util/Sweetalert2'
 
 interface SizeData {
   id: number;
@@ -88,8 +89,16 @@ export default function page() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa kích cỡ này không?')) return
-    try {
+    const result = await showConfirmDialog({
+      title: 'Xác nhận xóa?',
+      text: `Bạn có chắc chắn muốn xóa kích cỡ này?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy'
+    })
+    if (result.isConfirmed) {
+        try {
       setLoadingBtn(true)
       const res = await DeleteSize_API(id, accessToken)
       if (res.status === 204 ) {
@@ -102,6 +111,7 @@ export default function page() {
       toast.error(error.message || 'Xóa kích cỡ thất bại')
     } finally {
       setLoadingBtn(false)
+    }
     }
   }     
 
@@ -183,4 +193,4 @@ export default function page() {
       />
     </div>
   )
-}
+} 

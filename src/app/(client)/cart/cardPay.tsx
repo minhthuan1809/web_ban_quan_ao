@@ -8,6 +8,7 @@ import { createOrder_API, createOrderWithPaymentMethod6_API } from "@/app/_servi
 import { toast } from "react-toastify";
 import InputPhone from "@/app/components/ui/InputPhone";
 import { useRouter } from "next/navigation";
+import showConfirmDialog from "@/app/_util/Sweetalert2";
 
 interface CardPayProps {
   selectedItems: number[];
@@ -53,6 +54,15 @@ export default function CardPay({
   const router = useRouter();
 
 const handlePayment = async () => {
+  const result = await showConfirmDialog({
+    title: 'Xác nhận đặt hàng?',
+    text: `Bạn có chắc chắn muốn đặt hàng?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Đặt hàng',
+    cancelButtonText: 'Hủy'
+  });
+  if (result.isConfirmed) {
   
   const orderItems = cartData.cartItems.filter((item: any) => 
     selectedItems.includes(item.id)
@@ -62,6 +72,7 @@ const handlePayment = async () => {
   }));
 
   const orderData = {
+    "cartId": cartData.id,
     "paymentMethodId": paymentMethod,
     "customerName": name,
     "customerEmail": userInfo?.email || "",
@@ -105,7 +116,8 @@ const handlePayment = async () => {
       }
     } catch (error) {
       console.error("Lỗi đặt hàng:", error);
-      toast.error("Có lỗi xảy ra khi đặt hàng");
+        toast.error("Có lỗi xảy ra khi đặt hàng");
+      }
     }
   }
 

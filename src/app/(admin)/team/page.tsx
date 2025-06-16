@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
 import ModalAddEditTeam from "./ModalAddEditTeam";
 import TitleSearchAdd from "@/app/components/ui/TitleSearchAdd";
+import showConfirmDialog from "@/app/_util/Sweetalert2";
 
 export default function Team() {
   const [teams, setTeams] = useState([]);
@@ -56,6 +57,15 @@ export default function Team() {
   }, [fetchTeams]);
 
   const handleDeleteTeam = async (id: string) => {
+    const result = await showConfirmDialog({
+      title: 'Xác nhận xóa?',
+      text: `Bạn có chắc chắn muốn xóa đội bóng này?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy'
+    })  
+    if (result.isConfirmed) {
     try {
       setLoadingBtn(true);
       const response: any = await deleteTeam_API(id, accessToken);
@@ -68,7 +78,8 @@ export default function Team() {
     } catch (error) {
       toast.error("Có lỗi xảy ra khi xóa đội bóng");
     } finally {
-      setLoadingBtn(false);
+          setLoadingBtn(false);
+      }
     }
   }
 

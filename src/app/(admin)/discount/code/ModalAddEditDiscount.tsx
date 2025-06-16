@@ -12,9 +12,11 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
   const [isLoading, setIsLoading] = useState(false)
   const { accessToken } = useAuthInfor()
   
+  const [code, setCode] = useState('')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [discountValue, setDiscountValue] = useState(0)
+  const [discountType, setDiscountType] = useState('PERCENTAGE')
+  const [discountValue, setDiscountValue] = useState(10)
   const [minimumAmount, setMinimumAmount] = useState(0)
   const [maximumDiscount, setMaximumDiscount] = useState(0)
   const [maxUsageCount, setMaxUsageCount] = useState(1)
@@ -23,18 +25,28 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
   const [userSpecific, setUserSpecific] = useState(false)
   const [userIds, setUserIds] = useState<number[]>([])
 
+  const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCode(e.target.value.toUpperCase())
+  }
+
   const handleSubmit = async () => {
     try {
       setIsLoading(true)
       
       // Chuyển đổi date string thành ISO format
-      const validFromISO = new Date(validFrom).toISOString()
-      const validToISO = new Date(validTo).toISOString()
+      const validFromDate = new Date(validFrom)
+      validFromDate.setHours(0, 0, 0, 0)
+      const validFromISO = validFromDate.toISOString()
+      
+      const validToDate = new Date(validTo)
+      validToDate.setHours(23, 59, 59, 999)
+      const validToISO = validToDate.toISOString()
       
       const data = {
+        "code": code,
         "name": name,
         "description": description,
-        "discountType": ["PERCENTAGE"],
+        "discountType": discountType,
         "discountValue": discountValue,
         "minimumAmount": minimumAmount,
         "maximumDiscount": maximumDiscount,
@@ -45,7 +57,6 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
         "userIds": userIds
       }
 
-      console.log(data)
       
       let res;
       if (isEditing) {
@@ -75,8 +86,10 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
   }
 
   const resetForm = () => {
+    setCode('')
     setName('')
     setDescription('')
+    setDiscountType('PERCENTAGE')
     setDiscountValue(0)
     setMinimumAmount(0)
     setMaximumDiscount(0)
@@ -89,8 +102,10 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
 
   useEffect(() => {
     if (initialData) {
+      setCode(initialData.code || '')
       setName(initialData.name || '')
       setDescription(initialData.description || '')
+      setDiscountType(initialData.discountType || 'PERCENTAGE')
       setDiscountValue(initialData.discountValue || 0)
       setMinimumAmount(initialData.minimumAmount || 0)
       setMaximumDiscount(initialData.maximumDiscount || 0)
@@ -105,11 +120,6 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
   }, [initialData, isOpen])
 
 
-  const handleFormSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    handleSubmit()
-  }
-
   return (
     <Modal 
       isOpen={isOpen} 
@@ -120,7 +130,6 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
       backdrop="blur"
     >
       <ModalContent>
-        <form onSubmit={handleFormSubmit}>
           <ModalHeader className="flex flex-col gap-1">
             <h2 className="text-xl font-semibold">
               {isEditing ? 'Sửa mã giảm giá' : 'Thêm mã giảm giá mới'}
@@ -132,6 +141,16 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
               {/* Cột trái */}
               <div className="flex flex-col gap-4">
               
+                <Input
+                  label="Mã giảm giá"
+                  value={code}
+                  onChange={handleCodeChange}
+                  placeholder="Nhập mã giảm giá (viết hoa)"
+                  variant="bordered"
+                  labelPlacement="outside"
+                  isRequired
+                  className="uppercase"
+                />
                 
                 <Input
                   label="Tên mã giảm giá"
@@ -152,23 +171,35 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
                   labelPlacement="outside"
                   minRows={3}
                 />
-         
                 
-       
+                <Select
+                  label="Loại giảm giá"
+                  placeholder="Chọn loại giảm giá"
+                  value={discountType}
+                  onChange={(e) => setDiscountType(e.target.value)}
+                  variant="bordered"
+                  labelPlacement="outside"
+                  isRequired
+                >
+                  <SelectItem key="PERCENTAGE" value="PERCENTAGE">Phần trăm (%)</SelectItem>
+                  <SelectItem key="FIXED_AMOUNT" value="FIXED_AMOUNT">Số tiền cố định (VNĐ)</SelectItem>
+                </Select>
               </div>
               
               {/* Cột phải */}
               <div className="flex flex-col gap-4">
                 <Input
                   type="number"
-                  label="Giá trị đơn hàng tối thiểu"
-                  value={minimumAmount.toString()}
-                  onChange={(e) => setMinimumAmount(parseFloat(e.target.value) || 0)}
-                  placeholder="0 = không giới hạn"
+                  label="Giá trị giảm giá"
+                  value={discountValue.toString()}
+                  onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
+                  placeholder={discountType === 'PERCENTAGE' ? "Nhập % giảm giá" : "Nhập số tiền giảm giá"}
                   variant="bordered"
                   labelPlacement="outside"
                   endContent={
-                    <span className="text-small text-default-400">VNĐ</span>
+                    <span className="text-small text-default-400">
+                      {discountType === 'PERCENTAGE' ? '%' : 'VNĐ'}
+                    </span>
                   }
                 />
                 
@@ -177,6 +208,18 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
                   label="Giảm giá tối đa"
                   value={maximumDiscount.toString()}
                   onChange={(e) => setMaximumDiscount(parseFloat(e.target.value) || 0)}
+                  placeholder="0 = không giới hạn"
+                  variant="bordered"
+                  labelPlacement="outside"
+                  endContent={
+                    <span className="text-small text-default-400">VNĐ</span>
+                  }
+                />
+                <Input
+                  type="number"
+                  label="Số tiền để áp dụng mã giảm giá"
+                  value={minimumAmount.toString()}
+                  onChange={(e) => setMinimumAmount(parseFloat(e.target.value) || 0)}
                   placeholder="0 = không giới hạn"
                   variant="bordered"
                   labelPlacement="outside"
@@ -268,14 +311,13 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
             </Button>
             <Button 
               color="primary" 
-              type="submit" 
+              onPress={handleSubmit}
               isLoading={isLoading}
               className="font-medium"
             >
               {isEditing ? 'Cập nhật' : 'Tạo mã giảm giá'}
             </Button>
           </ModalFooter>
-        </form>
       </ModalContent>
     </Modal>
   )

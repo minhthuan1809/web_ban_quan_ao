@@ -100,7 +100,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
             </div>
           </div>
         </div>
-        {order.status === 'DELIVERED' && (
+        {!order.isReviewed  && (
           <div className="mt-4 flex justify-end">
             <button 
               onClick={() => setIsOpen(true)}

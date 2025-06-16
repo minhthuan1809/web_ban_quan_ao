@@ -11,6 +11,7 @@ import {
 } from "@nextui-org/react";
 import { Pencil, Trash2 } from "lucide-react";
 import React from "react";
+import showConfirmDialog from "@/app/_util/Sweetalert2";
 
 interface RenderTableProps {
   data: Array<{
@@ -69,14 +70,26 @@ export default function RenderTable({
                     startContent={<Pencil size={16} />}
                     onPress={() => handleEdit(item)}
                     isDisabled={item.isDeleted}
-                  ></Button>
+                    />
                   <Button
                     size="sm"
                     className="bg-red-500 text-white"
                     startContent={<Trash2 size={16} />}
-                    onPress={() => handleDelete(item.id.toString())}
+                    onPress={async () => {
+                      const result = await showConfirmDialog({  
+                        title: 'Xác nhận xóa?',
+                        text: `Bạn có chắc chắn muốn xóa ${title} "${item.name}"?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Xóa',
+                        cancelButtonText: 'Hủy'
+                      });   
+                      if (result.isConfirmed) { 
+                        handleDelete(item.id.toString());
+                      }
+                    }}
                     isDisabled={item.isDeleted}
-                  ></Button>
+                  />
                 </div>
               </TableCell>
             </TableRow>

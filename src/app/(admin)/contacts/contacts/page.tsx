@@ -95,13 +95,9 @@ export default function ContactsPage() {
         title={{
           title: "Liên hệ",
           search: "Tìm kiếm liên hệ...",
-          btn: "Gửi email"
         }}
         onSearch={(value) => setSearchValue(value)}
-        onAdd={() => {
-          setSelectedContact(null);
-          setIsMailModalOpen(true);
-        }}  
+ 
       />  
       <Table
         aria-label="Bảng danh sách liên hệ"

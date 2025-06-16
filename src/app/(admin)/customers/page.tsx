@@ -11,6 +11,7 @@ import { User, UserPlus, Edit3, Trash2, Users } from 'lucide-react';
 import Loading from '@/app/_util/Loading';
 import { toast } from 'react-toastify';
 import ModalAddUse from './ModalAddUse';
+import showConfirmDialog from '@/app/_util/Sweetalert2';
 
 interface User {
   id: number;
@@ -107,7 +108,15 @@ export default function PageUser() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa người dùng này?')) return;
+    const result = await showConfirmDialog({
+      title: 'Xác nhận xóa?',
+      text: `Bạn có chắc chắn muốn xóa người dùng này?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy'
+    })      
+    if (result.isConfirmed) {
     setLoading(true);
     try {
       await deleteUser_API(id, accessToken);
@@ -116,7 +125,8 @@ export default function PageUser() {
     } catch (error) {
       toast.error('Xóa người dùng thất bại!');
     } finally {
-      setLoading(false);
+        setLoading(false);
+      }
     }
   }
 

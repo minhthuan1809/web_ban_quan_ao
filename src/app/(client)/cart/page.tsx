@@ -11,6 +11,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@nextui-org/react';
 import { ShoppingBag } from 'lucide-react';
+import showConfirmDialog from '@/app/_util/Sweetalert2';
 
 export default function Page() {
     const { userInfo } = useAuthInfor();
@@ -55,7 +56,15 @@ export default function Page() {
     }
 
     const handleDeleteItem = async (itemId: number) => {
-        if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này không?")) {
+        const result = await showConfirmDialog({
+            title: 'Xác nhận xóa?',
+            text: `Bạn có chắc chắn muốn xóa sản phẩm này?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xóa',
+            cancelButtonText: 'Hủy'
+        })  
+        if (result.isConfirmed) {
         try {
             await DeleteCard_API(itemId.toString());
             setCartItems(cartItems.filter(item => item.id !== itemId));

@@ -77,7 +77,7 @@ export default function Page() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
   const [showStatusDropdown, setShowStatusDropdown] = useState<number | null>(null);
-  const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
   const fetchOrders = useCallback(async () => {
     try {

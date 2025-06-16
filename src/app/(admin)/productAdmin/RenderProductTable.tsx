@@ -8,6 +8,7 @@ import RenderTextEditer from '@/app/_util/ui/RenderTextEditer';
 import { Pagination, Input, Button, Badge } from '@nextui-org/react';
 import Modadescription from '../_modal/Modadescription';
 import { DiscountPrice } from '@/app/_util/DiscountPrice';
+import showConfirmDialog from '@/app/_util/Sweetalert2';
 
 interface RenderProductTableProps {
   products: any[];
@@ -227,7 +228,20 @@ export default function RenderProductTable({
                         className="bg-red-500 text-white rounded-md min-w-10 h-10 flex items-center justify-center"
                         isIconOnly
                         size="sm"
-                        onClick={() => handleDeleteProduct(product)}
+                        onClick={async () => {
+                          const result = await showConfirmDialog({
+                            title: 'Xác nhận xóa?',
+                            text: `Bạn có chắc chắn muốn xóa sản phẩm "${product.name}"?`,
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonText: 'Xóa',
+                            cancelButtonText: 'Hủy'
+                          });
+                          
+                          if (result.isConfirmed) {
+                            handleDeleteProduct(product);
+                          }
+                        }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
