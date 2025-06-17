@@ -24,6 +24,7 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
 
   useEffect(() => {
     setMounted(true);
+    fetchSize();
   }, []);
 
   const fetchSize = useCallback(async () => {
@@ -43,23 +44,10 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
   }, [searchTerm, accessToken]);
 
   useEffect(() => {
-    if (mounted) {
-      const debounceTimer = setTimeout(() => {
-        fetchSize();
-      }, 500);
-
-      return () => clearTimeout(debounceTimer);
-    }
-  }, [fetchSize, mounted]);
-
-  useEffect(() => {
     if (mounted && size) {
       const selectedSize = sizeList.find(item => item.id.toString() === size);
       if (selectedSize) {
         setSearchTerm(selectedSize.name);
-      } else {
-        setSearchTerm('');
-        setSize('');
       }
     }
   }, [size, sizeList, mounted]);

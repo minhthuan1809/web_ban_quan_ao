@@ -40,7 +40,6 @@ export default function DashboardPage() {
       try {
         setLoading(true)
         const data = await getDashboardStats(accessToken)
-        console.log("data", data)
         setStats(data)
       } catch (error) {
         console.error('Error fetching dashboard stats:', error)

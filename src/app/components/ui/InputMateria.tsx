@@ -54,15 +54,19 @@ export default function InputMateria({ setMaterial, material }: { setMaterial: (
 
   useEffect(() => {
     if (mounted && material) {
-      const selectedMaterial = materialList.find(item => item.id.toString() === material);
+      const selectedMaterial = materialList.find(item => item.id.toString() === material.toString());
       if (selectedMaterial) {
         setSearchTerm(selectedMaterial.name);
-      } else {
-        setSearchTerm('');
-        setMaterial('');
       }
     }
   }, [material, materialList, mounted]);
+
+  // Thêm useEffect mới để fetch dữ liệu ngay khi component mount nếu có material
+  useEffect(() => {
+    if (mounted && material && materialList.length === 0) {
+      fetchMaterial();
+    }
+  }, [mounted, material]);
 
   if (!mounted) {
     return null;

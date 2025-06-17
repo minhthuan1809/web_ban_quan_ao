@@ -46,3 +46,14 @@ export const updateSize_API = async (id: string, name: string, accessToken?: str
     });
     return res;
 }
+
+// check size is used in product
+export const checkSizeIsUsedInProduct_API = async (id: string, accessToken?: string) => {
+    const res = await axios.get(`${API_URL}/sizes/${id}`, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
+        },
+    });
+    return res;
+}

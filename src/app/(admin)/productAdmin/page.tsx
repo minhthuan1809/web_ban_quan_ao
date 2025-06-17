@@ -25,7 +25,6 @@ export default function ProductPage() {
       setLoading(true);
       try {
         const response = await getProducts_API(searchTerm, page, limit, {})
-        console.log("response", response)
         
         if (response.status === 200) {
           // Đảm bảo dữ liệu được xử lý đúng cách trước khi hiển thị

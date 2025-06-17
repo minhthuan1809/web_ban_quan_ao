@@ -89,7 +89,6 @@ const handlePayment = async () => {
 
   if(paymentMethod === 6 ) {
     const res = await createOrderWithPaymentMethod6_API(calculateTotalAfterDiscount(), userInfo?.id);
-    console.log(res);
     if(res.status === 200) {
       try {
         const res = await createOrder_API(orderData , userInfo?.id);

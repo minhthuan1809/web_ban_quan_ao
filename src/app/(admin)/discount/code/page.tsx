@@ -45,12 +45,23 @@ export default function Code() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null);  
   const [reload, setReload] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (editCoupon) {
+      setIsOpen(true);
+    }
+  }, [editCoupon]);
+
+  const handleCloseModal = () => {
+    setIsOpen(false);
+    setEditCoupon(null);
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
         const res = await GetAllCode_API(searchQuery , page);
-        console.log(res);
         if (res && res.content) {
           setCoupons(res.content);
           setTotal(res.totalPages || 1);
@@ -109,7 +120,8 @@ export default function Code() {
           }}
             onSearch={(value) => setSearchQuery(value)}
             onAdd={() => {
-              setIsOpen(true)
+              setEditCoupon(null);
+              setIsOpen(true);
             }}
         />
 
@@ -208,11 +220,13 @@ export default function Code() {
           )}
         </>
       )}
-      <ModalAddEditDiscount
+      <ModalAddEditDiscount 
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={handleCloseModal}
         initialData={editCoupon}
-        onSuccess={() => setReload(!reload)}
+        onSuccess={() => {
+          setReload(!reload);
+        }}
       />
     </div>
   )

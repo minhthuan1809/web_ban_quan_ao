@@ -50,3 +50,14 @@ export const updateColor_API = async (id: string, name: string, code: string, ac
     });
     return res;
 }
+
+// check color is used in product
+export const checkColorIsUsedInProduct_API = async (id: string, accessToken?: string) => {
+    const res = await axios.get(`${API_URL}/colors/${id}`, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
+        },
+    });
+    return res;
+}

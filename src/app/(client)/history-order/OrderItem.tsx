@@ -9,7 +9,10 @@ interface OrderItemProps {
   statusMap: Record<string, { label: string; color: string }>;
 }
 
+
+
 export default function OrderItem({ order, statusMap }: OrderItemProps) {
+
 
   const formatDate = (timestamp: number) => format(new Date(timestamp), 'dd/MM/yyyy HH:mm');
   const formatCurrency = (amount: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -100,7 +103,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
             </div>
           </div>
         </div>
-        {!order.isReviewed  && (
+        {(!order.isReviewed && order.status.toUpperCase().trim() === 'DELIVERED')  && (
           <div className="mt-4 flex justify-end">
             <button 
               onClick={() => setIsOpen(true)}

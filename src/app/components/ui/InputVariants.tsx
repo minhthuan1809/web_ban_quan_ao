@@ -1,36 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { PlusIcon, PencilIcon, TrashIcon } from "lucide-react";
 import FormatPrice from "@/app/_util/FormatPrice";
 import InputSize from "./inputSize";
-import { Input } from "@nextui-org/react";
+import { Checkbox, Input } from "@nextui-org/react";
 import { NumberInput } from "@tremor/react";
+import InputColor from "./InputColor";
+import { GetAllColor_API } from "@/app/_service/color";
+import useAuthInfor from "@/app/customHooks/AuthInfor";
+import { toast } from "react-toastify";
+
 interface Variant {
   size: string;
   priceAdjustment: number;
   stockQuantity: number;
+  color: string[];
+  useBasePrice?: boolean;
 }
 
 interface Errors {
   size?: string;
   priceAdjustment?: string;
   stockQuantity?: string;
+  color?: string;
+}
+
+interface Color {
+  id: number;
+  name: string;
+  hexColor: string;
 }
 
 export default function InputVariants({
   variants,
   setVariants,
+  basePrice = 0
 }: {
   variants: Variant[];
   setVariants: (variants: Variant[]) => void;
+  basePrice: number;
 }) {
+
+  
   const [showModal, setShowModal] = useState(false);
   const [currentVariant, setCurrentVariant] = useState<Variant>({
     size: "",
     priceAdjustment: 0,
     stockQuantity: 0,
+    color: [],
+    useBasePrice: false
   });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [errors, setErrors] = useState<Errors>({});
+  const [colorList, setColorList] = useState<Color[]>([]);
+  const [loading, setLoading] = useState(false);
+  const { accessToken } = useAuthInfor();
+
+  const fetchColors = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await GetAllColor_API("", 1, accessToken);
+      if (res && res.data) {
+        setColorList(res.data);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Không thể tải danh sách màu sắc");
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    fetchColors();
+  }, [fetchColors]);
 
   const validateForm = () => {
     const newErrors: Errors = {};
@@ -45,6 +86,10 @@ export default function InputVariants({
 
     if (currentVariant.priceAdjustment <= 0) {
       newErrors.priceAdjustment = "Điều chỉnh giá phải lớn hơn 0";
+    }
+
+    if (!currentVariant.color || currentVariant.color.length === 0) {
+      newErrors.color = "Vui lòng chọn ít nhất một màu";
     }
 
     setErrors(newErrors);
@@ -68,12 +113,18 @@ export default function InputVariants({
       size: "",
       priceAdjustment: 0,
       stockQuantity: 0,
+      color: [],
+      useBasePrice: false
     });
     setErrors({});
   };
 
   const handleEdit = (index: number) => {
-    setCurrentVariant(variants[index]);
+    const variantToEdit = variants[index];
+    setCurrentVariant({
+      ...variantToEdit,
+      size: variantToEdit.size.toString()
+    });
     setEditingIndex(index);
     setShowModal(true);
     setErrors({});
@@ -89,6 +140,17 @@ export default function InputVariants({
     setErrors({ ...errors, size: undefined });
   };
 
+  const handleSelectColor = (color: string[]) => {
+    setCurrentVariant({ ...currentVariant, color: color });
+    setErrors({ ...errors, color: undefined });
+  };
+
+  // Hàm để lấy thông tin màu từ ID
+  const getColorInfo = (colorId: string) => {
+    const color = colorList.find(c => c.id.toString() === colorId);
+    return color || null;
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -101,6 +163,8 @@ export default function InputVariants({
               size: "",
               priceAdjustment: 0,
               stockQuantity: 0,
+              color: [],
+              useBasePrice: false
             });
             setErrors({});
             setShowModal(true);
@@ -116,7 +180,9 @@ export default function InputVariants({
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
                 Size
               </th>
-
+              <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
+                Màu sắc
+              </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">
                 Điều chỉnh giá
               </th>
@@ -132,7 +198,31 @@ export default function InputVariants({
             {variants.map((variant, index) => (
               <tr key={index} className="hover:bg-gray-50">
                 <td className="px-4 py-3">{variant.size}</td>
-
+                <td className="px-4 py-3">
+                  <div className="flex gap-1">
+                    {variant.color && variant.color.map((colorId, idx) => {
+                      const colorInfo = getColorInfo(colorId);
+                      return (
+                        <div key={idx} className="flex items-center gap-1">
+                          {colorInfo ? (
+                            <>
+                              <div 
+                                className="w-3 h-3 rounded-full" 
+                                style={{ backgroundColor: colorInfo.hexColor }}
+                              ></div>
+                              <span className="text-xs">{colorInfo.name}</span>
+                            </>
+                          ) : (
+                            <span className="text-xs">{colorId}</span>
+                          )}
+                        </div>
+                      );
+                    })}
+                    {(!variant.color || variant.color.length === 0) && (
+                      <span className="text-gray-400 text-xs">Chưa chọn màu</span>
+                    )}
+                  </div>
+                </td>
                 <td className="px-4 py-3">
                   <FormatPrice
                     price={variant.priceAdjustment}
@@ -201,9 +291,12 @@ export default function InputVariants({
               <div className="flex flex-col">
                 <Input
                   type="number"
+                  label="Điều chỉnh giá"
                   placeholder="Nhập giá điều chỉnh"
                   value={currentVariant.priceAdjustment.toString()}
                   variant="bordered"
+                  labelPlacement="outside"
+                  size="lg"
                   isInvalid={!!errors.priceAdjustment}
                   errorMessage={errors.priceAdjustment}
                   classNames={{
@@ -215,26 +308,42 @@ export default function InputVariants({
                     setCurrentVariant({
                       ...currentVariant,
                       priceAdjustment: Number(e.target.value),
+                      useBasePrice: false
                     });
                     setErrors({ ...errors, priceAdjustment: undefined });
                   }}
                 />
-                {errors.priceAdjustment && (
-                  <span className="text-red-500 text-sm">
-                    {errors.priceAdjustment}
-                  </span>
-                )}
+                <div className="flex items-center gap-2 mt-2">
+                  <Checkbox
+                    isSelected={currentVariant.useBasePrice}
+                    onChange={(e) => {
+                      setCurrentVariant({ 
+                        ...currentVariant, 
+                        useBasePrice: e.target.checked,
+                        priceAdjustment: e.target.checked ? basePrice : 0 
+                      });
+                    }}
+                  />
+                  <span className="text-sm">Theo giá gốc ({basePrice.toLocaleString('vi-VN')}đ)</span>
+                </div>
               </div>
 
               <div className="flex flex-col">
-                <label className="mb-2 font-medium">Số lượng</label>
-                <input
+                <Input
                   type="number"
-                  className={`border rounded px-3 py-2 ${
-                    errors.stockQuantity ? "border-red-500" : ""
-                  }`}
+                  label="Số lượng"
                   placeholder="Nhập số lượng"
-                  value={currentVariant.stockQuantity}
+                  value={currentVariant.stockQuantity.toString()}
+                  variant="bordered"
+                  labelPlacement="outside"
+                  size="lg"
+                  isInvalid={!!errors.stockQuantity}
+                  errorMessage={errors.stockQuantity}
+                  classNames={{
+                    label: "font-medium text-foreground",
+                    input: "text-foreground",
+                    inputWrapper: "bg-background"
+                  }}
                   onChange={(e) => {
                     setCurrentVariant({
                       ...currentVariant,
@@ -243,10 +352,15 @@ export default function InputVariants({
                     setErrors({ ...errors, stockQuantity: undefined });
                   }}
                 />
-                {errors.stockQuantity && (
-                  <span className="text-red-500 text-sm">
-                    {errors.stockQuantity}
-                  </span>
+              </div>
+              
+              <div className="flex flex-col">
+                <InputColor
+                  setColor={(value) => handleSelectColor(value)}
+                  color={currentVariant.color}
+                />
+                {errors.color && (
+                  <span className="text-red-500 text-sm">{errors.color}</span>
                 )}
               </div>
             </div>

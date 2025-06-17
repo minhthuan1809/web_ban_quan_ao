@@ -31,7 +31,13 @@ interface FormData {
   description: string;
   price: number;
   salePrice: number;
-  variants: any[];
+  variants: {
+    size: string;
+    priceAdjustment: number;
+    stockQuantity: number;
+    color: string[];
+    useBasePrice?: boolean;
+  }[];
   materialList: any[];
   size: string;
   color: string[];
@@ -88,12 +94,16 @@ export default function ModalAdd_Edit_Product({
       setForm(initialFormState);
       setErrors({});
     } else if (edit) {
+      console.log('Edit data:', edit);
+      console.log('Category:', edit.category);
+      console.log('Material:', edit.material);
+      
       setForm({
         name: edit.name || '',
-        categoryId: edit.category?.id || '',
+        categoryId: edit.categoryId?.toString() || edit.category?.id?.toString() || '',
         imageUrls: edit.imageUrls || [],
         teamId: edit.team?.id || "",
-        materialId: edit.material?.id || '',
+        materialId: edit.materialId?.toString() || edit.material?.id?.toString() || '',
         status: edit.status || 'ACTIVE',
         season: edit.season || '',
         jerseyType: edit.jerseyType || '',
@@ -101,9 +111,15 @@ export default function ModalAdd_Edit_Product({
         description: edit.description || '',
         price: edit.price || 0,
         salePrice: edit.salePrice || 0,
-        variants: edit.variants || [],
+        variants: edit.variants ? edit.variants.map((v: any) => ({
+          size: v.sizeId?.toString() || '',
+          color: v.colorId ? [v.colorId.toString()] : [],
+          priceAdjustment: v.priceAdjustment || 0,
+          stockQuantity: v.stockQuantity || 0,
+          useBasePrice: false
+        })) : [],
         materialList: [],
-        size: edit.variants && edit.variants.length > 0 ? (edit.variants[0].sizeId || '') : '',
+        size: edit.variants && edit.variants.length > 0 ? (edit.variants[0].sizeId || '').toString() : '',
         color: edit.variants && edit.variants.length > 0 
           ? edit.variants
               .map((variant: any) => variant.colorId && variant.colorId.toString())
@@ -146,18 +162,14 @@ export default function ModalAdd_Edit_Product({
         }
       }
 
-      // Tạo variants từ size và color
-      const variants: Variant[] = [];
+      const variants = [];
       if (form.size && form.color.length > 0) {
-        form.color.forEach(colorId => {
-          variants.push({
-            priceAdjustment: 0,
-            code: `${form.name}-${form.size}-${colorId}`.replace(/\s+/g, '-').toLowerCase(),
-            stockQuantity: 100, // Giá trị mặc định
-            sizeId: Number(form.size),
-            status: form.status,
-            colorId: Number(colorId)
-          });
+        variants.push({
+          size: form.size,
+          color: form.color,
+          priceAdjustment: 0,
+          stockQuantity: 100,
+          useBasePrice: true
         });
       }
 
@@ -174,7 +186,14 @@ export default function ModalAdd_Edit_Product({
         "description": form.description,
         "price": form.price,
         "salePrice": form.salePrice,
-        "variants": variants.length > 0 ? variants : form.variants
+        "variants": form.variants.map(v => ({
+          priceAdjustment: v.priceAdjustment,
+          code: `${form.name}-${v.size}-${v.color.join('-')}`.replace(/\s+/g, '-').toLowerCase(),
+          stockQuantity: v.stockQuantity,
+          sizeId: Number(v.size),
+          status: form.status,
+          colorId: Number(v.color[0])
+        }))
       };
     } catch (error) {
       console.error("Error in callApiCloudinary:", error);
@@ -194,8 +213,7 @@ export default function ModalAdd_Edit_Product({
           case 'jerseyType': return 'Loại áo';
           case 'description': return 'Mô tả';
           case 'price': return 'Giá';
-          case 'size': return 'Kích thước';
-          case 'color': return 'Màu sắc';
+          case 'variants': return 'Biến thể sản phẩm';
           default: return key;
         }
       });
@@ -234,8 +252,7 @@ export default function ModalAdd_Edit_Product({
           case 'jerseyType': return 'Loại áo';
           case 'description': return 'Mô tả';
           case 'price': return 'Giá';
-          case 'size': return 'Kích thước';
-          case 'color': return 'Màu sắc';
+          case 'variants': return 'Biến thể sản phẩm';
           default: return key;
         }
       });
@@ -429,6 +446,7 @@ export default function ModalAdd_Edit_Product({
        <InputVariants
             variants={form.variants}
             setVariants={(value) => handleInputChange('variants', value)}
+            basePrice={form.price}
           />
        </div>
 

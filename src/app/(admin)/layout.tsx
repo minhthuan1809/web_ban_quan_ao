@@ -231,6 +231,40 @@ export default function Layout({children}: {children: React.ReactNode}) {
                 />
             )}
 
+            {/* Mobile header */}
+            {isMobile && (
+                <header className="sticky top-0 z-30 flex items-center justify-between p-4 bg-card shadow-md">
+                    <button
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="p-2 rounded-lg hover:bg-primary/10"
+                    >
+                        <GetIconComponent icon="Menu" className="w-6 h-6" />
+                    </button>
+                    
+                    <div className="flex items-center gap-3">
+                        <ThemeToggle />
+                        <div 
+                            className="flex items-center gap-2 cursor-pointer"
+                            onClick={() => router.push("/settings")}
+                        >
+                            {user_Zustand?.avatarUrl ? (
+                                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary/20">
+                                    <img
+                                        src={user_Zustand.avatarUrl}
+                                        alt="avatar"
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                            ) : (
+                                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold">
+                                    {user_Zustand?.fullName?.charAt(0) || 'A'}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </header>
+            )}
+
             {/* Sidebar */}
             <aside
                 className={cn(
@@ -415,9 +449,9 @@ export default function Layout({children}: {children: React.ReactNode}) {
                 {/* Logout Button */}
                 <div className="p-4 border-t border-border">
                     <div className="flex items-center gap-2 mb-3">
-                        <ThemeToggle />
+                        {!isMobile && <ThemeToggle />}
                         <span className="text-sm text-muted-foreground">
-                            {(!isCollapsed || isMobile) && "Giao diện"}
+                            {(!isCollapsed || isMobile) && !isMobile && "Giao diện"}
                         </span>
                     </div>
                     <button
@@ -451,7 +485,7 @@ export default function Layout({children}: {children: React.ReactNode}) {
             {/* Main Content */}
             <main className={cn(
                 "transition-all duration-300",
-                isMobile ? "ml-0" : isCollapsed ? "ml-20" : "ml-80"
+                isMobile ? "ml-0 pt-16" : isCollapsed ? "ml-20" : "ml-80"
             )}>
                 <div className="p-4">
                     {isLoading ? <Loading /> : children}

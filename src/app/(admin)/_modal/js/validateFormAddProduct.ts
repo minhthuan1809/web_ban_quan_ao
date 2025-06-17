@@ -10,8 +10,6 @@ interface FormErrors {
     status?: string;
     salePrice?: string;
     variants?: string;
-    size?: string;
-    color?: string;
 }
 
 export const validateForm = (form: any, setErrors: (errors: any) => void) => {
@@ -61,15 +59,10 @@ export const validateForm = (form: any, setErrors: (errors: any) => void) => {
         missingFields.push('Giá khuyến mãi');
     }
     
-    // Kiểm tra size và color thay vì variants
-    if (!form.size) {
-        newErrors.size = 'Vui lòng chọn kích thước';
-        missingFields.push('Kích thước');
-    }
-    
-    if (!form.color || form.color.length === 0) {
-        newErrors.color = 'Vui lòng chọn ít nhất một màu sắc';
-        missingFields.push('Màu sắc');
+    // Kiểm tra variants
+    if (!form.variants || form.variants.length === 0) {
+        newErrors.variants = 'Vui lòng thêm ít nhất một biến thể sản phẩm';
+        missingFields.push('Biến thể sản phẩm');
     }
 
     setErrors(newErrors);

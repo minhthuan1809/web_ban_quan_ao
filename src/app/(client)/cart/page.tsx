@@ -46,7 +46,6 @@ export default function Page() {
         
         try {
             const res = await UpdateCard_API(itemId.toString(), { quantity: newQuantity, variantId: variantId, cartId: cartId });
-            console.log(res);
             setCartItems(cartItems.map(item => 
                 item.id === itemId ? {...item, quantity: newQuantity} : item    
             ));
@@ -279,7 +278,7 @@ export default function Page() {
                         {cartItems.length === 0 && (
                             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
                                 <div className="w-16 h-16 mx-auto mb-4 text-gray-300">
-                                    <svg fill="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M7 4V2C7 1.45 7.45 1 8 1H16C16.55 1 17 1.45 17 2V4H20C20.55 4 21 4.45 21 5S20.55 6 20 6H19V18C19 19.1 18.1 20 17 20H7C5.9 20 5 19.1 5 18V6H4C3.45 6 3 5.55 3 5S3.45 4 4 4H7ZM9 3V4H15V3H9ZM7 6V18H17V6H7Z"/>
                                     </svg>
                                 </div>

@@ -54,15 +54,19 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
 
   useEffect(() => {
     if (mounted && category) {
-      const selectedCategory = categoryList.find(item => item.id.toString() === category);
+      const selectedCategory = categoryList.find(item => item.id.toString() === category.toString());
       if (selectedCategory) {
         setSearchTerm(selectedCategory.name);
-      } else {
-        setSearchTerm('');
-        setCategory('');
       }
     }
   }, [category, categoryList, mounted]);
+
+  // Thêm useEffect mới để fetch dữ liệu ngay khi component mount nếu có category
+  useEffect(() => {
+    if (mounted && category && categoryList.length === 0) {
+      fetchCategory();
+    }
+  }, [mounted, category]);
 
   if (!mounted) {
     return null;

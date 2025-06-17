@@ -44,7 +44,6 @@ export default function InputUse({ setUse, use }: any) {
     try {
       setLoading(true)
       const res = await getUserById_API(accessToken)
-      console.log(res)
       
       setUseList(res.data.data)
     } catch (error: any) {
