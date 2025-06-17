@@ -13,13 +13,13 @@ import { Order, OrderTableProps ,OrderItem} from './type';
 
 // Định nghĩa các trạng thái đơn hàng và tên hiển thị tiếng Việt
 export const ORDER_STATUSES = {
-  PENDING: { label: 'Đang chờ', color: 'bg-yellow-100 text-yellow-800' },
-  CONFIRMED: { label: 'Đã xác nhận', color: 'bg-green-100 text-green-800' },
-  PROCESSING: { label: 'Đang xử lý', color: 'bg-blue-100 text-blue-800' },
-  SHIPPING: { label: 'Đang giao hàng', color: 'bg-indigo-100 text-indigo-800' },
-  DELIVERED: { label: 'Đã giao hàng', color: 'bg-purple-100 text-purple-800' },
-  CANCELLED: { label: 'Đã hủy', color: 'bg-red-100 text-red-800' },
-  REFUNDED: { label: 'Đã hoàn tiền', color: 'bg-orange-100 text-orange-800' }
+  PENDING: { label: 'Đang chờ', color: 'bg-warning/20 text-warning-600' },
+  CONFIRMED: { label: 'Đã xác nhận', color: 'bg-success/20 text-success-600' },
+  PROCESSING: { label: 'Đang xử lý', color: 'bg-primary/20 text-primary-600' },
+  SHIPPING: { label: 'Đang giao hàng', color: 'bg-secondary/20 text-secondary-600' },
+  DELIVERED: { label: 'Đã giao hàng', color: 'bg-success/20 text-success-600' },
+  CANCELLED: { label: 'Đã hủy', color: 'bg-danger/20 text-danger-600' },
+  REFUNDED: { label: 'Đã hoàn tiền', color: 'bg-warning/20 text-warning-600' }
 };
 
 // Định nghĩa luồng xử lý đơn hàng và các trạng thái tiếp theo có thể có
@@ -138,29 +138,29 @@ export default function OrderTable({ title, showStatusActions = true, mode }: Or
         <div className="overflow-x-auto">
           {/* Bảng cho màn hình lớn */}
           <div className="hidden md:block">
-            <table className="min-w-full bg-white border border-gray-200 rounded-lg">
-              <thead className="bg-gray-50">
+            <table className="min-w-full bg-background border border-divider rounded-lg">
+              <thead className="bg-content1">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã đơn</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách hàng</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày tạo</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng tiền</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground/50 uppercase tracking-wider">Mã đơn</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground/50 uppercase tracking-wider">Khách hàng</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground/50 uppercase tracking-wider">Ngày tạo</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground/50 uppercase tracking-wider">Tổng tiền</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground/50 uppercase tracking-wider">Trạng thái</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-foreground/50 uppercase tracking-wider">Thao tác</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-divider">
                 {orders.map((order) => (
                   <React.Fragment key={order.id}>
-                    <tr className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.code}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <tr className="hover:bg-content1 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{order.code}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground/80">
                         <div>{order.customerName}</div>
-                        <div className="text-xs">{order.customerEmail}</div>
-                        <div className="text-xs">{order.customerPhone}</div>
+                        <div className="text-xs text-foreground/60">{order.customerEmail}</div>
+                        <div className="text-xs text-foreground/60">{order.customerPhone}</div>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(order.createdAt)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{formatCurrency(order.totalAmount)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground/80">{formatDate(order.createdAt)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{formatCurrency(order.totalAmount)}</td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                           ORDER_STATUSES[order.status as keyof typeof ORDER_STATUSES]?.color || 'bg-gray-100 text-gray-800'
@@ -168,7 +168,7 @@ export default function OrderTable({ title, showStatusActions = true, mode }: Or
                           {ORDER_STATUSES[order.status as keyof typeof ORDER_STATUSES]?.label || order.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground/50">
                         <button
                           onClick={() => toggleOrderDetails(order.id)}
                           className="text-blue-600 hover:text-blue-800"
@@ -181,44 +181,44 @@ export default function OrderTable({ title, showStatusActions = true, mode }: Or
                     {expandedOrder === order.id && (
                       <tr>
                         <td colSpan={6} className="px-6 py-4">
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <h3 className="font-medium text-gray-900 mb-2">Thông tin đơn hàng</h3>
+                          <div className="bg-content2 p-4 rounded-lg">
+                            <h3 className="font-medium text-foreground mb-2">Thông tin đơn hàng</h3>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                               <div>
-                                <p className="text-sm"><span className="font-medium">Địa chỉ:</span> {order.shippingAddress}</p>
-                                <p className="text-sm"><span className="font-medium">Quận/Huyện:</span> {order.shippingDistrict}</p>
-                                <p className="text-sm"><span className="font-medium">Phường/Xã:</span> {order.shippingWard}</p>
+                                <p className="text-sm text-foreground/80"><span className="font-medium">Địa chỉ:</span> {order.shippingAddress}</p>
+                                <p className="text-sm text-foreground/80"><span className="font-medium">Quận/Huyện:</span> {order.shippingDistrict}</p>
+                                <p className="text-sm text-foreground/80"><span className="font-medium">Phường/Xã:</span> {order.shippingWard}</p>
                               </div>
                               <div>
-                                <p className="text-sm"><span className="font-medium">Phương thức thanh toán:</span> {order.paymentMethodName}</p>
-                                <p className="text-sm"><span className="font-medium">Trạng thái thanh toán:</span> {order.paymentStatus === 'PENDING' ? 'Chưa thanh toán' : 'Đã thanh toán'}</p>
-                                <p className="text-sm"><span className="font-medium">Ghi chú:</span> {order.note || 'Không có'}</p>
+                                <p className="text-sm text-foreground/80"><span className="font-medium">Phương thức thanh toán:</span> {order.paymentMethodName}</p>
+                                <p className="text-sm text-foreground/80"><span className="font-medium">Trạng thái thanh toán:</span> {order.paymentStatus === 'PENDING' ? 'Chưa thanh toán' : 'Đã thanh toán'}</p>
+                                <p className="text-sm text-foreground/80"><span className="font-medium">Ghi chú:</span> {order.note || 'Không có'}</p>
                               </div>
                             </div>
                             
-                            <h3 className="font-medium text-gray-900 mb-2">Sản phẩm</h3>
-                            <table className="min-w-full divide-y divide-gray-200">
-                              <thead className="bg-gray-100">
+                            <h3 className="font-medium text-foreground mb-2">Sản phẩm</h3>
+                            <table className="min-w-full divide-y divide-divider">
+                              <thead className="bg-content1">
                                 <tr>
-                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sản phẩm</th>
-                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Thông tin</th>
-                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Đơn giá</th>
-                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Số lượng</th>
-                                  <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Thành tiền</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-foreground/50 uppercase">Sản phẩm</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-foreground/50 uppercase">Thông tin</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-foreground/50 uppercase">Đơn giá</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-foreground/50 uppercase">Số lượng</th>
+                                  <th className="px-4 py-2 text-left text-xs font-medium text-foreground/50 uppercase">Thành tiền</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {order.orderItems.map((item) => (
                                   <tr key={item.id}>
-                                    <td className="px-4 py-2 text-sm text-gray-900">{item.productName}</td>
-                                    <td className="px-4 py-2 text-sm text-gray-500">
+                                    <td className="px-4 py-2 text-sm text-foreground-900">{item.productName}</td>
+                                    <td className="px-4 py-2 text-sm text-foreground-500">
                                       <p>Mã: {item.variantInfo.productCode}</p>
                                       <p>Màu: {item.variantInfo.colorName}</p>
                                       <p>Kích cỡ: {item.variantInfo.sizeName}</p>
                                     </td>
-                                    <td className="px-4 py-2 text-sm text-gray-900">{formatCurrency(item.unitPrice)}</td>
-                                    <td className="px-4 py-2 text-sm text-gray-900">{item.quantity}</td>
-                                    <td className="px-4 py-2 text-sm text-gray-900">{formatCurrency(item.totalPrice)}</td>
+                                    <td className="px-4 py-2 text-sm text-foreground-900">{formatCurrency(item.unitPrice)}</td>
+                                    <td className="px-4 py-2 text-sm text-foreground-900">{item.quantity}</td>
+                                    <td className="px-4 py-2 text-sm text-foreground-900">{formatCurrency(item.totalPrice)}</td>
                                   </tr>
                                 ))}
                               </tbody>

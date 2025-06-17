@@ -39,8 +39,6 @@ interface FormData {
     useBasePrice?: boolean;
   }[];
   materialList: any[];
-  size: string;
-  color: string[];
 }
 
 interface Variant {
@@ -67,8 +65,6 @@ const initialFormState: FormData = {
   salePrice: 0,
   variants: [],
   materialList: [],
-  size: '',
-  color: [],  
 };
 
 export default function ModalAdd_Edit_Product({
@@ -89,14 +85,14 @@ export default function ModalAdd_Edit_Product({
   const [errors, setErrors] = useState<any>({})
   const [form, setForm] = useState<FormData>(initialFormState);
 
+
+  
   useEffect(() => {
     if (!isOpen) {
       setForm(initialFormState);
       setErrors({});
     } else if (edit) {
-      console.log('Edit data:', edit);
-      console.log('Category:', edit.category);
-      console.log('Material:', edit.material);
+     
       
       setForm({
         name: edit.name || '',
@@ -112,19 +108,14 @@ export default function ModalAdd_Edit_Product({
         price: edit.price || 0,
         salePrice: edit.salePrice || 0,
         variants: edit.variants ? edit.variants.map((v: any) => ({
-          size: v.sizeId?.toString() || '',
-          color: v.colorId ? [v.colorId.toString()] : [],
+          size: v.size?.id?.toString() || '',
+          color: [v.color.id.toString()] ,   
           priceAdjustment: v.priceAdjustment || 0,
           stockQuantity: v.stockQuantity || 0,
           useBasePrice: false
         })) : [],
         materialList: [],
-        size: edit.variants && edit.variants.length > 0 ? (edit.variants[0].sizeId || '').toString() : '',
-        color: edit.variants && edit.variants.length > 0 
-          ? edit.variants
-              .map((variant: any) => variant.colorId && variant.colorId.toString())
-              .filter((id: string | undefined) => id && id.trim() !== '')
-          : [],
+  
       });
     }
   }, [edit, isOpen]);
@@ -163,10 +154,10 @@ export default function ModalAdd_Edit_Product({
       }
 
       const variants = [];
-      if (form.size && form.color.length > 0) {
+      if (form.variants.length > 0) {
         variants.push({
-          size: form.size,
-          color: form.color,
+          size: form.variants[0].size,
+          color: form.variants[0].color,
           priceAdjustment: 0,
           stockQuantity: 100,
           useBasePrice: true

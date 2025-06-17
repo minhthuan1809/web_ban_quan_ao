@@ -5,7 +5,7 @@ import { Eye, Trash2, Search, Plus, Edit, ChevronDown, ChevronRight, Filter, X, 
 import Loading from '@/app/_util/Loading';
 import FormatPrice from '@/app/_util/FormatPrice';
 import RenderTextEditer from '@/app/_util/ui/RenderTextEditer';
-import { Pagination, Input, Button, Badge } from '@nextui-org/react';
+import { Pagination, Input, Button, Badge, Chip } from '@nextui-org/react';
 import Modadescription from '../_modal/Modadescription';
 import { DiscountPrice } from '@/app/_util/DiscountPrice';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
@@ -197,14 +197,16 @@ export default function RenderProductTable({
                     </div>
 
                     {/* Status */}
-                    <div className="col-span-2 flex items-center justify-center">
-                      <Badge
-                        color={product.isDeleted ? "danger" : "success"}
-                        variant="flat"
+                    <div className="col-span-2 flex items-center justify-center   ">
+                      <Chip
+                        color={product.status === "ACTIVE" ? "success" : "danger"}
+                        variant="solid"
                         size="sm"
+                        radius="sm"
+                        className="text-xs text-white"
                       >
-                        {product.isDeleted ? "Ngừng bán" : "Hoạt động"}
-                      </Badge>
+                        {product.status === "ACTIVE" ? "Hoạt động" : "Ngừng bán"}
+                      </Chip>
                     </div>
 
                     {/* Actions */}

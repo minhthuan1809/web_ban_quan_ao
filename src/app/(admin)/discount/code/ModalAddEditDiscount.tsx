@@ -30,6 +30,7 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
   }
 
   const handleSubmit = async () => {
+    
     try {
       setIsLoading(true)
       

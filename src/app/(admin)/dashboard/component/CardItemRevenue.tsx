@@ -8,7 +8,7 @@ export default function CardItemRevenue({
   stats,
   icon = {
     icon: "Calendar",
-    className: "w-3 h-3 text-blue-500",
+    className: "w-3 h-3 text-primary",
   },
   title = "Tổng doanh thu",
   description = "Tính theo ngày",
@@ -22,31 +22,32 @@ export default function CardItemRevenue({
   description: string;
 }) {
   return (
-    <div>
-      <Card className="border border-gray-200 shadow-sm">
-        <CardBody className="p-4">
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <Text className="text-gray-500 text-sm">{title}</Text>
-              <Metric className="text-2xl font-semibold">
-                {formatCurrency(stats)} 
-              </Metric>
-              <div className="flex items-center mt-2">
-                <div className="w-4 h-4 rounded-full bg-blue-100 flex items-center justify-center mr-2">
-                  <GetIconComponent
-                    icon={icon.icon as any}
-                    className="w-3 h-3 text-blue-500"
-                  />
-                </div>
-                <Text className="text-xs text-gray-500">{description}</Text>
+    <Card className="border-none shadow-md hover:shadow-xl transition-all duration-200 bg-content1">
+      <CardBody className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Text className="text-foreground/80 font-medium">{title}</Text>
+            <Metric className="text-3xl font-bold text-foreground">
+              {formatCurrency(stats)}
+            </Metric>
+            <div className="flex items-center mt-3">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+                <GetIconComponent
+                  icon={icon.icon as any}
+                  className="w-4 h-4 text-primary"
+                />
               </div>
+              <Text className="text-sm text-foreground/60">{description}</Text>
             </div>
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <GetIconComponent icon={icon.icon as any} className={icon?.className} />
-                </div>
           </div>
-        </CardBody>
-      </Card>
-    </div>
+          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center transform transition-transform duration-200 hover:scale-110">
+            <GetIconComponent 
+              icon={icon.icon as any} 
+              className="w-6 h-6 text-primary"
+            />
+          </div>
+        </div>
+      </CardBody>
+    </Card>
   );
 }

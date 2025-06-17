@@ -45,12 +45,24 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
 
   useEffect(() => {
     if (mounted && size) {
-      const selectedSize = sizeList.find(item => item.id.toString() === size);
+      console.log('Current size:', size);
+      console.log('Size list:', sizeList);
+      const selectedSize = sizeList.find(item => item.id.toString() === size.toString());
       if (selectedSize) {
         setSearchTerm(selectedSize.name);
+      } else {
+        // Nếu không tìm thấy size trong list hiện tại, fetch lại data
+        fetchSize();
       }
     }
-  }, [size, sizeList, mounted]);
+  }, [size, sizeList, mounted, fetchSize]);
+
+  // Thêm useEffect để fetch size list khi component mount hoặc khi size thay đổi
+  useEffect(() => {
+    if (mounted && size && sizeList.length === 0) {
+      fetchSize();
+    }
+  }, [mounted, size, sizeList.length, fetchSize]);
 
   if (!mounted) {
     return null;

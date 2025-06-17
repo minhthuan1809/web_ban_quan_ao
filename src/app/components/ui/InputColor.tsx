@@ -1,7 +1,7 @@
 "use client"
 import React, { useCallback, useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
-import { Select, SelectItem, Chip, Avatar } from '@nextui-org/react';
+import { Select, SelectItem, Chip } from '@nextui-org/react';
 import { GetAllColor_API } from '@/app/_service/color';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 
@@ -21,10 +21,12 @@ export default function InputColor({ setColor, color }: { setColor: (color: stri
   const [currentPage, setCurrentPage] = useState(1);
   const { accessToken } = useAuthInfor();
   const [mounted, setMounted] = useState(false);
-  const [validSelectedKeys, setValidSelectedKeys] = useState<Set<string>>(new Set());
+  const [validSelectedKey, setValidSelectedKey] = useState<string>("");
 
   useEffect(() => {
     setMounted(true);
+    // Fetch data ngay khi component mount
+    fetchData();
   }, []);
 
   const fetchData = useCallback(async () => {
@@ -39,28 +41,38 @@ export default function InputColor({ setColor, color }: { setColor: (color: stri
     }
   }, [searchQuery, currentPage, accessToken])
 
+  // Xác thực key đã chọn
   useEffect(() => {
-    if (mounted) {
-      const timer = setTimeout(() => {
-        fetchData()
-      }, 500)
-      return () => clearTimeout(timer)
-    }
-  }, [fetchData, mounted])
+    if (mounted && color && Array.isArray(color) && color.length > 0) {      
+      // Nếu có color nhưng không có trong colorList, fetch lại data
+      if (colorList.length === 0) {
+        fetchData();
+        return;
+      }
 
-  // Lọc và xác thực các key đã chọn
-  useEffect(() => {
-    if (mounted && colorList.length > 0 && color && Array.isArray(color)) {
-      // Lọc bỏ các giá trị rỗng và không hợp lệ
-      const validKeys = color.filter(key => 
-        key && 
-        key.toString().trim() !== '' && 
-        colorList.some(item => item.id.toString() === key.toString())
-      );
+      // Lấy giá trị đầu tiên trong mảng color
+      const selectedKey = color[0];
       
-      setValidSelectedKeys(new Set(validKeys));
+      // Kiểm tra xem key có hợp lệ không
+      if (selectedKey && 
+          selectedKey.toString().trim() !== '' && 
+          colorList.some(item => item.id.toString() === selectedKey.toString())) {
+        setValidSelectedKey(selectedKey);
+      } else if (colorList.length > 0) {
+        // Nếu key không hợp lệ và đã có colorList, fetch lại data
+        fetchData();
+      }
+    } else {
+      setValidSelectedKey("");
     }
-  }, [color, colorList, mounted]);
+  }, [color, colorList, mounted, fetchData]);
+
+  // Thêm useEffect để fetch color list khi component mount hoặc khi color thay đổi
+  useEffect(() => {
+    if (mounted && color && color.length > 0 && colorList.length === 0) {
+      fetchData();
+    }
+  }, [mounted, color, colorList.length, fetchData]);
 
   if (!mounted) {
     return null;
@@ -73,40 +85,36 @@ export default function InputColor({ setColor, color }: { setColor: (color: stri
         trigger: "min-h-12 py-2",
         label: "font-medium text-foreground",
       }}
-      
-      isMultiline={true}
       items={colorList}
       label="Màu sắc"
-   
       labelPlacement="outside"
       placeholder="Chọn màu sắc"
-      selectionMode="multiple"
+      selectionMode="single"
       variant="bordered"
       size="lg"
       isLoading={loading}
       onSelectionChange={(keys) => {
-        const selectedValues = Array.from(keys).map(key => key.toString());
-        setColor(selectedValues);
+        const selectedValue = Array.from(keys)[0]?.toString() || "";
+        setColor(selectedValue ? [selectedValue] : []);
       }}
-      selectedKeys={validSelectedKeys}
+      selectedKeys={validSelectedKey ? new Set([validSelectedKey]) : new Set()}
       renderValue={(items) => {
-        return (
+        const item = items[0];
+        return item ? (
           <div className="flex flex-wrap gap-2">
-            {items.map((item) => (
-              <Chip 
-                key={item.key} 
-                startContent={
-                  <div 
-                    className="w-3 h-3 rounded-full mr-1" 
-                    style={{ backgroundColor: item.data?.hexColor || '#000000' }}
-                  />
-                }
-              >
-                {item.data?.name}
-              </Chip>
-            ))}
+            <Chip 
+              key={item.key} 
+              startContent={
+                <div 
+                  className="w-3 h-3 rounded-full mr-1" 
+                  style={{ backgroundColor: item.data?.hexColor || '#000000' }}
+                />
+              }
+            >
+              {item.data?.name}
+            </Chip>
           </div>
-        );
+        ) : null;
       }}
       onOpenChange={(isOpen) => {
         if (isOpen) {

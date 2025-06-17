@@ -45,3 +45,23 @@ export const deleteCoupon_API = async (id: number) => {
     });
     return res;
 }
+
+// disable coupon
+export const disableCoupon_API = async (id: number) => {
+    const res = await axios.put(`${API_URL}/coupons/${id}/deactivate`, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+    return res;
+}
+
+// enable coupon
+export const enableCoupon_API = async (id: number) => {
+    const res = await axios.put(`${API_URL}/coupons/${id}/activate`, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
+    });
+    return res;
+}

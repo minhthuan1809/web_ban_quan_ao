@@ -1,7 +1,7 @@
 'use client'
-import { deleteCoupon_API, GetAllCode_API } from '@/app/_service/discount';
+  import { deleteCoupon_API, disableCoupon_API, enableCoupon_API, GetAllCode_API } from '@/app/_service/discount';
 import React, { useEffect, useState } from 'react'
-import { Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip, Pagination, Spinner } from "@nextui-org/react";
+import { Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip, Pagination, Spinner, Switch } from "@nextui-org/react";
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { Pencil, Trash } from 'lucide-react';
@@ -45,7 +45,6 @@ export default function Code() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null);  
   const [reload, setReload] = useState<boolean>(false);
-
   useEffect(() => {
     if (editCoupon) {
       setIsOpen(true);
@@ -73,7 +72,7 @@ export default function Code() {
       }
     };
     fetchData();
-  }, [reload]);
+    }, [reload]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
@@ -110,6 +109,23 @@ export default function Code() {
     }
   }
 
+  const handleToggle = async (id: number , isActive: boolean) => {
+    if(isActive){
+      const res = await disableCoupon_API(id );
+      if(res.status === 200){
+        toast.success("Vô hiệu hóa mã giảm giá thành công");
+        setReload(!reload);
+      }
+    }else{
+      const res = await enableCoupon_API(id );
+      if(res.status === 200){
+        toast.success("Kích hoạt mã giảm giá thành công");
+        setReload(!reload);
+      }
+    }
+  }
+  console.log('coupons', coupons);
+  
   return (
     <div className="p-6">
           <TitleSearchAdd 
@@ -174,12 +190,10 @@ export default function Code() {
                     <p>{coupon.usedCount}/{coupon.maxUsageCount || "∞"}</p>
                   </TableCell>
                   <TableCell className='text-center'>
-                    <Chip 
-                      color={coupon.isActive ? "success" : "danger"}
-                      variant="flat"
-                    >
-                      {coupon.isActive ? "Đang hoạt động" : "Đã vô hiệu"}
-                    </Chip>
+                  <Switch
+                    isSelected={coupon.isActive}
+                    onValueChange={() => handleToggle(coupon.id , coupon.isActive)}
+                  />
                   </TableCell>
                   <TableCell className='text-center'>
                     <div className="flex gap-2 justify-center items-center">
