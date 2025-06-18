@@ -107,7 +107,7 @@ export default function PageRegister() {
               <div className="p-2 bg-primary/10 rounded-lg">
                 <UserPlus className="w-6 h-6 text-primary" />
               </div>
-              <h2 className="text-4xl font-bold text-foreground tracking-tight">
+              <h2 className="text-4xl font-bold text-foreground ">
                 Đăng Ký
               </h2>
             </div>

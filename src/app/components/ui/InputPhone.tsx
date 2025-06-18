@@ -15,23 +15,43 @@ export default function InputPhone({
   onChange: (value: string) => void;
 }) {
   const [isInvalid, setIsInvalid] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Only allow numbers
     const numericValue = e.target.value.replace(/[^0-9]/g, '');
-    onChange(numericValue);
     
-    // Check if length is less than 10 when user has entered something
-    setIsInvalid(numericValue.length > 0 && numericValue.length < 10);
+    // Validate phone number format
+    if (numericValue.length > 0) {
+      if (!numericValue.startsWith('0')) {
+        setIsInvalid(true);
+        setErrorMessage("Số điện thoại phải bắt đầu bằng số 0");
+        onChange(numericValue);
+        return;
+      }
+      
+      if (numericValue.length < 10) {
+        setIsInvalid(true);
+        setErrorMessage("Số điện thoại phải đủ 10 số");
+      } else {
+        setIsInvalid(false);
+        setErrorMessage("");
+      }
+    } else {
+      setIsInvalid(false);
+      setErrorMessage("");
+    }
+
+    onChange(numericValue);
   };
 
   return (
     <Input
       isRequired
       isInvalid={isInvalid}
-      errorMessage={isInvalid && "Số điện thoại phải đủ 10 số"}
+      errorMessage={errorMessage}
       classNames={{
-        inputWrapper: " w-full mt-[1rem]",
+        inputWrapper: " w-full",
       }}
       startContent={
         <Phone

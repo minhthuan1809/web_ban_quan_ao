@@ -21,7 +21,7 @@ export default function InputInformation({
       isRequired
       type="text"
       classNames={{
-        inputWrapper: "w-full mt-[1rem]",
+        inputWrapper: "w-full ",
       }}
       startContent={
         <GetIconComponent

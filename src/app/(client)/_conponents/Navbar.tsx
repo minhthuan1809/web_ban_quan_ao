@@ -225,11 +225,11 @@ export default function Navbar() {
                     </div>
                   ) : (
                     <div className="p-2 space-y-2">
-                      <Button
+                       <Button
                         as={Link}
                         href="/login"
                         color="primary"
-                        variant="flat"
+                        variant="light"
                         className="w-full justify-start"
                       >
                         Đăng nhập

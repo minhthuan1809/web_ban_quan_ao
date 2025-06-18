@@ -89,7 +89,7 @@ export default function Layout({children}: {children: React.ReactNode}) {
             },
             {
               name: "Lịch Sử Thanh Toán",
-              href: "/orders/history-pay",
+              href: "/orders/payments",
               icon: "History",
             },
           ],
