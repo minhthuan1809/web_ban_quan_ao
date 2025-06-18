@@ -10,7 +10,6 @@ import {
   Divider,
 } from "@nextui-org/react";
 import React from "react";
-import { Contact } from "./typecontac";
 import { Send, User, Calendar, MapPin } from "lucide-react";
 
 export default function ModalDetalMail({
@@ -20,7 +19,7 @@ export default function ModalDetalMail({
 }: {
   isDetailModalOpen: boolean;
   setIsDetailModalOpen: (open: boolean) => void;
-  selectedContact: Contact | null | null;
+  selectedContact: any;
 }) {
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -99,7 +98,7 @@ export default function ModalDetalMail({
                             ? "Chờ xử lý"
                             : selectedContact.status === "PROCESSING"
                             ? "Đang xử lý"
-                            : selectedContact.status === "RESOLVED"
+                            : selectedContact.status === "COMPLETED"
                             ? "Đã xử lý"
                             : "Từ chối"}
                         </Chip>
@@ -212,7 +211,7 @@ export default function ModalDetalMail({
                       <div className="space-y-4">
                         <Divider />
                         <h3 className="text-medium font-semibold">Lịch sử phản hồi</h3>
-                        {selectedContact.replies.map((reply) => (
+                        {selectedContact.replies.map((reply : any) => (
                           <Card key={reply.id} className="bg-primary-50">
                             <CardBody>
                               <div className="flex justify-between items-center mb-2">

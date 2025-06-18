@@ -1,6 +1,6 @@
 import axios from "axios";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
-import { Contact } from '@/app/(admin)/contacts/typecontac';
+import { Contact } from '@/app/(admin)/contacts/typecontact';
 
 const { accessToken , userInfo } = useAuthInfor();
 

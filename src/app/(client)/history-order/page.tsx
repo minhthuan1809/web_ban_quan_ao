@@ -6,7 +6,7 @@ import { Pagination } from '@nextui-org/react';
 import OrderLoader from './OrderLoader';
 import OrderTabs from './OrderTabs';
 import OrderItem from './OrderItem';
-
+import OrderEmptyState from './OrderEmptyState';
 
 interface OrderItem {
   id: number;
@@ -58,7 +58,7 @@ const statusMap = {
 };
 
 export default function HistoryOrderPage() {
-  const { userInfo } = useAuthInfor() || { userInfo: { id: 0 } };
+  const { userInfo } = useAuthInfor();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(1);
@@ -68,8 +68,8 @@ export default function HistoryOrderPage() {
   useEffect(() => {
     const fetchOrders = async (loading: boolean) => {
       try {
-        setLoading(loading );
-        if (userInfo.id) {
+        setLoading(loading);
+        if (userInfo?.id) {
           const res = await getOrderById_API(userInfo.id);
           if (res?.data) {
             setOrders(res.data);
@@ -77,25 +77,31 @@ export default function HistoryOrderPage() {
           } else {
             setOrders([]);
           }
+        } else {
+          setOrders([]);
         }
       } catch (error) {
         console.error("Lỗi khi lấy dữ liệu đơn hàng:", error);
         setOrders([]);
       } finally {
-        setLoading(loading );
+        setLoading(false);
       }
     };
     
-    fetchOrders(true);
-    
-    // Thiết lập interval để gọi API mỗi 2 giây
-    const intervalId = setInterval(() => {
-      fetchOrders(false);
-    }, 2000);
-    
-    // Xóa interval khi component unmount
-    return () => clearInterval(intervalId);
-  }, [userInfo.id]);
+    if (userInfo?.id) {
+      fetchOrders(true);
+      
+      // Thiết lập interval để gọi API mỗi 2 giây
+      const intervalId = setInterval(() => {
+        fetchOrders(false);
+      }, 2000);
+      
+      // Xóa interval khi component unmount
+      return () => clearInterval(intervalId);
+    } else {
+      setLoading(false);
+    }
+  }, [userInfo?.id]);
 
   // Lọc đơn hàng theo trạng thái
   const filteredOrders = React.useMemo(() => {
@@ -128,6 +134,16 @@ export default function HistoryOrderPage() {
 
   if (loading) {
     return <OrderLoader />;
+  }
+
+  if (!userInfo?.id) {
+    return (
+      <div className="max-w-6xl mx-auto py-6 px-4 min-h-screen">
+        <div className="text-center py-12">
+          <p className="text-gray-500 text-lg">Vui lòng đăng nhập để xem lịch sử đơn hàng</p>
+        </div>
+      </div>
+    );
   }
 
   return (

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { getHistoryContact_API } from '@/app/_service/contact';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Chip, Tooltip, Button, Input } from "@nextui-org/react";
 import { Eye, Mail, User } from "lucide-react";
-import { Contact } from '../typecontac';
+import { Contact } from '../typecontact';
 import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 
 export default function HistoryContact() {
