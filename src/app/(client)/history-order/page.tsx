@@ -6,7 +6,6 @@ import { Pagination } from '@nextui-org/react';
 import OrderLoader from './OrderLoader';
 import OrderTabs from './OrderTabs';
 import OrderItem from './OrderItem';
-import OrderEmptyState from './OrderEmptyState';
 
 interface OrderItem {
   id: number;
