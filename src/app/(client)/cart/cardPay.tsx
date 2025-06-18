@@ -9,6 +9,7 @@ import { toast } from "react-toastify";
 import InputPhone from "@/app/components/ui/InputPhone";
 import { useRouter } from "next/navigation";
 import showConfirmDialog from "@/app/_util/Sweetalert2";
+import Image from "next/image";
 
 interface CardPayProps {
   selectedItems: number[];

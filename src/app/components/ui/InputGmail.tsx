@@ -39,7 +39,7 @@ export default function InputGmail({
       <Input
         isRequired
         classNames={{
-          inputWrapper: "w-full mt-[1rem]",
+          inputWrapper: "w-full",
         }}
         validationState={error ? "invalid" : "valid"}
         errorMessage={""}

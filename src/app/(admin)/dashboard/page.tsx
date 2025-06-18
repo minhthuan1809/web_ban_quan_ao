@@ -5,6 +5,7 @@ import useAuthInfor from '@/app/customHooks/AuthInfor'
 import { Card, CardBody } from '@nextui-org/react'
 import { BadgeDelta, Metric, Text } from "@tremor/react"
 import CardItemRevenue from './component/CardItemRevenue';
+import GetIconComponent from '@/app/_util/Icon';
 
 interface DashboardStats {
   todayRevenue: number;
@@ -92,12 +93,33 @@ export default function DashboardPage() {
         />
 
         {/* Đơn hàng */}
-        <CardItemRevenue 
-          stats={stats.todayOrders} 
-          icon={{icon: "ShoppingBag", className: "w-6 h-6 text-primary"}} 
-          title="Đơn hàng" 
-          description="Tính theo ngày" 
-        />
+        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-200 bg-content1">
+      <CardBody className="p-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <Text className="text-foreground/80 font-medium">Đơn hàng</Text>
+            <Metric className="text-3xl font-bold text-foreground">
+              {stats.todayOrders}
+            </Metric>
+            <div className="flex items-center mt-3">
+              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-2">
+                <GetIconComponent
+                  icon={"ShoppingBag"}
+                  className="w-4 h-4 text-primary"
+                />
+              </div>
+              <Text className="text-sm text-foreground/60">Tính theo ngày</Text>
+            </div>
+          </div>
+          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center transform transition-transform duration-200 hover:scale-110">
+            <GetIconComponent 
+              icon={"ShoppingBag"} 
+              className="w-6 h-6 text-primary"
+            />
+          </div>
+        </div>
+      </CardBody>
+    </Card>
 
         {/* Doanh thu tháng */}
         <CardItemRevenue 

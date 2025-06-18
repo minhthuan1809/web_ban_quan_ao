@@ -15,8 +15,6 @@ import { X, Package, DollarSign, Percent } from 'lucide-react';
 import InputCategory from '@/app/components/ui/InputCategory';
 import InputMateria from '@/app/components/ui/InputMateria';
 import InputVariants from '@/app/components/ui/InputVariants';
-import InputSize from '@/app/components/ui/inputSize';
-import InputColor from '@/app/components/ui/InputColor';
 
 interface FormData {
   name: string;

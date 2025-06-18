@@ -1,7 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Star, ThumbsUp, Play } from 'lucide-react';
+import { getReviews_API } from '../_service/Evaluate';
+import { useParams } from 'next/navigation';
 
 export default function SimpleEvaluateComment() {
+
+  const params = useParams();
+  const productId = params.slug;
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const reviews = await getReviews_API(Number(productId[1]));
+      console.log("reviews", reviews);
+    }
+    fetchReviews();
+  }, []);
   const reviews = [
     {
       id: 1,

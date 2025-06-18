@@ -15,8 +15,8 @@ export default function InputGender({ placeholder, label, value, onChange }: Inp
         <label className="flex items-center space-x-2 cursor-pointer">
           <input
             type="radio"
-            value="male"
-            checked={value === "male"}
+            value="MALE"
+            checked={value === "MALE"}
             onChange={(e) => onChange(e.target.value)}
             className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
           />
@@ -26,8 +26,8 @@ export default function InputGender({ placeholder, label, value, onChange }: Inp
         <label className="flex items-center space-x-2 cursor-pointer">
           <input
             type="radio"
-            value="female"
-            checked={value === "female"}
+            value="FEMALE"
+            checked={value === "FEMALE"}
             onChange={(e) => onChange(e.target.value)}
             className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
           />
@@ -37,8 +37,8 @@ export default function InputGender({ placeholder, label, value, onChange }: Inp
         <label className="flex items-center space-x-2 cursor-pointer">
           <input
             type="radio"
-            value="other"
-            checked={value === "other"}
+            value="OTHER"
+            checked={value === "OTHER"}
             onChange={(e) => onChange(e.target.value)}
             className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
           />

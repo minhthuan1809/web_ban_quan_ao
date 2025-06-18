@@ -18,7 +18,10 @@ export const deleteUser_API = async (id: number, token: string) => {
 
 export const CreateUser_API = async (data: any, token: string) => {
     try {
-        const response = await axios.post(`${API_URL}/users`, data, {
+        const response = await axios.post(`${API_URL}/users`, {
+            ...data,
+            isAdmin : true,
+        }, {
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`,

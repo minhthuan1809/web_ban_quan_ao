@@ -56,18 +56,29 @@ export default function ProductDetailPage({
   const [isOpen, setIsOpen] = useState(false);
   const [showProductInfo, setShowProductInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentPrice, setCurrentPrice] = useState(0);
+  const [currentSalePrice, setCurrentSalePrice] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         setIsLoading(true);
         const resVariant = await getVariantDetail_API(id);
+        
         setProduct(resVariant.data);
+        setCurrentPrice(resVariant.data.price);
+        setCurrentSalePrice(resVariant.data.salePrice);
+        
         if (resVariant.data?.variants?.length > 0) {
           const firstVariant = resVariant.data.variants[0];
           setSelectedSize(firstVariant.size.name);
           setSelectedColor(firstVariant.color);
           setSelectedVariant(firstVariant);
+          
+          if (firstVariant.priceAdjustment) {
+            setCurrentPrice(firstVariant.priceAdjustment);
+            setCurrentSalePrice(firstVariant.priceAdjustment);
+          }
         }
       } catch (error) {
         console.error('Error fetching product:', error);
@@ -114,8 +125,16 @@ export default function ProductDetailPage({
         v.size.name === selectedSize && v.color.id === selectedColor.id
       );
       setSelectedVariant(variant);
+      
+      if (variant?.priceAdjustment) {
+        setCurrentPrice(variant.priceAdjustment);
+        setCurrentSalePrice(variant.priceAdjustment);
+      } else {
+        setCurrentPrice(product.price);
+        setCurrentSalePrice(product.salePrice);
+      }
     }
-  }, [selectedSize, selectedColor, product.variants]);
+  }, [selectedSize, selectedColor, product.variants, product.price, product.salePrice]);
 
   // When size changes, update color selection
   useEffect(() => {
@@ -129,9 +148,9 @@ export default function ProductDetailPage({
   };
 
   const calculateDiscount = () => {
-    if (product && product.price !== product.salePrice) {
+    if (currentPrice !== currentSalePrice) {
       return Math.round(
-        ((product.price - product.salePrice) / product.price) * 100
+        ((currentPrice - currentSalePrice) / currentPrice) * 100
       );
     }
     return 0;
@@ -237,14 +256,14 @@ export default function ProductDetailPage({
 
             {/* Price */}
             <div className="space-y-1">
-              {product.price !== product.salePrice ? (
+              {currentPrice !== currentSalePrice ? (
                 <>
                   <div className="text-default-400 line-through text-lg">
-                    {formatPrice(product.price)}
+                    {formatPrice(currentPrice)}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-bold text-foreground">
-                      {formatPrice(product.salePrice)}
+                      {formatPrice(currentSalePrice)}
                     </span>
                     <span className="bg-primary text-primary-foreground px-2 py-1 rounded text-sm font-medium">
                       -{calculateDiscount()}%
@@ -253,7 +272,7 @@ export default function ProductDetailPage({
                 </>
               ) : (
                 <div className="text-3xl font-bold text-foreground">
-                  {formatPrice(product.price)}
+                  {formatPrice(currentPrice)}
                 </div>
               )}
               <div className="flex items-center gap-2 text-sm text-default-600">
@@ -458,10 +477,6 @@ export default function ProductDetailPage({
         <div className="mt-8">
           <Card className="shadow-small">
             <CardBody className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-xl font-semibold text-foreground">Đánh giá sản phẩm</h2>
-                <div className="flex-1 border-b border-border"></div>
-              </div>
               <EvaluateComment />
             </CardBody>
           </Card>
