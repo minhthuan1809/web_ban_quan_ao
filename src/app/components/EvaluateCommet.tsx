@@ -1,53 +1,87 @@
 import React, { useEffect, useState } from 'react';
-import { Star, ThumbsUp, Play } from 'lucide-react';
+import { Star, ThumbsUp } from 'lucide-react';
 import { getReviews_API } from '../_service/Evaluate';
 import { useParams } from 'next/navigation';
+import { Pagination } from '@nextui-org/react';
+
+interface User {
+  id: number;
+  fullName: string;
+  email: string;
+  avatarUrl: string | null;
+}
+
+interface Review {
+  id: number;
+  user: User;
+  rating: number;
+  comment: string;
+  images: string[] | null;
+  createdAt: number;
+  answers: any[];
+  isDeleted: boolean;
+}
+
+interface ReviewResponse {
+  data: Review[];
+  metadata: {
+    page: number;
+    page_size: number;
+    total: number;
+    total_page: number;
+    ranger: {
+      from: number;
+      to: number;
+    };
+  };
+}
 
 export default function SimpleEvaluateComment() {
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [ratingCounts, setRatingCounts] = useState<{ [key: number]: number }>({});
+  const [imageCount, setImageCount] = useState(0);
+  const [metadata, setMetadata] = useState<ReviewResponse['metadata'] | null>(null);
 
   const params = useParams();
   const productId = params.slug;
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const totalPage = metadata?.total_page || 1;
 
   useEffect(() => {
     const fetchReviews = async () => {
-      const reviews = await getReviews_API(Number(productId[1]));
-      console.log("reviews", reviews);
-    }
-    fetchReviews();
-  }, []);
-  const reviews = [
-    {
-      id: 1,
-      username: "l****8",
-      date: "2021-07-11 15:32",
-      rating: 5,
-      comment: "Đặt mua cho ba mình 1m7 hơn 80kg, có bụng thì áo ôm khít luôn nha mọi người, tuy nhiên áo cho người trẻ nên form ôm cũng đúng thui. Chất lượng tốt so với giá tiền nê 👍👍",
-      likes: 2,
-      hasVideo: true,
-      videoDuration: "0:06",
-      images: [
-        "/api/placeholder/60/60",
-        "/api/placeholder/60/60", 
-        "/api/placeholder/60/60"
-      ]
-    },
-    {
-      id: 2,
-      username: "thanhzino",
-      date: "2021-07-26 20:52",
-      rating: 5,
-      comment: "Hàng đẹp! Giao nhanh! Vải áo mỏng mát, vải quần có độ co giãn nhe! Với giá ntn mà dc bộ đồ Chất vậy mình tây quá Ok r a",
-      likes: 4,
-      hasVideo: true,
-      videoDuration: "0:12",
-      images: [
-        "/api/placeholder/60/60",
-        "/api/placeholder/60/60"
-      ]
-    }
-  ];
+      try {
+        const response = await getReviews_API(page, 10, '');
+        const reviewsData = response.data;
+        const metadata = response.metadata;
+        
+        setReviews(reviewsData);
+        setMetadata(metadata);
+        
+        // Calculate average rating
+        const totalRating = reviewsData.reduce((sum: number, review: Review) => sum + review.rating, 0);
+        const avg = reviewsData.length > 0 ? totalRating / reviewsData.length : 0;
+        setAverageRating(Number(avg.toFixed(1)));
 
-  const renderStars = (rating: number ) => {
+        // Calculate rating counts
+        const counts: { [key: number]: number } = {};
+        reviewsData.forEach((review: Review) => {
+          counts[review.rating] = (counts[review.rating] || 0) + 1;
+        });
+        setRatingCounts(counts);
+
+        // Calculate image count
+        const imgCount = reviewsData.filter((review: Review) => review.images && review.images.length > 0).length;
+        setImageCount(imgCount);
+      } catch (error) {
+        console.error('Error fetching reviews:', error);
+      }
+    };
+    fetchReviews();
+  }, [productId, page]);
+
+  const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
       <Star
         key={index}
@@ -57,98 +91,106 @@ export default function SimpleEvaluateComment() {
     ));
   };
 
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
+    return date.toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
   return (
-    <div className="bg-white p-4 mx-auto">
-      {/* Header */}
-      <h2 className="text-lg font-medium mb-4 text-gray-900">ĐÁNH GIÁ SẢN PHẨM</h2>
+    <div className="bg-white p-4 ">
+      <h2 className="text-lg font-medium mb-4 text-gray-900">
+        ĐÁNH GIÁ SẢN PHẨM {metadata && `(${metadata.total})`}
+      </h2>
       
-      {/* Rating Summary - Simplified */}
       <div className="flex items-center gap-6 mb-6 pb-4 border-b">
         <div className="text-center">
-          <div className="text-3xl font-bold text-gray-900 mb-1">4.8</div>
+          <div className="text-3xl font-bold text-gray-900 mb-1">{averageRating}</div>
           <div className="text-sm text-gray-600">trên 5</div>
           <div className="flex justify-center gap-1 mt-1">
-            {renderStars(5)}
+            {renderStars(Math.round(averageRating))}
           </div>
         </div>
         
         <div className="text-sm text-gray-600">
-          <div>5 Sao (3,3k) • 4 Sao (273) • 3 Sao (108)</div>
-          <div className="mt-1">Có Hình Ảnh/Video (472)</div>
+          <div>
+            {[5, 4, 3, 2, 1].map(rating => (
+              ratingCounts[rating] ? `${rating} Sao (${ratingCounts[rating]})${rating > 1 ? ' • ' : ''}` : ''
+            ))}
+          </div>
+          <div className="mt-1">Có Hình Ảnh/Video ({imageCount})</div>
         </div>
       </div>
 
-      {/* Reviews */}
       <div className="space-y-5">
         {reviews.map((review) => (
           <div key={review.id} className="pb-5 border-b border-gray-100 last:border-b-0">
             <div className="flex gap-3">
-              {/* User Avatar - Simplified */}
-              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-sm">
-                {review.username.charAt(0).toUpperCase()}
+              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-sm overflow-hidden">
+                {review.user.avatarUrl ? (
+                  <img 
+                    src={review.user.avatarUrl}
+                    alt={review.user.fullName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  review.user.fullName.charAt(0).toUpperCase()
+                )}
               </div>
               
               <div className="flex-1">
-                {/* User Info */}
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium text-gray-900">{review.username}</span>
+                  <span className="text-sm font-medium text-gray-900">{review.user.fullName}</span>
                   <div className="flex gap-1">
                     {renderStars(review.rating)}
                   </div>
                 </div>
                 
                 <div className="text-xs text-gray-500 mb-3">
-                  {review.date}
+                  {formatDate(review.createdAt)}
                 </div>
                 
-                {/* Comment */}
                 <p className="text-gray-800 text-sm mb-3 leading-relaxed">
                   {review.comment}
                 </p>
                 
-                {/* Media - Simplified */}
-                <div className="flex gap-2 mb-3">
-                  {review.hasVideo && (
-                    <div className="relative">
-                      <div className="w-16 h-16 bg-gray-100 rounded">
+                {review.images && review.images.length > 0 && (
+                  <div className="flex gap-2 mb-3 flex-wrap">
+                    {review.images.map((image, index) => (
+                      <div key={index} className="w-16 h-16 bg-gray-100 rounded">
                         <img 
-                          src={review.images[0]} 
-                          alt="Video"
+                          src={image} 
+                          alt={`Ảnh ${index + 1}`}
                           className="w-full h-full object-cover rounded"
                         />
                       </div>
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="bg-black bg-opacity-50 rounded-full p-1">
-                          <Play size={12} className="text-white fill-white" />
-                        </div>
-                      </div>
-                      <div className="absolute bottom-0 right-0 bg-black bg-opacity-70 text-white text-xs px-1 rounded-tl ">
-                        {review.videoDuration}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {review.images.slice(1).map((image, index) => (
-                    <div key={index} className="w-16 h-16 bg-gray-100 rounded">
-                      <img 
-                        src={image} 
-                        alt={`Ảnh ${index + 1}`}
-                        className="w-full h-full object-cover rounded"
-                      />
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Like Button - Simplified */}
-                <button className="flex items-center gap-1 text-gray-500 hover:text-gray-700 text-sm">
-                  <ThumbsUp size={14} />
-                  <span>{review.likes}</span>
-                </button>
+                    ))}
+                  </div>
+                )}
+            
               </div>
             </div>
           </div>
         ))}
       </div>
+   <div className='flex justify-center'>
+
+    {totalPage > 1 && (
+   <Pagination
+        total={totalPage}
+        page={page}
+        onChange={(page) => {
+          setPage(page as number);
+          setPageSize(10);
+        }}
+      />
+    )}
+   </div>
     </div>
   );
 }
