@@ -117,7 +117,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
           </div>
         )}
       </div>
-        <ModalEvaluate isOpen={isOpen} onClose={() => setIsOpen(false)} orderId={order.id} />
+        <ModalEvaluate isOpen={isOpen} onClose={() => setIsOpen(false)} dataOrder={order} />
     </div>
   );
 } 

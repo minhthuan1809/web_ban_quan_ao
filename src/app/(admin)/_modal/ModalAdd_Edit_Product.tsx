@@ -143,7 +143,7 @@ export default function ModalAdd_Edit_Product({
       
       if (newImages.length > 0) {
         try {
-          const newUploadedImages = await uploadToCloudinary(newImages, "kick-style");
+          const newUploadedImages = await uploadToCloudinary(newImages, process.env.NEXT_PUBLIC_FOLDER || "");
           uploadedImages = [...form.imageUrls.filter(img => typeof img === 'string'), ...newUploadedImages];
         } catch (error) {
           toast.error("Có lỗi khi tải lên hình ảnh. Vui lòng kiểm tra định dạng file.");
