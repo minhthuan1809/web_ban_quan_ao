@@ -5,13 +5,11 @@ export const getProducts_API = async (search: string, page: number, limit: numbe
     try {
         // Handle other filters
         const filterParams = {
-            category: filter?.categories || [],
-            sizes: filter?.sizes || [],
+            categoryIds: filter?.categories || [],
+            sizeIds: filter?.sizes || [],
             minPrice: filter?.priceRange?.[0] || 0,
             maxPrice: filter?.priceRange?.[1] || 500000000
         };
-
-        console.log("filterParams" , filterParams);
 
         // Build query parameters
         const queryParams = new URLSearchParams({

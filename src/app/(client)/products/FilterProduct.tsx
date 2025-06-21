@@ -52,7 +52,8 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
   useEffect(() => {
     const fetchCategories = async () => {
       const res = await getCategory_API("", 1, 100, "createdAt", "desc")
-      setCategories(res.data)
+        setCategories(res.data)
+ 
     }
     fetchCategories()
   }, [selectedCategories])
@@ -95,8 +96,8 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
             >
               {categories.map((category : any) => (
                 <Checkbox
-                  key={category.slug}
-                  value={category.name}
+                  key={category.id}
+                  value={category.id}
                   classNames={{
                     label: "text-xs sm:text-sm text-default-700",
                   }}
@@ -117,15 +118,15 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
                 <div
                   key={size.id}
                   className={`cursor-pointer h-7 sm:h-9 flex items-center justify-center rounded border transition-colors text-xs sm:text-sm ${
-                    selectedSizes.includes(size.name)
+                    selectedSizes.includes(size.id)
                       ? "bg-primary text-primary-foreground border-primary"
                       : "border-border text-default-700 hover:border-primary/50"
                   }`}
                   onClick={() => {
-                    if (selectedSizes.includes(size.name)) {
-                      setSelectedSizes(selectedSizes.filter((s : any) => s !== size.name))
+                    if (selectedSizes.includes(size.id)) {
+                      setSelectedSizes(selectedSizes.filter((s : any) => s !== size.id))
                     } else {
-                      setSelectedSizes([...selectedSizes, size.name])
+                      setSelectedSizes([...selectedSizes, size.id])
                     }
                   }}
                 >
