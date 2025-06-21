@@ -33,7 +33,7 @@ export default function ModalAddUse({
   const handleSubmit = async () => {
     console.log(formData);
     if (!file) return;
-    const newUploadedImages = await uploadToCloudinary([file], "kick-style");
+    const newUploadedImages = await uploadToCloudinary([file], process.env.NEXT_PUBLIC_FOLDER || "");
     formData.avatarUrl = newUploadedImages[0] || "";
     try {
       setLoading(true);
@@ -53,7 +53,7 @@ export default function ModalAddUse({
 
   const handleEdit = async () => {
     if (!file) return;
-    const newUploadedImages = await uploadToCloudinary([file], "kick-style");
+    const newUploadedImages = await uploadToCloudinary([file], process.env.NEXT_PUBLIC_FOLDER || "");
     formData.avatarUrl = newUploadedImages[0] || "";
     try {
       setLoading(true);

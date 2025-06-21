@@ -16,9 +16,9 @@ export const createEvaluate_API = async (data: any) => {
 }
 
 
-export const getReviews_API = async (productId: number) => {
+export const getReviews_API = async (page: number, pageSize: number = 10, searchValue: string = '') => {
   const { accessToken } = useAuthInfor();
-      const response = await axios.get(`${API_URL}/reviews?productId=${productId}`, {
+      const response = await axios.get(`${API_URL}/reviews?page_size=${pageSize}&page=${page}&search=${searchValue}`, {
           headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${accessToken}`,

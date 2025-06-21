@@ -1,18 +1,45 @@
 "use client"
 import React, { useState } from 'react'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Textarea, Card, CardBody, Divider } from "@nextui-org/react"
+import { Modal, ModalContent, ModalBody, ModalFooter, Button, Textarea, Card, CardBody, Divider } from "@nextui-org/react"
 import { Star, MessageSquare, Camera } from 'lucide-react'
 import InputTakeImg from '@/app/_util/ui/InputTakeImg';
 import { createEvaluate_API } from '@/app/_service/Evaluate';
 import { toast } from 'react-toastify';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { uploadToCloudinary } from '@/app/_util/upload_img_cloudinary';
-    
+import Image from 'next/image';
+
+interface OrderItem {
+  id: number;
+  productId: number;
+  productName: string;
+  quantity: number;
+  totalPrice: number;
+  unitPrice: number;
+  variantId: number;
+  variantInfo: {
+    sizeName: string;
+    colorName: string;
+    productCode: string;
+  };
+}
+
 interface ModalEvaluateProps {
   isOpen: boolean;
   onClose: () => void;
-  orderId: string;
+  dataOrder: {
+    id: number;
+    orderItems: OrderItem[];
+  };
 }
+
+interface ProductEvaluation {
+  rating: number;
+  comment: string;
+  images: (string | File)[];
+  hoveredStar: number;
+}
+
 const { userInfo } = useAuthInfor();
 const ratingLabels = {
   1: "Rất không hài lòng",
@@ -22,187 +49,184 @@ const ratingLabels = {
   5: "Rất hài lòng"
 };
 
-export default function ModalEvaluate({ isOpen, onClose, orderId }: ModalEvaluateProps) {
-    const [rating, setRating] = useState<number>(5);
-  const [comment, setComment] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [images, setImages] = useState<(string | File)[]>([]);
-  const [hoveredStar, setHoveredStar] = useState<number>(0);
+export default function ModalEvaluate({ isOpen, onClose, dataOrder}: ModalEvaluateProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [evaluations, setEvaluations] = useState<ProductEvaluation[]>(
+    dataOrder.orderItems.map(() => ({
+      rating: 5,
+      comment: "",
+      images: [],
+      hoveredStar: 0
+    }))
+  );
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-        const uploadedImages = await uploadToCloudinary(images, "kick-style");
+      for (let i = 0; i < dataOrder.orderItems.length; i++) {
+        const item = dataOrder.orderItems[i];
+        const evaluation = evaluations[i];
+        const uploadedImages = await uploadToCloudinary(evaluation.images, process.env.NEXT_PUBLIC_FOLDER || "");
+        
         const data = {
-            "userId": userInfo?.id,
-            "orderId": orderId,
-            "rating": rating,
-            "comment": comment,
-                "images": uploadedImages
-          }
-      const res = await createEvaluate_API(data);
-      if(res.status === 200){
-        toast.success("Gửi đánh giá thành công");
-        onClose();
-      }else{
-        toast.error("Gửi đánh giá thất bại");
+          "userId": userInfo?.id || 0,
+          "orderId": dataOrder.id || 0,
+          "rating": evaluation.rating,
+          "productId": item.productId || 0,
+          "comment": evaluation.comment,
+          "images": uploadedImages,
+          "isAdmin": true
+        }
+        
+        const res = await createEvaluate_API(data);
+        if(res.status !== 200) {
+          toast.error(`Gửi đánh giá thất bại cho sản phẩm ${item.productName}`);
+          return;
+        }
       }
-      setRating(5);
-      setComment("");
-      setImages([]);
+      toast.success("Gửi tất cả đánh giá thành công");
       onClose();
     } catch (error) {
       console.error("Lỗi khi gửi đánh giá:", error);
+      toast.error("Có lỗi xảy ra khi gửi đánh giá");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleStarClick = (star: number) => {
-    setRating(star);
+  const handleStarClick = (index: number, star: number) => {
+    const newEvaluations = [...evaluations];
+    newEvaluations[index].rating = star;
+    setEvaluations(newEvaluations);
   };
 
-  const handleStarHover = (star: number) => {
-    setHoveredStar(star);
+  const handleStarHover = (index: number, star: number) => {
+    const newEvaluations = [...evaluations];
+    newEvaluations[index].hoveredStar = star;
+    setEvaluations(newEvaluations);
   };
 
-  const handleStarLeave = () => {
-    setHoveredStar(0);
+  const handleStarLeave = (index: number) => {
+    const newEvaluations = [...evaluations];
+    newEvaluations[index].hoveredStar = 0;
+    setEvaluations(newEvaluations);
   };
-
-  const displayRating = hoveredStar || rating;
 
   return (
     <Modal 
       isOpen={isOpen} 
       onClose={onClose} 
       size="2xl"
-      classNames={{
-        backdrop: "bg-gradient-to-t from-zinc-900 to-zinc-900/10 backdrop-opacity-20",
-        header: "hidden",
-        base: "max-w-[600px] w-full"
-      }}
+      scrollBehavior="inside"
     >
       <ModalContent>
         {(onClose) => (
           <>
-      
-            <ModalBody className="px-6 py-4 max-h-[70vh] overflow-y-auto">
-              <div className="flex flex-col gap-6">
-                {/* Rating Section */}
-                <Card className="bg-gradient-to-r from-primary-50 to-secondary-50 border-none shadow-sm">
-                  <CardBody className="flex flex-col items-center gap-3 py-6">
-                    <div className="flex items-center gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          onClick={() => handleStarClick(star)}
-                          onMouseEnter={() => handleStarHover(star)}
-                          onMouseLeave={handleStarLeave}
-                          className="focus:outline-none transition-transform hover:scale-110 active:scale-95"
-                        >
-                          <Star
-                            size={36}
-                            className={`${
-                              star <= displayRating
-                                ? "fill-yellow-400 text-yellow-400 drop-shadow-sm"
-                                : "fill-none text-gray-300 hover:text-yellow-200"
-                            } transition-all duration-200`}
+            <ModalBody className="p-4">
+              <div className="space-y-8">
+                {dataOrder.orderItems.map((item, index) => (
+                  <div key={item.productId} className="space-y-4">
+                    <Card>
+                      <CardBody className="flex gap-4">
+                        <div className="w-24 h-24 relative">
+                          <Image 
+                            src={`/products/${item.variantInfo.productCode}.jpg`}
+                            alt={item.productName}
+                            fill
+                            className="object-cover"
                           />
-                        </button>
-                      ))}
-                    </div>
-                    
-                    <div className="text-center">
-                      <p className="text-lg font-medium text-default-700">
-                        {ratingLabels[displayRating as keyof typeof ratingLabels]}
-                      </p>
-                      <p className="text-sm text-default-500">
-                        {displayRating} trên 5 sao
-                      </p>
-                    </div>
-                  </CardBody>
-                </Card>
+                        </div>
+                        <div>
+                          <h3>{item.productName}</h3>
+                          <p>
+                            {item.variantInfo.sizeName} - {item.variantInfo.colorName}
+                          </p>
+                          <p>
+                            Số lượng: {item.quantity}
+                          </p>
+                          <p>
+                            {item.unitPrice.toLocaleString('vi-VN')}đ
+                          </p>
+                        </div>
+                      </CardBody>
+                    </Card>
 
-                <Divider />
+                    <Card>
+                      <CardBody>
+                        <div className="flex justify-center gap-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              onClick={() => handleStarClick(index, star)}
+                              onMouseEnter={() => handleStarHover(index, star)}
+                              onMouseLeave={() => handleStarLeave(index)}
+                            >
+                              <Star
+                                size={24}
+                                className={star <= (evaluations[index].hoveredStar || evaluations[index].rating) ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                        <p className="text-center mt-2">
+                          {ratingLabels[(evaluations[index].hoveredStar || evaluations[index].rating) as keyof typeof ratingLabels]}
+                        </p>
+                      </CardBody>
+                    </Card>
 
-                {/* Image Upload Section */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <Camera className="text-default-500" size={20} />
-                    <h3 className="text-medium font-medium text-default-700">
-                      Thêm hình ảnh
-                    </h3>
-                    <span className="text-xs text-default-400 bg-default-100 px-2 py-1 rounded-full">
-                      Tùy chọn
-                    </span>
-                  </div>
-                  
-                  <Card className="border-2 border-dashed border-default-200 bg-default-50">
-                    <CardBody className="py-4">
+                    <div>
+                      <h3 className="mb-2">Thêm hình ảnh</h3>
                       <InputTakeImg
-                        images={images}
-                        setImages={setImages}
-                        onChange={setImages}
+                        images={evaluations[index].images}
+                        setImages={(newImages) => {
+                          const newEvaluations = [...evaluations];
+                          newEvaluations[index].images = newImages;
+                          setEvaluations(newEvaluations);
+                        }}
+                        onChange={(newImages) => {
+                          const newEvaluations = [...evaluations];
+                          newEvaluations[index].images = newImages;
+                          setEvaluations(newEvaluations);
+                        }}
                         numberImg={5}
                       />
-                      <p className="text-xs text-default-400 mt-2 text-center">
-                        Tối đa 5 hình ảnh, mỗi ảnh không quá 5MB
+                    </div>
+
+                    <div>
+                      <h3 className="mb-2">Nhận xét</h3>
+                      <Textarea
+                        placeholder="Nhập nhận xét của bạn"
+                        value={evaluations[index].comment}
+                        onChange={(e) => {
+                          const newEvaluations = [...evaluations];
+                          newEvaluations[index].comment = e.target.value;
+                          setEvaluations(newEvaluations);
+                        }}
+                        minRows={4}
+                      />
+                      <p className="text-sm text-gray-500 mt-1">
+                        {evaluations[index].comment.length}/500 ký tự
                       </p>
-                    </CardBody>
-                  </Card>
-                </div>
+                    </div>
 
-                <Divider />
-
-                {/* Comment Section */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="text-default-500" size={20} />
-                    <h3 className="text-medium font-medium text-default-700">
-                      Nhận xét chi tiết
-                    </h3>
+                    {index < dataOrder.orderItems.length - 1 && <Divider className="my-4"/>}
                   </div>
-                  
-                  <Textarea
-                    placeholder="Hãy chia sẻ chi tiết về chất lượng sản phẩm, dịch vụ giao hàng, đóng gói... để giúp người mua khác có quyết định tốt hơn"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    minRows={4}
-                    maxRows={8}
-                    className="w-full"
-                    classNames={{
-                      input: "resize-none",
-                      inputWrapper: "bg-default-50 border-default-200 hover:border-default-300 focus-within:border-primary"
-                    }}
-                  />
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-default-400">
-                      Tối thiểu 10 ký tự để đánh giá có ý nghĩa
-                    </span>
-                    <span className="text-xs text-default-400">
-                      {comment.length}/500
-                    </span>
-                  </div>
-                </div>
+                ))}
               </div>
             </ModalBody>
             
-            <ModalFooter className="px-6 py-4">
+            <ModalFooter>
               <Button 
-                color="default" 
-                variant="light" 
+                color="default"
                 onPress={onClose}
-                className="font-medium"
               >
-                Hủy bỏ
+                Hủy
               </Button>
               <Button
                 color="primary"
                 onPress={handleSubmit}
                 isLoading={isSubmitting}
-                className="font-medium px-8 bg-gradient-to-r from-primary to-primary-600"
-                isDisabled={comment.length < 10}
+                isDisabled={evaluations.some((evaluation) => evaluation.comment.length < 10)}
               >
                 {isSubmitting ? "Đang gửi..." : "Gửi đánh giá"}
               </Button>

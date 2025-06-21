@@ -170,9 +170,9 @@ export default function Layout({children}: {children: React.ReactNode}) {
           ],
         },
         {
-          name: "Phân Quyền",
-          href: "/permissions",
-          icon: "Shield",
+          name: "Quản Lý Đánh Giá",
+          href: "/evaluate",
+          icon: "MessageCircle",
         },
     ];
 

@@ -1,6 +1,5 @@
 import CardProduct from '@/app/(admin)/_conponents/CardProduct'
 import React from 'react'
-import { mockDataProduct } from './mockdata'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Grid } from 'swiper/modules'
 import 'swiper/css'
@@ -18,13 +17,15 @@ interface ProductCarouselProps {
 
 export default function ProductCarousel({
   title = 'Sản phẩm liên quan',
-  data = mockDataProduct,
+  data = [],
   className = '',
   productsPerRow = 5,
   rows = 2,
 }: ProductCarouselProps) {
 
-  if (!data.length) {
+  console.log("data" , data);
+
+  if (!data || !data.length) {
     return (
       <div className={`${className}`}>
         <h2 className="text-lg font-semibold mb-4 text-gray-900">{title}</h2>
@@ -85,8 +86,8 @@ export default function ProductCarousel({
         }}
         className="pb-12"
       >
-        {data.map((product, index) => (
-          <SwiperSlide key={index}>
+        {data.map((product) => (
+          <SwiperSlide key={product.id}>
             <div className="transition-all duration-300 hover:scale-[1.02]">
               <CardProduct product={product} />
             </div>

@@ -52,7 +52,7 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
       return [file];
     }
     if (file instanceof File) {
-      const res = await uploadToCloudinary([file], "teamBall");
+      const res = await uploadToCloudinary([file], process.env.NEXT_PUBLIC_FOLDER || "");
       return res;
     }
     return [];

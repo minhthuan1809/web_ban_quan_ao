@@ -1,5 +1,5 @@
 "use client";
-import { getProductDetail_API, getVariantDetail_API } from "@/app/_service/products";
+import { getProductDetail_API, getProducts_API, getVariantDetail_API } from "@/app/_service/products";
 import React, { useEffect, useState } from "react";
 import {
   Star,
@@ -23,6 +23,7 @@ import InstructChooseSize from "@/app/(client)/_modal/InstructChooseSize";
 import { CreateCard_API } from "@/app/_service/Card";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { Button, Card, CardBody, Chip } from "@nextui-org/react";
+import { log } from "console";
 
 export default function ProductDetailPage({
   params,
@@ -58,6 +59,7 @@ export default function ProductDetailPage({
   const [isLoading, setIsLoading] = useState(true);
   const [currentPrice, setCurrentPrice] = useState(0);
   const [currentSalePrice, setCurrentSalePrice] = useState(0);
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -90,6 +92,31 @@ export default function ProductDetailPage({
       fetchProduct();
     }
   }, [id]);
+
+  // Sản phẩm liên quan
+  useEffect(() => {
+    const fetchReviews = async () => {
+
+    
+      const response = await getProducts_API('', 1, 10, {
+        category: [product.category.id]
+      });
+    
+      setRelatedProducts(response.data.data);
+    }
+    fetchReviews();
+  }, [product]);
+
+  // get
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const response = await getProducts_API('', 1, 10, {
+        category: [product.category.id]
+      });
+      setRelatedProducts(response.data);
+    }
+    fetchReviews();
+  }, [product]);
 
   // Group variants by size and color
   const sizes = React.useMemo(() => {
@@ -486,11 +513,7 @@ export default function ProductDetailPage({
         <div className="mt-8">
           <Card className="shadow-small">
             <CardBody className="p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <h2 className="text-xl font-semibold text-foreground">Sản phẩm liên quan</h2>
-                <div className="flex-1 border-b border-border"></div>
-              </div>
-              <ProductCarousel />
+              <ProductCarousel title="Sản phẩm liên quan" data={relatedProducts} />
             </CardBody>
           </Card>
         </div>

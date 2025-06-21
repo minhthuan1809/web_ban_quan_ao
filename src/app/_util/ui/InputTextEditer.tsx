@@ -49,7 +49,7 @@ const InputTextEditor: React.FC<InputTextEditorProps> = ({ value, onChange, heig
                 try {
                     if (files.length === 0) return false;
                     // Upload to Cloudinary
-                    uploadToCloudinary([files[0]], 'textEditer').then((res) => {
+                    uploadToCloudinary([files[0]], process.env.NEXT_PUBLIC_FOLDER || "").then((res) => {
                         if (res && res.length > 0) {
                             const result = {
                                 result: [{
