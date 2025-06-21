@@ -1,12 +1,15 @@
 "use client"
-import { getReviews_API } from '@/app/_service/Evaluate';
+import { getReviews_API, updateAnswer_API } from '@/app/_service/Evaluate';
 import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 import React, { useEffect, useState } from 'react'
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, Chip, Tooltip, Button, Pagination, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input } from "@nextui-org/react";
 import { Star, MessageCircle, Send } from 'lucide-react';
 import Image from 'next/image';
-import { formatDate } from 'date-fns';
+import { formatDate, differenceInDays } from 'date-fns';
 import Loading from '@/app/_util/Loading';
+import { createAnswer_API } from '@/app/_service/Evaluate';
+import useAuthInfor from '@/app/customHooks/AuthInfor';
+import { toast } from 'react-toastify';
 
 export default function EvaluatePage() {
     const [reviews, setReviews] = useState<any[]>([]);
@@ -19,12 +22,16 @@ export default function EvaluatePage() {
     const [isReplyModalOpen, setIsReplyModalOpen] = useState<boolean>(false);
     const [selectedReview, setSelectedReview] = useState<any>(null);
     const [replyText, setReplyText] = useState<string>('');
-
+    const { userInfo } = useAuthInfor();
+    const [reload, setReload] = useState<boolean>(false);
+    const [isEditing, setIsEditing] = useState<boolean>(false);
+    const [answerId, setAnswerId] = useState<number>(0);
     useEffect(() => {
         const fetchEvaluate = async () => {
             setLoading(true);
             try {
                 const response = await getReviews_API(currentPage, 15, searchValue);
+                
                 setReviews(response.data);
                 setTotalPage(response.metadata.total_page);
             } catch (error) {
@@ -39,18 +46,66 @@ export default function EvaluatePage() {
         }, 500);
 
         return () => clearTimeout(timer);
-    }, [currentPage, searchValue]);
+    }, [currentPage, searchValue, reload]);
 
     const handleReply = async (review: any) => {
         setSelectedReview(review);
         setIsReplyModalOpen(true);
+        if(review.answers && review.answers.length > 0) {
+            setIsEditing(true);
+            setReplyText(review.answers[0].answer);
+        } else {
+            setIsEditing(false);
+            setReplyText('');
+        }
     };
 
     const handleSubmitReply = async () => {
-        // Implement API call to submit reply
-        console.log("Replying to review:", selectedReview?.id, replyText);
-        setIsReplyModalOpen(false);
-        setReplyText('');
+        const data ={
+            userId: userInfo?.id,
+            answer: replyText,
+            images: [],
+            reviewId: selectedReview?.id
+          } 
+        const res = await createAnswer_API(data);
+        if(res.status === 200){
+            toast.success(isEditing ? "Sửa phản hồi thành công" : "Trả lời đánh giá thành công");
+            setIsReplyModalOpen(false);
+            setReplyText('');
+            setReload(!reload);
+        }else{
+            toast.error(isEditing ? "Sửa phản hồi thất bại" : "Trả lời đánh giá thất bại");
+            setIsReplyModalOpen(false);
+            setReplyText('');
+        }
+    };
+    const handleUpdateAnswer = async (id: number) => {
+        const data ={
+            userId: userInfo?.id,
+            answer: replyText,
+            images: [],
+            reviewId: selectedReview?.id
+          } 
+        const res = await updateAnswer_API(id, data);
+        if(res.status === 200){
+            toast.success("Sửa phản hồi thành công");
+            setIsReplyModalOpen(false);
+            setReplyText('');
+            setReload(!reload);
+            setIsEditing(false);
+        }
+        else{
+            toast.error("Sửa phản hồi thất bại");
+            setIsReplyModalOpen(false);
+            setReplyText('');
+            setIsEditing(false);
+        }
+    }
+
+    const canEditAnswer = (answer: any) => {
+        if (!answer) return false;
+        const daysSinceAnswer = differenceInDays(new Date(), new Date(answer.createdAt));
+        return daysSinceAnswer <= 15;
     };
 
     const columns = [
@@ -59,6 +114,7 @@ export default function EvaluatePage() {
         { name: "BÌNH LUẬN", uid: "comment" },
         { name: "HÌNH ẢNH", uid: "images" },
         { name: "NGÀY TẠO", uid: "createdAt" },
+        { name: "CÂU TRẢ LỜI", uid: "answers" },
         { name: "HÀNH ĐỘNG", uid: "actions" },
     ];
 
@@ -114,7 +170,35 @@ export default function EvaluatePage() {
                 ) : "Không có hình ảnh";
             case "createdAt":
                 return formatDate(review.createdAt, 'dd/MM/yyyy');
+            case "answers":
+                return review.answers && review.answers.length > 0 ? (
+                    <div className="space-y-2">
+                        {review.answers.map((answer: any, index: number) => (
+                            <div key={index} className="text-sm">
+                                <p className="text-gray-600">{answer.answer}</p>
+                                <p className="text-xs text-gray-400">{formatDate(answer.createdAt, 'dd/MM/yyyy')}</p>
+                            </div>
+                        ))}
+                    </div>
+                ) : "Chưa có câu trả lời";
             case "actions":
+                if (review.answers && review.answers.length > 0) {
+                    const canEdit = canEditAnswer(review.answers[0]);
+                    return (
+                        <Button
+                            color="warning"
+                            variant="flat"
+                            size="sm"
+                            onClick={() => {
+                                setAnswerId(review.answers[0].id);
+                                handleReply(review);
+                            }}
+                            isDisabled={!canEdit}
+                        >
+                            {canEdit ? "Sửa phản hồi" : "Hết hạn sửa"}
+                        </Button>
+                    );
+                }
                 return (
                     <Button
                         color="primary"
@@ -206,7 +290,7 @@ export default function EvaluatePage() {
                 >
                     <ModalContent>
                         <ModalHeader>
-                            <h3>Trả lời đánh giá</h3>
+                            <h3>{isEditing ? "Sửa phản hồi" : "Trả lời đánh giá"}</h3>
                         </ModalHeader>
                         <ModalBody>
                             <div className="space-y-4">
@@ -225,8 +309,8 @@ export default function EvaluatePage() {
                             <Button color="danger" variant="light" onPress={() => setIsReplyModalOpen(false)}>
                                 Hủy
                             </Button>
-                            <Button color="primary" onPress={handleSubmitReply}>
-                                Gửi trả lời
+                            <Button color="primary" onPress={isEditing ? () => handleUpdateAnswer(answerId) : handleSubmitReply}>
+                                {isEditing ? "Cập nhật" : "Gửi trả lời"}
                             </Button>
                         </ModalFooter>
                     </ModalContent>

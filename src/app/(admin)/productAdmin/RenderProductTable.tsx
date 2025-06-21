@@ -7,8 +7,8 @@ import FormatPrice from '@/app/_util/FormatPrice';
 import RenderTextEditer from '@/app/_util/ui/RenderTextEditer';
 import { Pagination, Input, Button, Badge, Chip } from '@nextui-org/react';
 import Modadescription from '../_modal/Modadescription';
-import { DiscountPrice } from '@/app/_util/DiscountPrice';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
+import { calculateDiscountedPrice } from '@/app/_util/CalculateCartPrice';
 
 interface RenderProductTableProps {
   products: any[];
@@ -42,6 +42,7 @@ export default function RenderProductTable({
   useEffect(() => {
     setMounted(true);
   }, []);
+  
 
   
 
@@ -176,7 +177,7 @@ export default function RenderProductTable({
                             </div>
                             <div className="text-danger font-semibold">
                               <FormatPrice
-                                price={DiscountPrice(product.price || 0, product.salePrice || 0)}
+                                price={calculateDiscountedPrice(product.price, product.salePrice)}
                                 className="text-danger font-semibold"
                               />
                             </div>
@@ -283,8 +284,9 @@ export default function RenderProductTable({
                                     {(product.price || 0).toLocaleString()} đ
                                   </div>
                                   <div className="text-danger font-semibold text-sm">
+                                    
                                     <FormatPrice
-                                      price={DiscountPrice(product.price || 0, product.salePrice || 0)}
+                                      price={calculateDiscountedPrice(product.price, product.salePrice)}
                                       className="text-danger font-semibold"
                                     />
                                   </div>

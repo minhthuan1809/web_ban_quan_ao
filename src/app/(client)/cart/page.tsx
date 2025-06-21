@@ -4,7 +4,7 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import { toast } from 'react-toastify';
-import { DiscountPrice } from '@/app/_util/DiscountPrice';
+import { calculateCartItemPrice, calculateCartItemTotal, getOriginalPrice, hasDiscount } from '@/app/_util/CalculateCartPrice';
 import FormatPrice from '@/app/_util/FormatPrice';
 import CardPay from './cardPay';
 import Link from 'next/link';
@@ -93,8 +93,7 @@ export default function Page() {
         return selectedItems.reduce((total, itemId) => {
             const item = cartItems.find(item => item.id === itemId);
             if (item) {
-                const price = DiscountPrice(item.variant.product.price, item.variant.product.salePrice);
-                return total + (price * item.quantity);
+                return total + calculateCartItemTotal(item);
             }
             return total;
         }, 0);
@@ -216,18 +215,18 @@ export default function Page() {
                                                 {/* Price */}
                                                 <div className="flex items-center gap-3 mb-4">
                                                     <FormatPrice 
-                                                        price={DiscountPrice(item.variant.product.price, item.variant.product.salePrice)} 
+                                                        price={calculateCartItemPrice(item)} 
                                                         className="text-red-600 text-lg font-medium" 
                                                         currency="₫" 
                                                     />
-                                                    {item.variant.product.salePrice > 0 && (
+                                                    {hasDiscount(item) && (
                                                         <FormatPrice 
-                                                            price={item.variant.product.price} 
+                                                            price={getOriginalPrice(item)} 
                                                             className="text-gray-400 line-through" 
                                                             currency="₫" 
                                                         />
                                                     )}
-                                                    {item.variant.product.salePrice > 0 && (
+                                                    {hasDiscount(item) && (
                                                         <span className="text-sm font-medium text-green-600">
                                                             -{item.variant.product.salePrice}%
                                                         </span>

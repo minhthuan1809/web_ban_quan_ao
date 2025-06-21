@@ -12,15 +12,41 @@ import {
 import { ChevronUp, ChevronDown } from "lucide-react"
 import { getCategory_API } from "@/app/_service/category"
 import { GetAllSize_API } from "@/app/_service/size"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export default function FilterProduct({filter, setFilter} : {filter: any, setFilter: any}) {
-
-  const [selectedCategories, setSelectedCategories] = useState([])
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
   const [selectedSizes, setSelectedSizes] = useState<string[]>([])
   const [priceRange, setPriceRange] = useState([0, 4905500])
   const [isFilterExpanded, setIsFilterExpanded] = useState(true)
   const [categories, setCategories] = useState([])
   const [sizes, setSizes] = useState([])
+
+  // Parse categories từ URL khi component mount
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      const urlCategories = categoryParam.split(',').filter(id => id.trim() !== '').map(id => id.trim());
+      setSelectedCategories(urlCategories);
+    }
+  }, []);
+
+  // Cập nhật URL khi categories thay đổi
+  useEffect(() => {
+    const params = new URLSearchParams(Array.from(searchParams.entries()));
+    
+    if (selectedCategories.length > 0) {
+      params.set('category', selectedCategories.join(','));
+    } else {
+      params.delete('category');
+    }
+    
+    const newUrl = `/products?${params.toString()}`;
+    router.push(newUrl, { scroll: false });
+  }, [selectedCategories]);
 
 //debounce
   useEffect(() => {
@@ -31,10 +57,10 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
         priceRange: priceRange,
       })
     }, 1000)
-
     return () => clearTimeout(timeout)
   }, [selectedCategories, selectedSizes, priceRange])
 
+  //fetch sizes
   useEffect(() => {
     const fetchSizes = async () => {
       const res = await GetAllSize_API("", 1)
@@ -56,7 +82,7 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
  
     }
     fetchCategories()
-  }, [selectedCategories])
+  }, [])
 
   return (
     <Card className="w-full lg:w-[280px] h-fit shadow-sm overflow-hidden border border-border rounded-lg bg-background">
@@ -89,7 +115,7 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
             <h3 className="text-xs sm:text-sm font-medium text-foreground mb-3">DANH MỤC SẢN PHẨM</h3>
             <CheckboxGroup
               value={selectedCategories}
-              onValueChange={(value : any) => setSelectedCategories(value)}
+              onValueChange={(value : string[]) => setSelectedCategories(value)}
               classNames={{
                 wrapper: "gap-2 sm:gap-3",
               }}
@@ -97,7 +123,7 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
               {categories.map((category : any) => (
                 <Checkbox
                   key={category.id}
-                  value={category.id}
+                  value={category.id.toString()}
                   classNames={{
                     label: "text-xs sm:text-sm text-default-700",
                   }}

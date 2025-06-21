@@ -123,7 +123,6 @@ export default function InputVariants({
 
   const handleEdit = (index: number) => {
     const variantToEdit = variants[index];
-    console.log('Editing variant:', variantToEdit);
     
     // Xử lý trường hợp khi edit sản phẩm
     const size = variantToEdit.sizeId ? variantToEdit.sizeId.toString() : variantToEdit.size;

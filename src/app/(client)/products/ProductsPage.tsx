@@ -4,7 +4,7 @@ import { Filter, Grid, List, Search } from 'lucide-react';
 import { getProducts_API } from '@/app/_service/products';
 import Loading from '@/app/_util/Loading';
 import { Input, Select, SelectItem } from '@nextui-org/react';
-import CardProduct from '@/app/(admin)/_conponents/CardProduct';
+import CardProduct from '@/app/components/CardProduct';  
 import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function ProductsPage({filter} : {filter: any}) {
@@ -16,10 +16,10 @@ export default function ProductsPage({filter} : {filter: any}) {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || "");
-  const [sort, setSort] = useState("name");
+  const [sort, setSort] = useState("all");
 
   const sortOptions = [
-    { value: "name", label: "Phổ biến" },
+    { value: "all", label: "Tất cả" },
     { value: "createdAt", label: "Mới nhất" },
     { value: "price", label: "Giá thấp → cao" },
     { value: "-price", label: "Giá cao → thấp" }
@@ -41,14 +41,33 @@ export default function ProductsPage({filter} : {filter: any}) {
           priceRange: [0, 5000000]
         };
         
+        // Lấy categories từ URL
+        const categoryParam = searchParams.get('category');
+        let urlCategories: string[] = [];
+        if (categoryParam) {
+          urlCategories = categoryParam.split(',').filter(id => id.trim() !== '').map(id => id.trim());
+        }
+        
         const currentFilter = {
           ...defaultFilter,
-          ...filter
+          ...filter,
+          // Ưu tiên categories từ URL
+          categories: urlCategories.length > 0 ? urlCategories : (filter?.categories || [])
         };
 
-        const res = await getProducts_API(searchTerm, page, limit, currentFilter);
+        const res = await getProducts_API("", page, limit, currentFilter);
         if (res.status === 200) {
-          setProducts(res.data.data);
+          let sortedProducts = [...res.data.data];
+          
+          if (sort === "price") {
+            sortedProducts.sort((a, b) => a.price - b.price);
+          } else if (sort === "-price") {
+            sortedProducts.sort((a, b) => b.price - a.price);
+          } else if (sort === "createdAt") {
+            sortedProducts.sort((a, b) => b.createdAt - a.createdAt);
+          }
+          
+          setProducts(sortedProducts);
           setTotal(res.data.metadata.total_page);
         }
       } catch (error) {
@@ -63,7 +82,7 @@ export default function ProductsPage({filter} : {filter: any}) {
     }, 500);
 
     return () => clearTimeout(timeout);
-  }, [page, limit, filter, searchTerm]);
+  }, [page, limit, filter, searchParams, sort]);
 
   if (loading) {
     return <Loading />;
@@ -96,6 +115,7 @@ export default function ProductsPage({filter} : {filter: any}) {
               <Select
                 size="sm"
                 variant="bordered"
+                defaultSelectedKeys={["all"]}
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
                 className="w-[140px] sm:w-[180px]"

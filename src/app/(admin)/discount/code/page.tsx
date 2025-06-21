@@ -124,7 +124,6 @@ export default function Code() {
       }
     }
   }
-  console.log('coupons', coupons);
   
   return (
     <div className="p-6">

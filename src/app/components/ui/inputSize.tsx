@@ -45,8 +45,6 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
 
   useEffect(() => {
     if (mounted && size) {
-      console.log('Current size:', size);
-      console.log('Size list:', sizeList);
       const selectedSize = sizeList.find(item => item.id.toString() === size.toString());
       if (selectedSize) {
         setSearchTerm(selectedSize.name);

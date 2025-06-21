@@ -23,7 +23,7 @@ import InstructChooseSize from "@/app/(client)/_modal/InstructChooseSize";
 import { CreateCard_API } from "@/app/_service/Card";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { Button, Card, CardBody, Chip } from "@nextui-org/react";
-import { log } from "console";
+import { calculateDiscountedPrice } from "@/app/_util/CalculateCartPrice";
 
 export default function ProductDetailPage({
   params,
@@ -57,8 +57,6 @@ export default function ProductDetailPage({
   const [isOpen, setIsOpen] = useState(false);
   const [showProductInfo, setShowProductInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentPrice, setCurrentPrice] = useState(0);
-  const [currentSalePrice, setCurrentSalePrice] = useState(0);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
 
   useEffect(() => {
@@ -66,22 +64,9 @@ export default function ProductDetailPage({
       try {
         setIsLoading(true);
         const resVariant = await getVariantDetail_API(id);
-        
+        console.log(resVariant.data);
         setProduct(resVariant.data);
-        setCurrentPrice(resVariant.data.price);
-        setCurrentSalePrice(resVariant.data.salePrice);
         
-        if (resVariant.data?.variants?.length > 0) {
-          const firstVariant = resVariant.data.variants[0];
-          setSelectedSize(firstVariant.size.name);
-          setSelectedColor(firstVariant.color);
-          setSelectedVariant(firstVariant);
-          
-          if (firstVariant.priceAdjustment) {
-            setCurrentPrice(firstVariant.priceAdjustment);
-            setCurrentSalePrice(firstVariant.priceAdjustment);
-          }
-        }
       } catch (error) {
         console.error('Error fetching product:', error);
       } finally {
@@ -96,24 +81,15 @@ export default function ProductDetailPage({
   // Sản phẩm liên quan
   useEffect(() => {
     const fetchReviews = async () => {
-
-    
+      const productPrice = Math.round(product.price);
+      const minPrice = Math.round(productPrice * 0.9); // Giá thấp hơn 10%
+      const maxPrice = Math.round(productPrice * 1.1); // Giá cao hơn 10%
+      
       const response = await getProducts_API('', 1, 10, {
-        category: [product.category.id]
+        priceRange: [minPrice, maxPrice]
       });
     
       setRelatedProducts(response.data.data);
-    }
-    fetchReviews();
-  }, [product]);
-
-  // get
-  useEffect(() => {
-    const fetchReviews = async () => {
-      const response = await getProducts_API('', 1, 10, {
-        category: [product.category.id]
-      });
-      setRelatedProducts(response.data);
     }
     fetchReviews();
   }, [product]);
@@ -152,43 +128,17 @@ export default function ProductDetailPage({
         v.size.name === selectedSize && v.color.id === selectedColor.id
       );
       setSelectedVariant(variant);
-      
-      if (variant?.priceAdjustment) {
-        setCurrentPrice(variant.priceAdjustment);
-        setCurrentSalePrice(variant.priceAdjustment);
-      } else {
-        setCurrentPrice(product.price);
-        setCurrentSalePrice(product.salePrice);
-      }
     }
-  }, [selectedSize, selectedColor, product.variants, product.price, product.salePrice]);
-
-  // When size changes, update color selection
-  useEffect(() => {
-    if (colors.length > 0 && (!selectedColor || !colors.some((c: any) => c.id === selectedColor.id))) {
-      setSelectedColor(colors[0]);
-    }
-  }, [colors, selectedColor]);
+  }, [selectedSize, selectedColor, product.variants]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price) + "đ";
   };
 
-  const calculateDiscount = () => {
-    if (currentPrice !== currentSalePrice) {
-      return Math.round(
-        ((currentPrice - currentSalePrice) / currentPrice) * 100
-      );
-    }
-    return 0;
-  };
+  
 
   const handleAddToCard = async () => {
-    if (!selectedVariant) {
-      toast.error("Vui lòng chọn kích thước và màu sắc");
-      return;
-    }
-
+if(userInfo){
     const data = {
       "cartId": userInfo.cartId,
       "variantId": selectedVariant.id,
@@ -203,6 +153,9 @@ export default function ProductDetailPage({
     } catch (error) {
       toast.error("Thêm vào giỏ hàng thất bại");
     }
+  }else{
+    toast.error("Vui lòng đăng nhập để thêm vào giỏ hàng");
+  }
   }
 
   if (isLoading) {
@@ -283,29 +236,25 @@ export default function ProductDetailPage({
 
             {/* Price */}
             <div className="space-y-1">
-              {currentPrice !== currentSalePrice ? (
+              {product.price !== product.salePrice ? (
                 <>
                   <div className="text-default-400 line-through text-lg">
-                    {formatPrice(currentPrice)}
+                    {formatPrice(product.price)}
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-bold text-foreground">
-                      {formatPrice(currentSalePrice)}
+                      {formatPrice(calculateDiscountedPrice(product.price, product.salePrice))}
                     </span>
                     <span className="bg-primary text-primary-foreground px-2 py-1 rounded text-sm font-medium">
-                      -{calculateDiscount()}%
+                      -{product.salePrice}%
                     </span>
                   </div>
                 </>
               ) : (
                 <div className="text-3xl font-bold text-foreground">
-                  {formatPrice(currentPrice)}
+                  {formatPrice(product.price)}
                 </div>
               )}
-              <div className="flex items-center gap-2 text-sm text-default-600">
-                <Truck size={16} />
-                <span>Freeship đơn trên 200K</span>
-              </div>
             </div>
 
             {/* Team/Product Info */}
@@ -372,7 +321,7 @@ export default function ProductDetailPage({
             </div>
 
             {/* Color Selection */}
-            {colors.length > 0 && (
+            {colors.length > 0 && selectedSize && (
               <div className="space-y-3">
                 <span className="text-sm font-medium text-foreground">
                   Màu sắc

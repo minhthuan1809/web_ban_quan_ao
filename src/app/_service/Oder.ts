@@ -19,7 +19,7 @@ export const getOrder_API = async (page: number, searchQuery: string) => {
     // Lấy token chỉ khi hàm được gọi
     const { accessToken } = useAuthInfor() || { accessToken: null };
     
-    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/orders?page=${page}&searchQuery=${searchQuery}&size=100`, {
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/orders?page=${page}&Search=${searchQuery}&size=100`, {
         headers: {
             'Authorization': `Bearer ${accessToken}`,
             'Content-Type': 'application/json'

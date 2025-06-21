@@ -11,6 +11,15 @@ interface User {
   avatarUrl: string | null;
 }
 
+interface Answer {
+  id: number;
+  answer: string;
+  images: string[];
+  createdAt: number;
+  updatedAt: number;
+  isDeleted: boolean;
+}
+
 interface Review {
   id: number;
   user: User;
@@ -18,7 +27,7 @@ interface Review {
   comment: string;
   images: string[] | null;
   createdAt: number;
-  answers: any[];
+  answers: Answer[];
   isDeleted: boolean;
 }
 
@@ -44,15 +53,15 @@ export default function SimpleEvaluateComment() {
   const [metadata, setMetadata] = useState<ReviewResponse['metadata'] | null>(null);
 
   const params = useParams();
-  const productId = params.slug;
+  const _params = params.slug;
+  const productId = _params[1];
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10);
   const totalPage = metadata?.total_page || 1;
 
   useEffect(() => {
     const fetchReviews = async () => {
       try {
-        const response = await getReviews_API(page, 10, '');
+        const response = await getReviews_API(page, 10, '', productId);
         const reviewsData = response.data;
         const metadata = response.metadata;
         
@@ -86,7 +95,7 @@ export default function SimpleEvaluateComment() {
       <Star
         key={index}
         size={14}
-        className={`${index < rating ? 'fill-gray-800 text-gray-800' : 'text-gray-300'}`}
+        className={`text-yellow-500 ${index < rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300'}`}
       />
     ));
   };
@@ -172,25 +181,36 @@ export default function SimpleEvaluateComment() {
                     ))}
                   </div>
                 )}
-            
+
+                {review.answers && review.answers.length > 0 && (
+                  <div className="mt-4 pl-4 border-l-2 border-gray-200">
+                    {review.answers.map((answer) => (
+                      <div key={answer.id} className="mb-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-sm font-medium text-blue-600">KICKSTYLE</span>
+                          <span className="text-xs text-gray-500">{formatDate(answer.createdAt)}</span>
+                        </div>
+                        <p className="text-sm text-gray-700">{answer.answer}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
         ))}
       </div>
-   <div className='flex justify-center'>
-
-    {totalPage > 1 && (
-   <Pagination
-        total={totalPage}
-        page={page}
-        onChange={(page) => {
-          setPage(page as number);
-          setPageSize(10);
-        }}
-      />
-    )}
-   </div>
+      <div className='flex justify-center'>
+        {totalPage > 1 && (
+          <Pagination
+            total={totalPage}
+            page={page}
+            onChange={(page) => {
+              setPage(page as number);
+            }}
+          />
+        )}
+      </div>
     </div>
   );
 }

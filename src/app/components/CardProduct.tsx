@@ -2,14 +2,14 @@ import React from 'react';
 import { Star, ShoppingCart } from 'lucide-react';
 import Link from 'next/link';
 import formatVietNamese from '@/app/_util/FomatVietNamese';
-import { DiscountPrice } from '@/app/_util/DiscountPrice';
+import { calculateDiscountedPrice } from '@/app/_util/CalculateCartPrice';
 import { Button } from '@nextui-org/react';
 
-const formatPrice = (price) => {
+const formatPrice = (price : number) => {
   return new Intl.NumberFormat('vi-VN').format(price) + 'đ';
 };
 
-const CardProduct = ({ product }) => {
+const CardProduct = ({ product } : { product : any }  ) => {
   return (
     <div className="group bg-background rounded-lg hover:shadow-medium transition-all duration-300 overflow-hidden border border-border">
       {/* Product Image */}
@@ -28,7 +28,7 @@ const CardProduct = ({ product }) => {
                 HOT
               </div>
             )}
-            {product.price !== product.salePrice && (
+            {product.salePrice && product.salePrice > 0 && (
               <div className="bg-danger/90 text-danger-foreground px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium shadow-sm backdrop-blur-sm">
                 {product.salePrice}%
               </div>
@@ -64,10 +64,10 @@ const CardProduct = ({ product }) => {
 
         {/* Price section */}
         <div className="flex flex-col gap-0.5 sm:gap-1">
-          {product.price !== product.salePrice ? (
+          {product.salePrice && product.salePrice > 0 ? (
             <>
               <span className="text-sm sm:text-base font-bold text-danger">
-                {formatPrice(DiscountPrice(product.price, product.salePrice))}
+                {formatPrice(calculateDiscountedPrice(product.price, product.salePrice))}
               </span>
               <span className="text-[10px] sm:text-xs text-default-400 line-through">
                 {formatPrice(product.price)}

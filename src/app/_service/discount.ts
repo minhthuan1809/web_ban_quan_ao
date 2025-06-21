@@ -68,7 +68,7 @@ export const enableCoupon_API = async (id: number) => {
 
 // get {id} coupon
 
-export const getCouponById_API = async (id: number) => {
+export const getCouponById_API = async (id: string) => {
     const res = await axios.get(`${API_URL}/coupons/user/${id}`, {
         headers: {
             Authorization: `Bearer ${accessToken}`,

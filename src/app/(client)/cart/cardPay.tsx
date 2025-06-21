@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import InputPhone from "@/app/components/ui/InputPhone";
 import { useRouter } from "next/navigation";
 import showConfirmDialog from "@/app/_util/Sweetalert2";
-import Image from "next/image";
+import ModalChooseDiscount from "../_modal/ModalChooseDiscount";
 
 interface CardPayProps {
   selectedItems: number[];
@@ -44,10 +44,12 @@ export default function CardPay({
   const [name, setName] = useState<string>(userInfo?.fullName || "");
   const [phone, setPhone] = useState<string>(userInfo?.phoneNumber || "");
   const [note, setNote] = useState<string>("");
-  const [discountCode, setDiscountCode] = useState<string>("");
+  const [discountCode, setDiscountCode] = useState<any>({
+    code: "",
+  });
   const [discount, setDiscount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<number>(1);
-
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const calculateTotalAfterDiscount = () => {
     return calculateTotal() + feeShip - discount;
   };
@@ -83,7 +85,7 @@ const handlePayment = async () => {
     "shippingWard": address.ward.wardName,
     "shippingCity": address.city.cityName,
     "note": note,
-    "couponCode": discountCode,
+    "couponCode": discountCode.code,
     "items": orderItems
   };
 
@@ -121,13 +123,6 @@ const handlePayment = async () => {
     }
   }
 
-
-
-
-  
-
-  
-  
 }
 
   return (
@@ -222,9 +217,12 @@ const handlePayment = async () => {
 
           {/* Mã giảm giá */}
           <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Gift className="text-gray-600" size={18} />
-              <span className="font-medium text-gray-900">Mã giảm giá</span>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Gift className="text-gray-600" size={18} />
+                <span className="font-medium text-gray-900">Mã giảm giá</span> 
+              </div>
+              <span className="text-blue-600 hover:underline text-sm cursor-pointer" onClick={() => setIsOpen(true)}>Chọn mã giảm giá</span>
             </div>
             <Input
               placeholder="Nhập mã giảm giá (nếu có)"
@@ -236,8 +234,15 @@ const handlePayment = async () => {
                 input: "text-gray-900",
                 inputWrapper: "border-gray-200 hover:border-gray-300 focus-within:border-gray-900"
               }}
-              onChange={(e) => setDiscountCode(e.target.value)}
+              onChange={(e) => setDiscountCode({...discountCode, code: e.target.value} as any)}
+              value={discountCode?.code}
             />
+            {discount > 0 && (
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600">Giảm giá:</span>
+                <span className="text-green-600 font-medium">-<FormatPrice price={discount} currency="₫" /></span>
+              </div>
+            )}
           </div>
 
           {/* Chi tiết thanh toán */}
@@ -341,6 +346,14 @@ const handlePayment = async () => {
           </div>
         </div>
       </div>
+      <ModalChooseDiscount 
+        isOpen={isOpen} 
+        onClose={() => setIsOpen(false)} 
+        setDiscountCode={setDiscountCode} 
+        discountCode={discountCode} 
+        orderTotal={calculateTotal()} 
+        setDiscount={setDiscount}
+      />
     </div>
   );
 }

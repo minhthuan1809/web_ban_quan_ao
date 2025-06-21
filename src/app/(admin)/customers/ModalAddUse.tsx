@@ -31,7 +31,6 @@ export default function ModalAddUse({
   const [file, setFile] = useState<File | null>(null);
 
   const handleSubmit = async () => {
-    console.log(formData);
     if (!file) return;
     const newUploadedImages = await uploadToCloudinary([file], process.env.NEXT_PUBLIC_FOLDER || "");
     formData.avatarUrl = newUploadedImages[0] || "";

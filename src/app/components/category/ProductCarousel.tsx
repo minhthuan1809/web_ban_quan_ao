@@ -1,4 +1,4 @@
-import CardProduct from '@/app/(admin)/_conponents/CardProduct'
+import CardProduct from '@/app/components/CardProduct' 
 import React from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'
 import { Navigation, Pagination, Grid } from 'swiper/modules'
@@ -23,7 +23,6 @@ export default function ProductCarousel({
   rows = 2,
 }: ProductCarouselProps) {
 
-  console.log("data" , data);
 
   if (!data || !data.length) {
     return (
