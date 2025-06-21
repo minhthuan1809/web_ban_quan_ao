@@ -11,6 +11,7 @@ import {
 } from "@nextui-org/react"
 import { ChevronUp, ChevronDown } from "lucide-react"
 import { getCategory_API } from "@/app/_service/category"
+import { GetAllSize_API } from "@/app/_service/size"
 
 export default function FilterProduct({filter, setFilter} : {filter: any, setFilter: any}) {
 
@@ -19,8 +20,7 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
   const [priceRange, setPriceRange] = useState([0, 4905500])
   const [isFilterExpanded, setIsFilterExpanded] = useState(true)
   const [categories, setCategories] = useState([])
- 
-
+  const [sizes, setSizes] = useState([])
 
 //debounce
   useEffect(() => {
@@ -35,24 +35,19 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
     return () => clearTimeout(timeout)
   }, [selectedCategories, selectedSizes, priceRange])
 
-
-  const sizes = [
-    { key: "S", label: "S" },
-    { key: "XS", label: "XS" },
-    { key: "M", label: "M" },
-    { key: "L", label: "L" },
-    { key: "XL", label: "XL" },
-    { key: "XXL", label: "XXL" },
-    { key: "29", label: "29" },
-    { key: "30", label: "30" },
-    { key: "31", label: "31" },
-    { key: "34", label: "34" },
-  ]
+  useEffect(() => {
+    const fetchSizes = async () => {
+      const res = await GetAllSize_API("", 1)
+      if(res.data) {
+        setSizes(res.data)
+      }
+    }
+    fetchSizes()
+  }, [])  
 
   const formatPrice = (value: number) => {
     return new Intl.NumberFormat("vi-VN").format(value) + "đ"
   }
-
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -61,7 +56,6 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
     }
     fetchCategories()
   }, [selectedCategories])
-
 
   return (
     <Card className="w-full lg:w-[280px] h-fit shadow-sm overflow-hidden border border-border rounded-lg bg-background">
@@ -121,21 +115,21 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
             <div className="grid grid-cols-3 sm:grid-cols-2 gap-1.5 sm:gap-2">
               {sizes.map((size : any) => (
                 <div
-                  key={size.key}
+                  key={size.id}
                   className={`cursor-pointer h-7 sm:h-9 flex items-center justify-center rounded border transition-colors text-xs sm:text-sm ${
-                    selectedSizes.includes(size.key)
+                    selectedSizes.includes(size.name)
                       ? "bg-primary text-primary-foreground border-primary"
                       : "border-border text-default-700 hover:border-primary/50"
                   }`}
                   onClick={() => {
-                    if (selectedSizes.includes(size.key)) {
-                      setSelectedSizes(selectedSizes.filter((s : any) => s !== size.key))
+                    if (selectedSizes.includes(size.name)) {
+                      setSelectedSizes(selectedSizes.filter((s : any) => s !== size.name))
                     } else {
-                      setSelectedSizes([...selectedSizes, size.key])
+                      setSelectedSizes([...selectedSizes, size.name])
                     }
                   }}
                 >
-                  {size.label}
+                  {size.name}
                 </div>
               ))}
             </div>

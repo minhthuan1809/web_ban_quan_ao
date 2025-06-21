@@ -47,7 +47,6 @@ export default function ProductsPage({filter} : {filter: any}) {
         };
 
         const res = await getProducts_API(searchTerm, page, limit, currentFilter);
-        
         if (res.status === 200) {
           setProducts(res.data.data);
           setTotal(res.data.metadata.total_page);

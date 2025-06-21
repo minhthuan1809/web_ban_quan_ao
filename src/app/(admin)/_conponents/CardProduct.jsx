@@ -94,16 +94,6 @@ const CardProduct = ({ product }) => {
             <span className="text-[10px] sm:text-xs text-default-500 ml-0.5 sm:ml-1">(4.0)</span>
           </div>
 
-          {/* Add to cart button */}
-          <Button
-            size="sm"
-            color="primary"
-            variant="flat"
-            className="font-medium px-2 sm:px-3 py-1 sm:py-1.5 text-[10px] sm:text-sm"
-            startContent={<ShoppingCart size={12} />}
-          >
-            Thêm
-          </Button>
         </div>
       </div>
     </div>

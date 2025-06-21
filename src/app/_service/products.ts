@@ -11,6 +11,8 @@ export const getProducts_API = async (search: string, page: number, limit: numbe
             maxPrice: filter?.priceRange?.[1] || 500000000
         };
 
+        console.log("filterParams" , filterParams);
+
         // Build query parameters
         const queryParams = new URLSearchParams({
             search: search || '',
