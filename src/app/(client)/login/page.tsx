@@ -19,15 +19,12 @@ export default function PageLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Starting login process...', { email: gmail, password: password.length > 0 ? '***' : 'empty' });
     try {
       setLoading(true);
-      console.log('Calling API with URL:', process.env.NEXT_PUBLIC_API_URL);
       const response = await authLogin_API({
         email: gmail,
         password: password,
       });
-      console.log('Login response:', response);
       
             // Sử dụng response từ API và map cho đúng interface
       const tokenData = {

@@ -16,7 +16,7 @@ interface ModalChooseDiscountProps {
 export default function ModalChooseDiscount({ isOpen, onClose, setDiscountCode, discountCode, orderTotal, setDiscount}: ModalChooseDiscountProps) {
     const [discountList, setDiscountList] = useState<any[]>([]);
     const [search, setSearch] = useState('');
-    const { userInfo, accessToken } = useAuthInfor();
+    const { user: userInfo, accessToken } = useAuthInfor();
 
     useEffect(() => {
         const fetchDiscountList = async () => {
@@ -70,7 +70,6 @@ export default function ModalChooseDiscount({ isOpen, onClose, setDiscountCode, 
         setDiscount(discountAmount);
     };
 
-    console.log("filteredDiscounts" , filteredDiscounts);
 
     return (
         <Modal

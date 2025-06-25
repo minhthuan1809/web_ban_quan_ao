@@ -31,8 +31,8 @@ productApiClient.interceptors.response.use(
   }
 );
 
-// TypeScript Interfaces
-export interface ProductVariant {
+// Service-specific TypeScript Interfaces (different from centralized types)
+export interface ServiceProductVariant {
   id: number;
   productId: number;
   sizeId: number;
@@ -75,7 +75,7 @@ export interface Product {
   materialId: number;
   gender: 'MALE' | 'FEMALE' | 'UNISEX';
   status: 'ACTIVE' | 'INACTIVE' | 'OUT_OF_STOCK';
-  variants: ProductVariant[];
+  variants: ServiceProductVariant[];
   category?: Category;
   material?: Material;
   averageRating?: number;
@@ -196,9 +196,9 @@ export class ProductService {
   /**
    * Get variant details by ID
    */
-  static async getVariantById(id: string | number): Promise<AxiosResponse<ProductVariant>> {
+  static async getVariantById(id: string | number): Promise<AxiosResponse<ServiceProductVariant>> {
     try {
-      const response = await productApiClient.get<ProductVariant>(`/products/detail/${id}`);
+      const response = await productApiClient.get<ServiceProductVariant>(`/products/detail/${id}`);
       return response;
     } catch (error) {
       console.error('Error fetching variant details:', error);

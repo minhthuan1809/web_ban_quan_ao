@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Contact } from '@/app/(admin)/contacts/typecontact';
+import { Contact } from '../../types/contact';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 

@@ -1,4 +1,8 @@
-interface FormErrors {
+// Import types from centralized location
+import type { FormErrors } from '../../../../types/api';
+
+// Local interface for product form validation
+interface ProductFormErrors extends FormErrors {
     name?: string;
     categoryId?: string;
     imageUrls?: string;
@@ -13,7 +17,7 @@ interface FormErrors {
 }
 
 export const validateForm = (form: any, setErrors: (errors: any) => void) => {
-    const newErrors: FormErrors = {};
+    const newErrors: ProductFormErrors = {};
     let missingFields: string[] = [];
 
     if (!form.name.trim()) {

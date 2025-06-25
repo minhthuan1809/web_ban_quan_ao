@@ -1,16 +1,13 @@
 import Swal from "sweetalert2"; 
+// Import types from centralized location
+import type { SweetAlertOptions } from '../../types/ui';
 
-interface SweetAlertOptions {
-  title: string;
-  text: string;
-  icon: string;
-  showCancelButton?: boolean;
-  confirmButtonText?: string;
-  cancelButtonText?: string;
+// Local interface for this specific implementation
+interface LocalSweetAlertOptions extends SweetAlertOptions {
   reverseButtons?: boolean;
 }
 
-const showConfirmDialog = (options: SweetAlertOptions) => {
+const showConfirmDialog = (options: LocalSweetAlertOptions) => {
   return Swal.fire({
     title: options.title,
     text: options.text,

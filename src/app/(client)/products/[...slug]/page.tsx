@@ -32,7 +32,7 @@ export default function ProductDetailPage({
 }: {
   params: { slug: string[] };
 }) {
-  const { userInfo } = useAuthInfor();
+  const { user } = useAuthInfor();
   const id = params.slug[1];
   const [product, setProduct] = useState<any>({
     name: '',
@@ -66,7 +66,6 @@ export default function ProductDetailPage({
       try {
         setIsLoading(true);
         const resVariant = await getVariantDetail_API(id);
-        console.log(resVariant.data);
         setProduct(resVariant.data);
         
       } catch (error) {
@@ -140,9 +139,9 @@ export default function ProductDetailPage({
   
 
   const handleAddToCard = async () => {
-if(userInfo){
+if(user){
     const data = {
-      "cartId": userInfo.cartId,
+      "cartId": user.cartId,
       "variantId": selectedVariant.id,
       "quantity": quantity
     }

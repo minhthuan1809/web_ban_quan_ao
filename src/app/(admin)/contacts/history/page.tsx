@@ -14,7 +14,7 @@ export default function HistoryContact() {
     const [totalPages, setTotalPages] = useState(1);
     const rowsPerPage = 10;
     const [searchValue, setSearchValue] = useState("");
-    const { accessToken, userInfo } = useAuthInfor();
+    const { accessToken, user : userInfo } = useAuthInfor();
     
     useEffect(() => {
         const fetchHistoryContact = async () => {

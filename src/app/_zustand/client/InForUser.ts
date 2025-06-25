@@ -1,10 +1,8 @@
 import { create } from "zustand";
 
 
-interface UserState {
-  user_Zustand: any | null;
-  setUser_Zustand: (user: any | null) => void;
-}
+// Import types from centralized location
+import type { UserState } from '../../../types/auth';
 
 export const useUserStore = create<UserState>((set) => ({
   user_Zustand: null,

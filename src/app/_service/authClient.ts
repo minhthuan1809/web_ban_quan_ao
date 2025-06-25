@@ -42,7 +42,14 @@ authApiClient.interceptors.response.use(
   }
 );
 
-// TypeScript Interfaces
+// Import types from centralized location
+import type {
+  AuthUser,
+  AuthResponse,
+  RefreshTokenResponse
+} from '../../types/auth';
+
+// Local interfaces that differ from centralized types
 export interface LoginRequest {
   email: string;
   password: string;
@@ -60,43 +67,6 @@ export interface RegisterRequest {
     district: { districtId: number; districtName: string };
     ward: { wardId: number; wardName: string };
   };
-}
-
-export interface AuthUser {
-  id: number;
-  fullName: string;
-  email: string;
-  phone: string;
-  gender: string;
-  address: string;
-  district: string;
-  ward: string;
-  avatarUrl?: string | null;
-  isVerify: boolean;
-  role: {
-    id: number;
-    name: string;
-    createdAt: number;
-    updatedAt: number;
-    isDeleted: boolean;
-  };
-  cartId?: number;
-  createdAt: number;
-  updatedAt?: number | null;
-}
-
-export interface AuthResponse {
-  userInfo: AuthUser;
-  accessToken: string;
-  refreshToken?: string;
-  expiresIn: number;
-  tokenType: 'Bearer';
-}
-
-export interface RefreshTokenResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
 }
 
 export interface ResetPasswordRequest {
@@ -118,9 +88,6 @@ export class AuthService {
    */
   static async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
-      console.log('AuthService.login called with:', { ...credentials, password: '***' });
-      console.log('API_URL:', API_URL);
-      console.log('Full URL will be:', `${API_URL}/auth/login`);
       const response: AxiosResponse<AuthResponse> = await authApiClient.post('/auth/login', credentials);
       
       // Store tokens securely

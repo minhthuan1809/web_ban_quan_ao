@@ -1,29 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Types
-interface TokenData {
-  accessToken: string;
-  userInfo: {
-    id: number;
-    email: string;
-    fullName: string;
-    role: {
-      id: number;
-      name: string;
-    };
-    isVerify: boolean;
-  };
-  expiresIn?: number;
-  tokenType?: string;
-}
-
-interface AuthResult {
-  isAuthenticated: boolean;
-  isAdmin: boolean;
-  user: TokenData['userInfo'] | null;
-  accessToken: string | null;
-}
+// Import types from centralized location
+import type { TokenData, AuthResult } from './types/auth';
 
 // Constants
 const ADMIN_PATHS = [

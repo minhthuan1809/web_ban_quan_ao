@@ -7,7 +7,7 @@
   import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
   import Loading from '@/app/_util/Loading';
   import { Pagination } from '@nextui-org/react';
-  import { Order, OrderTableProps ,OrderItem} from './type';  
+  import type { AdminOrder as Order, AdminOrderItem as OrderItem, AdminOrderTableProps as OrderTableProps } from '../../../../types/order';  
 
 
 

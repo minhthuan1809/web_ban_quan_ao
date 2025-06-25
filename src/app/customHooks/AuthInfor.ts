@@ -3,31 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 
 // TypeScript interfaces
-export interface UserRole {
-  id: number;
-  name: string;
-  createdAt?: number;
-  updatedAt?: number;
-  isDeleted?: boolean;
-  permissions?: string[];
-}
-
-export interface AuthUser {
-  id: number;
-  fullName: string;
-  email: string;
-  phone: string;
-  gender: string;
-  address: string;
-  district: string;
-  ward: string;
-  avatarUrl?: string | null;
-  isVerify: boolean;
-  role: UserRole;
-  cartId?: number;
-  createdAt: number;
-  updatedAt?: number | null;
-}
+// Import types from centralized location
+import type { AuthUser, UserRole } from '../../types/auth';
 
 // Custom hook for authentication information
 const useAuthInfor = () => {
@@ -36,32 +13,25 @@ const useAuthInfor = () => {
 
   // Khởi tạo từ cookie khi component mount
   useEffect(() => {
-    console.log('AuthInfor: Checking cookies...');
     
     const tokenFromCookie = getCookie('accessToken');
     const userFromCookie = getCookie('user');
     
-    console.log('accessToken cookie:', tokenFromCookie);
-    console.log('user cookie:', userFromCookie);
 
     if (tokenFromCookie) {
-      console.log('Setting accessToken from cookie');
       setAccessToken(tokenFromCookie as string);
     } else {
-      console.log('No accessToken cookie found');
     }
 
     if (userFromCookie) {
       try {
         const userData = JSON.parse(userFromCookie as string);
-        console.log('Setting user from cookie:', userData);
         setUser(userData);
       } catch (error) {
         console.error('Error parsing user data from cookie:', error);
         deleteCookie('user');
       }
     } else {
-      console.log('No user cookie found');
     }
   }, []);
 
@@ -106,7 +76,6 @@ const useAuthInfor = () => {
 
   // Function để force refresh từ cookies
   const refreshFromCookies = useCallback(() => {
-    console.log('Force refreshing from cookies...');
     
     // Thử nhiều cách để lấy cookie
     const methods = [
@@ -129,11 +98,9 @@ const useAuthInfor = () => {
         const token = method();
         if (token) {
           foundToken = token;
-          console.log('Found token via method:', method.toString());
           break;
         }
       } catch (e) {
-        console.log('Method failed:', e);
       }
     }
 
@@ -157,11 +124,9 @@ const useAuthInfor = () => {
         const userStr = method();
         if (userStr) {
           foundUser = JSON.parse(userStr);
-          console.log('Found user via method:', method.toString());
           break;
         }
       } catch (e) {
-        console.log('User method failed:', e);
       }
     }
 
@@ -172,7 +137,6 @@ const useAuthInfor = () => {
       setUser(foundUser);
     }
 
-    console.log('Refresh result - Token:', !!foundToken, 'User:', !!foundUser);
   }, []);
 
   return {

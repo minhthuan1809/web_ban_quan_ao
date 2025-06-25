@@ -1,147 +1,169 @@
 "use client";
 import { usePathname, useRouter } from 'next/navigation';
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useUserStore } from '@/app/_zustand/client/InForUser';
-import { cn } from '@nextui-org/react';
-import { deleteCookie } from 'cookies-next';
-import { authGetUserInfo_API, authLogout_API } from '@/app/_service/authClient';
+import { cn } from '@/app/_lib/utils';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import Loading from '@/app/_util/Loading';
 import { ThemeToggle } from './_conponents/ThemeToggle';
 import Link from 'next/link';
-import GetIconComponent from '@/app/_util/Icon';
+import { 
+  Home, 
+  Package, 
+  CheckCircle, 
+  History, 
+  DollarSign, 
+  Users, 
+  FolderOpen, 
+  LayoutGrid, 
+  Palette, 
+  Ruler, 
+  PhoneCall, 
+  Menu,
+  X,
+  ChevronRight,
+  LogOut,
+  Settings,
+  Bell,
+  Search,
+  Shield,
+  UserCheck,
+  Package2,
+  CreditCard,
+  Gift,
+  Star,
+  Mail,
+  AirVent
+} from 'lucide-react';
+import { Avatar, Button, Tooltip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react';
+import { toast } from 'react-toastify';
 
 interface MenuItem {
   name: string;
   href?: string;
-  icon: string;
+  icon: React.ComponentType<any>;
   submenu?: SubMenuItem[];
+  badge?: number;
+  color?: string;
 }
 
 interface SubMenuItem {
   name: string;
   href: string;
-  icon: string;
+  icon: React.ComponentType<any>;
 }
 
 const MENU_ITEMS: MenuItem[] = [
   {
-    name: "Tổng quan",
+    name: "Dashboard",
     href: "/dashboard", 
-    icon: "Home",
-  },
-  {
-    name: "Thông Kê",
-    href: "/statistical",
-    icon: "LayoutDashboard",
-    submenu: [
-      {
-        name: "Doanh thu",
-        href: "/statistical/stats",
-        icon: "LineChart",
-      },
-    ],
+    icon: Home,
+    color: "bg-blue-500"
   },
   {
     name: "Đơn Hàng",
-    href: "/orders",
-    icon: "Package",
+    icon: Package,
+    color: "bg-purple-500",
     submenu: [
       {
-        name: "Xác nhận đơn hàng",
+        name: "Chờ Xác Nhận",
         href: "/orders/confirm",
-        icon: "CheckCircle", 
+        icon: CheckCircle,
       },
       {
-        name: "Lịch Sử Đơn Hàng",
+        name: "Lịch Sử",
         href: "/orders/history",
-        icon: "History",
+        icon: History,
       },
       {
-        name: "Lịch Sử Thanh Toán",
+        name: "Thanh Toán",
         href: "/orders/payments",
-        icon: "History",
-      },
-    ],
-  },
-  {
-    name: "Mã Giảm Giá",
-    href: "/discount",
-    icon: "DollarSign",
-    submenu: [
-      {
-        name: "Tạo Mã Giảm Giá",
-        href: "/discount/code",
-        icon: "DollarSign",
+        icon: CreditCard,
       },
     ],
   },
   {
     name: "Sản Phẩm",
     href: "/productAdmin",
-    icon: "ShoppingBag",
+    icon: Package2,
+    color: "bg-orange-500"
   },
   {
     name: "Khách Hàng",
     href: "/customers",
-    icon: "Users",
+    icon: Users,
+    color: "bg-pink-500"
   },
   {
-    name: "Danh mục",
-    icon: "FolderMinus",
+    name: "Khuyến Mãi",
+    icon: Gift,
+    color: "bg-red-500",
     submenu: [
       {
-        name: "Danh mục",
+        name: "Mã Giảm Giá",
+        href: "/discount/code",
+        icon: DollarSign,
+      },
+    ],
+  },
+  {
+    name: "Danh Mục",
+    icon: FolderOpen,
+    color: "bg-indigo-500",
+    submenu: [
+      {
+        name: "Phân Loại",
         href: "/category",
-        icon: "LayoutGrid",
+        icon: LayoutGrid,
       },
       {
         name: "Đội Bóng",
         href: "/team",
-        icon: "Users",
+        icon: Shield,
       },
       {
-        name: "Chất liệu",
+        name: "Chất Liệu",
         href: "/material",
-        icon: "AirVent",
+        icon: AirVent,
       },
       {
-        name: "Màu",
+        name: "Màu Sắc",
         href: "/color",
-        icon: "Palette",
+        icon: Palette,
       },
       {
-        name: "Kích cỡ",
+        name: "Kích Cỡ",
         href: "/size",
-        icon: "Ruler",
+        icon: Ruler,
       },
     ],
   },
   {
     name: "Liên Hệ",
-    href: "/contacts",
-    icon: "PhoneCall",
+    icon: PhoneCall,
+    color: "bg-cyan-500",
     submenu: [
       {
-        name: "Liên Hệ",
+        name: "Tin Nhắn Mới",
         href: "/contacts/contacts",
-        icon: "PhoneCall",
+        icon: Mail,
       },
       {
-        name: "Lịch Sử Liên Hệ",
+        name: "Lịch Sử",
         href: "/contacts/history",
-        icon: "History",
+        icon: History,
       },
     ],
   },
   {
-    name: "Quản Lý Đánh Giá",
+    name: "Đánh Giá",
     href: "/evaluate",
-    icon: "MessageCircle",
+    icon: Star,
+    color: "bg-yellow-500"
   },
 ];
 
-export default function Layout({children}: {children: React.ReactNode}) {
+export default function AdminLayout({children}: {children: React.ReactNode}) {
     const pathname = usePathname();
     const router = useRouter();
     const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -149,14 +171,13 @@ export default function Layout({children}: {children: React.ReactNode}) {
     const [isMobile, setIsMobile] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user_Zustand, setUser_Zustand } = useUserStore();
-    const { accessToken } = useAuthInfor() || { accessToken: null };
-    const [isLoadingBtnLogout, setIsLoadingBtnLogout] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const { accessToken, user, clearAuthData } = useAuthInfor();
+    const [isLoading, setIsLoading] = useState(true);
 
     // Check mobile screen size
     useEffect(() => {
       const checkMobile = () => {
-        const mobile = window.innerWidth < 768;
+        const mobile = window.innerWidth < 1024;
         setIsMobile(mobile);
         if (!mobile) setIsMobileMenuOpen(false);
       };
@@ -181,98 +202,134 @@ export default function Layout({children}: {children: React.ReactNode}) {
       setActiveMenu(activeMenu === name ? null : name);
     }, [activeMenu]);
 
-    // Get user info
+    // Auth check
     useEffect(() => {
-        setIsLoading(true);
-        const fetchUserInfo = async () => {
-            try {
-                if (!accessToken) {
-                    setUser_Zustand(null);
-                    router.push("/login");
-                    return;
-                }
-                
-                const res = await authGetUserInfo_API(accessToken);
-                if (res) {
-                    setUser_Zustand(res);
-                } else {
-                    setUser_Zustand(null);
-                    router.push("/login");
-                }
-            } catch (error) {
-                console.error("Error getting user info:", error);
-                setUser_Zustand(null);
-                router.push("/login");
-            } finally {
-                setIsLoading(false);
-            }
-        };
+      if (!accessToken || !user) {
+        if (!accessToken) {
+          router.push('/login');
+          return;
+        }
+        return;
+      }
 
-        fetchUserInfo();
-    }, [accessToken, router, setUser_Zustand]);
+      // Check admin role
+      if (user.role?.name?.trim().toLowerCase() !== 'admin') {
+        toast.error('Bạn không có quyền truy cập trang admin');
+        router.push('/');
+        return;
+      }
+
+      setUser_Zustand(user);
+      setIsLoading(false);
+    }, [accessToken, user, router, setUser_Zustand]);
 
     // Handle logout
     const handleLogout = useCallback(async () => {
-        setIsLoadingBtnLogout(true);
-        try {
-            router.push("/login");
-            setUser_Zustand(null);
-            if (accessToken) {
-                await authLogout_API(accessToken);
-            }
-        } catch (error) {
-            console.error("Logout error:", error);
-        } finally {
-            setIsLoadingBtnLogout(false);
-        }
-    }, [router, setUser_Zustand, accessToken]);
+      try {
+        clearAuthData();
+        setUser_Zustand(null);
+        toast.success('Đăng xuất thành công');
+        router.push('/login');
+      } catch (error) {
+        console.error('Logout error:', error);
+        toast.error('Có lỗi xảy ra khi đăng xuất');
+      }
+    }, [clearAuthData, setUser_Zustand, router]);
 
-    // Memoized components
-    const UserAvatar = useMemo(() => {
-        if (user_Zustand?.avatarUrl) {
-            return (
-                <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white/20">
-                    <img
-                        src={user_Zustand.avatarUrl}
-                        alt="avatar"
-                        className="w-full h-full object-cover"
-                    />
-                </div>
-            );
-        }
-        return (
-            <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-white text-xl font-bold border-2 border-white/20">
-                {user_Zustand?.fullName?.charAt(0) || 'A'}
-            </div>
-        );
-    }, [user_Zustand]);
-
-    const MobileUserAvatar = useMemo(() => {
-        if (user_Zustand?.avatarUrl) {
-            return (
-                <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-primary/20">
-                    <img
-                        src={user_Zustand.avatarUrl}
-                        alt="avatar"
-                        className="w-full h-full object-cover"
-                    />
-                </div>
-            );
-        }
-        return (
-            <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-sm font-bold">
-                {user_Zustand?.fullName?.charAt(0) || 'A'}
-            </div>
-        );
-    }, [user_Zustand]);
-
+    // Loading state
     if (isLoading) {
-        return <Loading />;
+      return <Loading />;
     }
 
+    // Render menu item
+    const renderMenuItem = (item: MenuItem) => {
+      const isActive = item.href ? pathname.startsWith(item.href) : false;
+      const hasSubmenu = item.submenu && item.submenu.length > 0;
+      const isSubmenuOpen = activeMenu === item.name;
+
+      return (
+        <div key={item.name} className="mb-1">
+          {hasSubmenu ? (
+            <button
+              onClick={() => toggleSubmenu(item.name)}
+              className={cn(
+                "w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-gray-100 dark:hover:bg-gray-800",
+                isSubmenuOpen ? "bg-primary/10 text-primary" : "text-gray-600 dark:text-gray-300"
+              )}
+            >
+              <div className="flex items-center space-x-3">
+                <div className={cn(
+                  "p-2.5 rounded-lg transition-colors",
+                  isSubmenuOpen ? "bg-primary/20" : "bg-gray-100 dark:bg-gray-700",
+                  item.color && !isSubmenuOpen ? item.color + " text-white" : ""
+                )}>
+                  <item.icon size={20} />
+                </div>
+                {!isCollapsed && (
+                  <span className="font-medium text-sm">{item.name}</span>
+                )}
+              </div>
+              {!isCollapsed && (
+                <ChevronRight 
+                  size={16} 
+                  className={cn(
+                    "transition-transform duration-200",
+                    isSubmenuOpen ? "rotate-90" : ""
+                  )} 
+                />
+              )}
+            </button>
+          ) : (
+            <Link href={item.href || '#'}>
+              <div className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-gray-100 dark:hover:bg-gray-800 relative",
+                isActive ? "bg-primary text-white shadow-lg" : "text-gray-600 dark:text-gray-300"
+              )}>
+                <div className={cn(
+                  "p-2.5 rounded-lg transition-colors",
+                  isActive ? "bg-white/20" : "bg-gray-100 dark:bg-gray-700",
+                  item.color && !isActive ? item.color + " text-white" : ""
+                )}>
+                  <item.icon size={20} />
+                </div>
+                {!isCollapsed && (
+                  <span className="font-medium text-sm">{item.name}</span>
+                )}
+                {isActive && (
+                  <div className="absolute right-2 w-1 h-8 bg-white rounded-l-full" />
+                )}
+              </div>
+            </Link>
+          )}
+
+          {/* Submenu */}
+          {hasSubmenu && isSubmenuOpen && !isCollapsed && (
+            <div className="mt-2 ml-6 space-y-1 border-l-2 border-gray-200 dark:border-gray-700 pl-4">
+              {item.submenu?.map((subItem) => {
+                const isSubActive = pathname.startsWith(subItem.href);
+                return (
+                  <Link key={subItem.href} href={subItem.href}>
+                    <div className={cn(
+                      "flex items-center space-x-3 px-3 py-2.5 rounded-lg transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800",
+                      isSubActive 
+                        ? "bg-primary/10 text-primary border-l-2 border-primary" 
+                        : "text-gray-500 dark:text-gray-400"
+                    )}>
+                      <subItem.icon size={16} />
+                      <span className="text-sm">{subItem.name}</span>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+    };
+
     return (
-        <div className="min-h-screen bg-background">
-            {/* Mobile overlay */}
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+            {/* Mobile Overlay */}
             {isMobile && isMobileMenuOpen && (
                 <div
                     className="fixed inset-0 bg-black/50 z-40"
@@ -280,214 +337,198 @@ export default function Layout({children}: {children: React.ReactNode}) {
                 />
             )}
 
-            {/* Mobile header */}
-            {isMobile && (
-                <header className="sticky top-0 z-30 flex items-center justify-between p-4 bg-card shadow-md">
-                    <button
-                        onClick={() => setIsMobileMenuOpen(true)}
-                        className="p-2 rounded-lg hover:bg-primary/10 transition-colors"
-                    >
-                        <GetIconComponent icon="Menu" className="w-6 h-6" />
-                    </button>
-                    
-                    <div className="flex items-center gap-3">
-                        <ThemeToggle />
-                        <div 
-                            className="flex items-center gap-2 cursor-pointer"
-                            onClick={() => router.push("/settings")}
-                        >
-                            {MobileUserAvatar}
-                        </div>
-                    </div>
-                </header>
-            )}
-
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 bg-card shadow-lg transition-all duration-300 flex flex-col",
+                    "fixed inset-y-0 left-0 z-50 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700 transition-all duration-300 flex flex-col shadow-xl",
                     isMobile
                         ? isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
                         : "translate-x-0",
-                    isMobile ? "w-80" : isCollapsed ? "w-20" : "w-80"
+                    isCollapsed ? "w-20" : "w-80"
                 )}
             >
                 {/* Header */}
-                <div className="h-20 border-b border-border flex items-center justify-between px-6 bg-gradient-to-r from-primary to-primary-600">
-                    {(!isCollapsed || isMobile) && (
-                        <div
-                            className="flex items-center gap-3 cursor-pointer hover:opacity-90 transition-opacity"
-                            onClick={() => router.push("/settings")}
-                        >
-                            {UserAvatar}
-                            <div className="flex flex-col">
-                                <span className="text-sm font-semibold text-white">{user_Zustand?.fullName}</span>
-                                <span className="text-xs text-primary-100">
-                                    {user_Zustand?.roleName}
-                                </span>
-                                <span className="text-xs text-primary-200 truncate max-w-40">
-                                    {user_Zustand?.email}
-                                </span>
+                <div className="h-16 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 bg-gradient-to-r from-primary to-blue-600">
+                    {!isCollapsed && (
+                        <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                                <Package2 className="text-white" size={24} />
+                            </div>
+                            <div>
+                                <h1 className="text-xl font-bold text-white">
+                                    KICKSTYLE
+                                </h1>
+                                <p className="text-xs text-blue-100">Admin Panel</p>
                             </div>
                         </div>
                     )}
 
                     {!isMobile && (
-                        <button
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            size="sm"
                             onClick={() => setIsCollapsed(!isCollapsed)}
-                            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                            className="text-white hover:bg-white/10"
                         >
-                            <div className={`transform transition-transform ${isCollapsed ? "rotate-180" : ""}`}>
-                                <GetIconComponent icon="ChevronLeft" className="w-5 h-5 text-white" />
-                            </div>
-                        </button>
+                            <Menu size={18} />
+                        </Button>
                     )}
 
                     {isMobile && (
-                        <button
+                        <Button
+                            isIconOnly
+                            variant="light"
+                            size="sm"
                             onClick={() => setIsMobileMenuOpen(false)}
-                            className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                            className="text-white hover:bg-white/10"
                         >
-                            <GetIconComponent icon="X" className="w-5 h-5 text-white" />
-                        </button>
+                            <X size={18} />
+                        </Button>
                     )}
                 </div>
                 
                 {/* Navigation */}
-                <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-                    {MENU_ITEMS.map((item) => (
-                        <div key={item.name}>
-                            {item.submenu ? (
-                                <div className="space-y-1">
-                                    <button
-                                        onClick={() => toggleSubmenu(item.name)}
-                                        className={cn(
-                                            "w-full flex items-center justify-between px-4 py-3 rounded-lg transition-all duration-200 group",
-                                            item.href && (pathname.startsWith(item.href) ||
-                                            item.submenu.some((sub) => pathname.startsWith(sub.href)))
-                                                ? "bg-primary/10 text-primary"
-                                                : "text-foreground hover:bg-primary/10 hover:text-primary"
-                                        )}
-                                    >
-                                        <div className="flex items-center space-x-3">
-                                            <div className={cn(
-                                                "flex-shrink-0 w-6 h-6 transition-colors",
-                                                item.href && (pathname.startsWith(item.href) ||
-                                                item.submenu.some((sub) => pathname.startsWith(sub.href)))
-                                                    ? "text-primary"
-                                                    : "text-muted-foreground group-hover:text-primary"
-                                            )}>
-                                                <GetIconComponent icon={item.icon as any} />
-                                            </div>
-                                            {(!isCollapsed || isMobile) && (
-                                                <span className="text-sm font-medium">{item.name}</span>
-                                            )}
-                                        </div>
-                                        {(!isCollapsed || isMobile) && (
-                                            <div className={cn(
-                                                "transform transition-transform duration-200",
-                                                activeMenu === item.name ? "rotate-180" : ""
-                                            )}>
-                                                <GetIconComponent
-                                                    icon="ChevronDown"
-                                                    className="w-4 h-4 text-muted-foreground"   
-                                                />
-                                            </div>
-                                        )}
-                                    </button>
-
-                                    {activeMenu === item.name && (!isCollapsed || isMobile) && (
-                                        <div className="ml-6 space-y-1 border-l-2 border-border pl-4">
-                                            {item.submenu.map((subitem) => (
-                                                <Link
-                                                    key={subitem.name}
-                                                    href={subitem.href}
-                                                    className={cn(
-                                                        "flex items-center px-3 py-2 text-sm rounded-lg transition-all duration-200 group",
-                                                        pathname.startsWith(subitem.href)
-                                                            ? "bg-primary/10 text-primary font-medium"
-                                                            : "text-muted-foreground hover:bg-primary/10 hover:text-primary"
-                                                    )}
-                                                    onClick={() => setIsMobileMenuOpen(false)}
-                                                >
-                                                    <div className={cn(
-                                                        "w-5 h-5 mr-3 transition-colors",
-                                                        pathname.startsWith(subitem.href)
-                                                            ? "text-primary"
-                                                            : "text-muted-foreground group-hover:text-primary"
-                                                    )}>
-                                                        <GetIconComponent icon={subitem.icon as any} />
-                                                    </div>
-                                                    {subitem.name}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <Link
-                                    href={item.href || ""}
-                                    className={cn(
-                                        "flex items-center px-4 py-3 rounded-lg transition-all duration-200 group",
-                                        pathname === item.href || pathname.startsWith(item.href + "/")
-                                            ? "bg-primary/10 text-primary font-medium"
-                                            : "text-foreground hover:bg-primary/10 hover:text-primary"
-                                    )}
-                                    onClick={() => setIsMobileMenuOpen(false)}
-                                >
-                                    <div className={cn(
-                                        "flex-shrink-0 w-6 h-6 transition-colors",
-                                        pathname === item.href || pathname.startsWith(item.href + "/")
-                                            ? "text-primary"
-                                            : "text-muted-foreground group-hover:text-primary"
-                                    )}>
-                                        <GetIconComponent icon={item.icon as any} />
-                                    </div>
-                                    {(!isCollapsed || isMobile) && (
-                                        <span className="ml-3 text-sm">{item.name}</span>
-                                    )}
-                                </Link>
-                            )}
-                        </div>
-                    ))}
+                <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+                    <div className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4 px-2">
+                        Menu Chính
+                    </div>
+                    {MENU_ITEMS.map(renderMenuItem)}
                 </nav>
 
-                {/* Footer */}
-                <div className="p-4 border-t border-border">
-                    <div className="flex items-center gap-2 mb-3">
-                        {!isMobile && <ThemeToggle />}
-                        {(!isCollapsed || isMobile) && !isMobile && (
-                            <span className="text-sm text-muted-foreground">Giao diện</span>
-                        )}
-                    </div>
-                    
-                    <button
-                        onClick={handleLogout}
-                        disabled={isLoadingBtnLogout}
-                        className={cn(
-                            "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200",
-                            "text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20",
-                            "disabled:opacity-50 disabled:cursor-not-allowed"
-                        )}
-                    >
-                        <GetIconComponent icon="LogOut" className="w-5 h-5" />
-                        {(!isCollapsed || isMobile) && (
-                            <span className="text-sm font-medium">
-                                {isLoadingBtnLogout ? "Đang đăng xuất..." : "Đăng xuất"}
-                            </span>
-                        )}
-                    </button>
+                {/* User Profile */}
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                    {!isCollapsed ? (
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                                <Avatar
+                                    src={user_Zustand?.avatarUrl || undefined}
+                                    name={user_Zustand?.fullName?.charAt(0)}
+                                    size="sm"
+                                    className="bg-primary text-white border-2 border-white shadow-lg"
+                                />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                        {user_Zustand?.fullName}
+                                    </p>
+                                    <p className="text-xs text-gray-500 truncate">
+                                        {user_Zustand?.role?.name}
+                                    </p>
+                                </div>
+                            </div>
+                            <Dropdown>
+                                <DropdownTrigger>
+                                    <Button 
+                                        isIconOnly 
+                                        variant="light" 
+                                        size="sm"
+                                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                                    >
+                                        <Settings size={16} />
+                                    </Button>
+                                </DropdownTrigger>
+                                <DropdownMenu>
+                                    <DropdownItem key="profile" startContent={<UserCheck size={16} />}>
+                                        Hồ sơ
+                                    </DropdownItem>
+                                    <DropdownItem key="settings" startContent={<Settings size={16} />}>
+                                        Cài đặt
+                                    </DropdownItem>
+                                    <DropdownItem 
+                                        key="logout" 
+                                        color="danger"
+                                        startContent={<LogOut size={16} />}
+                                        onClick={handleLogout}
+                                    >
+                                        Đăng xuất
+                                    </DropdownItem>
+                                </DropdownMenu>
+                            </Dropdown>
+                        </div>
+                    ) : (
+                        <div className="flex justify-center">
+                            <Tooltip content={user_Zustand?.fullName}>
+                                <Avatar
+                                    src={user_Zustand?.avatarUrl || undefined}
+                                    name={user_Zustand?.fullName?.charAt(0)}
+                                    size="sm"
+                                    className="bg-primary text-white cursor-pointer border-2 border-white shadow-lg"
+                                />
+                            </Tooltip>
+                        </div>
+                    )}
                 </div>
             </aside>
 
-            {/* Main content */}
+            {/* Main Content */}
             <main className={cn(
                 "transition-all duration-300",
-                isMobile ? "ml-0" : isCollapsed ? "ml-20" : "ml-80",
-                isMobile ? "pt-20" : "pt-0"
+                isCollapsed ? "lg:ml-20" : "lg:ml-80"
             )}>
-                {children}
+                {/* Top Bar */}
+                <header className="h-16 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 shadow-sm">
+                    {/* Mobile Menu Button */}
+                    <Button
+                        isIconOnly
+                        variant="light"
+                        size="sm"
+                        onClick={() => setIsMobileMenuOpen(true)}
+                        className="lg:hidden"
+                    >
+                        <Menu size={20} />
+                    </Button>
+
+                    {/* Breadcrumb */}
+                    <div className="hidden lg:block">
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
+                            {pathname.split('/').pop()?.replace(/([A-Z])/g, ' $1').trim() || 'Dashboard'}
+                        </h2>
+                        <p className="text-sm text-gray-500">
+                            Quản lý và điều hành hệ thống
+                        </p>
+                    </div>
+
+                    {/* Right Actions */}
+                    <div className="flex items-center space-x-4">
+                        <Button isIconOnly variant="light" size="sm">
+                            <Search size={18} />
+                        </Button>
+                        
+                        <div className="relative">
+                            <Button isIconOnly variant="light" size="sm">
+                                <Bell size={18} />
+                            </Button>
+                            <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full text-xs flex items-center justify-center text-white"></span>
+                        </div>
+
+                        <ThemeToggle />
+
+                        <div className="hidden lg:flex items-center space-x-3 pl-4 border-l border-gray-200 dark:border-gray-700">
+                            <Avatar
+                                src={user_Zustand?.avatarUrl || undefined}
+                                name={user_Zustand?.fullName?.charAt(0)}
+                                size="sm"
+                                className="bg-primary text-white"
+                            />
+                            <div className="text-sm">
+                                <p className="font-medium text-gray-700 dark:text-gray-300">
+                                    {user_Zustand?.fullName}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    {user_Zustand?.role?.name}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                {/* Page Content */}
+                <div className="">
+                    <div className=" mx-auto">
+                        {children}
+                    </div>
+                </div>
             </main>
         </div>
     );
-}
+} 

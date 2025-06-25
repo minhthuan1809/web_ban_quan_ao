@@ -7,7 +7,7 @@ import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagina
 import { Eye, Mail, Send, User } from "lucide-react";
 import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 import ModalSentMail from '../../_modal/ModalSentMail';
-import { Contact } from '../typecontact'; 
+import type { AdminContact as Contact } from '../../../../types/contact'; 
 import ModalDetalMail from '../../_modal/ModalDetalMail';
 
 export default function ContactsPage() {
