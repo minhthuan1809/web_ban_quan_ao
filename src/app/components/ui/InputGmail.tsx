@@ -38,6 +38,20 @@ export default function InputGmail({
   const [isFocused, setIsFocused] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
+  // Domain typo correction - Định nghĩa trước để tránh lỗi hoisting
+  const suggestDomainCorrection = useCallback((domain: string): string | null => {
+    const typoMap: Record<string, string> = {
+      'gmai.com': 'gmail.com',
+      'gmial.com': 'gmail.com',
+      'gmall.com': 'gmail.com',
+      'yahooo.com': 'yahoo.com',
+      'hotmial.com': 'hotmail.com',
+      'outlok.com': 'outlook.com',
+    };
+
+    return typoMap[domain] || null;
+  }, []);
+
   const handleFocus = useCallback(() => setIsFocused(true), []);
   const handleBlur = useCallback(() => {
     setIsFocused(false);
@@ -95,21 +109,7 @@ export default function InputGmail({
     }
 
     return { isValid: true, error: "" };
-  }, [value, allowAllDomains]);
-
-  // Domain typo correction
-  const suggestDomainCorrection = useCallback((domain: string): string | null => {
-    const typoMap: Record<string, string> = {
-      'gmai.com': 'gmail.com',
-      'gmial.com': 'gmail.com',
-      'gmall.com': 'gmail.com',
-      'yahooo.com': 'yahoo.com',
-      'hotmial.com': 'hotmail.com',
-      'outlok.com': 'outlook.com',
-    };
-
-    return typoMap[domain] || null;
-  }, []);
+  }, [value, allowAllDomains, suggestDomainCorrection]);
 
   // Apply suggestion
   const applySuggestion = useCallback(() => {
@@ -125,9 +125,14 @@ export default function InputGmail({
 
   // Notify parent about validation changes
   useEffect(() => {
-    if (onValidationChange) {
-      onValidationChange(emailValidation.isValid);
-    }
+    // Sử dụng setTimeout để tránh setState trong render
+    const timeout = setTimeout(() => {
+      if (onValidationChange) {
+        onValidationChange(emailValidation.isValid);
+      }
+    }, 0);
+
+    return () => clearTimeout(timeout);
   }, [emailValidation.isValid, onValidationChange]);
 
   const endContent = useMemo(() => {

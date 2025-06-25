@@ -188,7 +188,6 @@ export default function RootLayout({
         />
         
         {/* Performance hints */}
-        <link rel="preload" href="/fonts/inter.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
       </head>
       
       <body className="font-inter antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300 overflow-x-hidden">
