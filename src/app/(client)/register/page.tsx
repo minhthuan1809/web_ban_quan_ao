@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import InputPassword from "@/app/components/ui/InputPassword";
 import InputGmail from "@/app/components/ui/InputGmail";
 import InputInformation from "@/app/components/ui/InputInformation";
@@ -14,194 +14,305 @@ import { useRouter } from "next/navigation";
 import { Button, Checkbox } from "@nextui-org/react";
 import { UserPlus } from "lucide-react";
 
+interface FormData {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  phone: string;
+  gender: string;
+  address: {
+    city: { cityName: string };
+    district: { districtName: string };
+    ward: { wardName: string };
+  } | null;
+  agreeToTerms: boolean;
+}
+
+const INITIAL_FORM_DATA: FormData = {
+  fullName: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  phone: "",
+  gender: "",
+  address: null,
+  agreeToTerms: false,
+};
+
+const VALIDATION_RULES = {
+  fullName: { required: true, minLength: 2, message: "Tên phải có ít nhất 2 ký tự" },
+  email: { required: true, pattern: /\S+@\S+\.\S+/, message: "Email không hợp lệ" },
+  password: { required: true, minLength: 6, message: "Mật khẩu phải có ít nhất 6 ký tự" },
+  phone: { required: true, pattern: /^[0-9]{10,11}$/, message: "Số điện thoại không hợp lệ" },
+  gender: { required: true, message: "Vui lòng chọn giới tính" },
+  address: { required: true, message: "Vui lòng chọn địa chỉ" },
+  agreeToTerms: { required: true, message: "Vui lòng đồng ý với điều khoản dịch vụ" },
+};
+
 export default function PageRegister() {
-  const [showConfirmPassword, setShowConfirmPassword] = useState("");
-  const [password, setPassword] = useState("");
-  const [username, setUsername] = useState("");
-  const [gmail, setGmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [gender, setGender] = useState("");
-  const [address, setAddress] = useState<any>([]);
+  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_DATA);
   const [loading, setLoading] = useState(false);
-  const [passwordError, setPasswordError] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const router = useRouter();
 
-  const [IsCheck, setIsCheck] = useState(false);
+  // Validation functions
+  const validateField = useCallback((field: keyof FormData, value: any) => {
+    const rule = VALIDATION_RULES[field as keyof typeof VALIDATION_RULES];
+    if (!rule) return "";
 
-  useEffect(() => {
-    if (password.length > 0 && password.length < 6) {
-      setPasswordError("Mật khẩu phải có ít nhất 6 ký tự");
-    } else if (showConfirmPassword && password !== showConfirmPassword) {
-      setPasswordError("Mật khẩu không khớp");
-    } else {
-      setPasswordError("");
+    if (rule.required) {
+      if (field === "address" && !value) return rule.message;
+      if (field === "agreeToTerms" && !value) return rule.message;
+      if (typeof value === "string" && !value.trim()) return rule.message;
     }
-  }, [password, showConfirmPassword]);
 
-  const IsSubmit =
-    !IsCheck ||
-    !gender ||
-    !address ||
-    !password ||
-    !showConfirmPassword ||
-    !gmail ||
-    !phone ||
-    !username ||
-    passwordError !== "";
+    if (field === "email" && value && !VALIDATION_RULES.email.pattern.test(value)) {
+      return VALIDATION_RULES.email.message;
+    }
 
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    if (field === "phone" && value && !VALIDATION_RULES.phone.pattern.test(value)) {
+      return VALIDATION_RULES.phone.message;
+    }
+
+    if (field === "password" && value && value.length < VALIDATION_RULES.password.minLength) {
+      return VALIDATION_RULES.password.message;
+    }
+
+    if (field === "fullName" && value && value.length < VALIDATION_RULES.fullName.minLength) {
+      return VALIDATION_RULES.fullName.message;
+    }
+
+    return "";
+  }, []);
+
+  // Password validation
+  const passwordError = useMemo(() => {
+    if (!formData.password) return "";
+    if (formData.password.length < 6) return "Mật khẩu phải có ít nhất 6 ký tự";
+    if (formData.confirmPassword && formData.password !== formData.confirmPassword) {
+      return "Mật khẩu không khớp";
+    }
+    return "";
+  }, [formData.password, formData.confirmPassword]);
+
+  // Form validation
+  const isFormValid = useMemo(() => {
+    const requiredFields: (keyof FormData)[] = [
+      "fullName", "email", "password", "confirmPassword", 
+      "phone", "gender", "address", "agreeToTerms"
+    ];
+    
+    return requiredFields.every(field => {
+      if (field === "address") return formData.address !== null;
+      if (field === "agreeToTerms") return formData.agreeToTerms;
+      return formData[field as keyof FormData] && validateField(field, formData[field]) === "";
+    }) && passwordError === "";
+  }, [formData, validateField, passwordError]);
+
+  // Form field update handler
+  const updateField = useCallback((field: keyof FormData, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: "" }));
+    }
+  }, [errors]);
+
+  // Address change handler
+  const handleAddressChange = useCallback((addressData: any) => {
+    updateField("address", addressData);
+  }, [updateField]);
+
+  // Submit handler
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (IsSubmit) return;
+    
+    if (!isFormValid) {
+      toast.error("Vui lòng điền đầy đủ thông tin hợp lệ!");
+      return;
+    }
+
     setLoading(true);
     try {
-      const res = await authRegister_API({
-        fullName: username,
-        email: gmail,
-        password: password,
-        phone: phone,
-        address: address?.city?.cityName,
-        district: address?.district?.districtName,
-        ward: address?.ward?.wardName,
-        gender: gender.toUpperCase(),
-      });
+      const submitData = {
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+        address: formData.address?.city?.cityName || "",
+        district: formData.address?.district?.districtName || "",
+        ward: formData.address?.ward?.wardName || "",
+        gender: formData.gender.toUpperCase(),
+        isAdmin: false,
+      };
+
+      const res = await authRegister_API(submitData);
       
       if (res.status === 200) {
-        toast.success(res.data);
+        toast.success("🎉 Đăng ký thành công! Vui lòng đăng nhập.");
         router.push("/login");
       }
     } catch (err: any) {
-      if (err.response?.status === 409) {
-        toast.error("Email đã được đăng ký");
-      } else {
-        toast.error("Đã có lỗi xảy ra, vui lòng thử lại sau");
-      }
+      const errorMessage = err.response?.status === 409 
+        ? "Email đã được đăng ký" 
+        : "Đã có lỗi xảy ra, vui lòng thử lại sau";
+      toast.error(errorMessage);
       console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [formData, isFormValid, router]);
 
   if (loading) {
     return <Loading />;
   }
 
   return (
-    <div className="min-h-screen w-full bg-background/40 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-background rounded-2xl shadow-large overflow-hidden">
+    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
         {/* Left side - Illustration */}
-        <div className="hidden md:flex items-center justify-center bg-primary/5 p-4">
-          <div
-            className="w-[300px] h-[300px] bg-cover bg-center rounded-2xl shadow-medium"
-            style={{
-              backgroundImage:
-                "url('https://images.unsplash.com/photo-1516321497487-e288fb19713f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')",
-              backgroundPosition: "center",
-            }}
-          />
+        <div className="hidden md:flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-8">
+          <div className="text-center text-white">
+            <div className="w-64 h-64 mx-auto mb-6 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+              <UserPlus className="w-24 h-24 text-white" />
+            </div>
+            <h3 className="text-2xl font-bold mb-4">Chào mừng đến với KICKSTYLE</h3>
+            <p className="text-blue-100">
+              Tạo tài khoản để khám phá những sản phẩm thời trang tuyệt vời
+            </p>
+          </div>
         </div>
 
         {/* Right side - Register form */}
         <div className="flex flex-col justify-center px-8 py-12">
           <div className="sm:mx-auto sm:w-full sm:max-w-md">
-            <div className="flex items-center justify-center gap-2 mb-6">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <UserPlus className="w-6 h-6 text-primary" />
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
+                <UserPlus className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-4xl font-bold text-foreground ">
+              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Đăng Ký
               </h2>
             </div>
-            <p className="text-center text-default-500 mb-6">
+            <p className="text-center text-gray-600 mb-8">
               Tạo tài khoản mới của bạn
             </p>
           </div>
 
-          <form className="space-y-6" onSubmit={submit}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputInformation
                 placeholder="Nguyễn Văn A"
                 label="Tên người dùng"
                 icon="User"
-                value={username}
-                onChange={(value) => setUsername(value)}
+                value={formData.fullName}
+                onChange={(value) => updateField("fullName", value)}
               />
               <InputGmail
                 placeholder="xxx@gmail.com"
-                label="Nhập Gmail"
-                value={gmail}
-                onChange={(value) => setGmail(value)}
+                label="Email"
+                value={formData.email}
+                onChange={(value) => updateField("email", value)}
               />
             </div>
+
+            {/* Phone */}
             <InputPhone
               placeholder="Nhập số điện thoại"
               label="Số điện thoại"
-              value={phone}
-              onChange={(value) => setPhone(value)}
+              value={formData.phone}
+              onChange={(value) => updateField("phone", value)}
             />
-            <InputAddress
-              onChange={(value) => setAddress(value)}
-              className="w-full"
-            />
-            <div className="flex flex-col gap-4">
-              <div className="flex gap-4">
+
+            {/* Address */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Địa chỉ <span className="text-red-500">*</span>
+              </label>
+              <InputAddress
+                onChange={handleAddressChange}
+                className="w-full"
+              />
+            </div>
+
+            {/* Passwords */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <InputPassword
                   placeholder="Nhập mật khẩu"
                   label="Mật khẩu"
-                  value={password}
-                  onChange={(value) => setPassword(value)}
+                  value={formData.password}
+                  onChange={(value) => updateField("password", value)}
                 />
                 <InputPassword
                   placeholder="Nhập lại mật khẩu"
-                  label="Nhập lại Mật khẩu"
-                  value={showConfirmPassword}
-                  onChange={(value) => setShowConfirmPassword(value)}
+                  label="Xác nhận mật khẩu"
+                  value={formData.confirmPassword}
+                  onChange={(value) => updateField("confirmPassword", value)}
                 />
               </div>
               {passwordError && (
-                <p className="text-danger text-sm">{passwordError}</p>
+                <p className="text-red-500 text-sm">{passwordError}</p>
               )}
             </div>
+
+            {/* Gender */}
             <InputGender
               placeholder="Chọn giới tính"
               label="Giới tính"
-              value={gender}
-              onChange={(value) => setGender(value)}
+              value={formData.gender}
+              onChange={(value) => updateField("gender", value)}
             />
 
-            <div className="flex items-center gap-2">
+            {/* Terms checkbox */}
+            <div className="flex items-start gap-3">
               <Checkbox
                 size="sm"
-                onChange={(e) => setIsCheck(e.target.checked)}
+                isSelected={formData.agreeToTerms}
+                onValueChange={(checked) => updateField("agreeToTerms", checked)}
+                className="mt-1"
               >
-                <span className="text-default-700">
+                <span className="text-sm text-gray-700">
                   Tôi đồng ý với{" "}
                   <Link
                     href="/terms"
-                    className="text-primary hover:text-primary-500 font-medium"
+                    className="text-blue-600 hover:text-blue-500 font-medium underline"
                   >
                     Điều khoản dịch vụ
+                  </Link>
+                  {" "}và{" "}
+                  <Link
+                    href="/privacy"
+                    className="text-blue-600 hover:text-blue-500 font-medium underline"
+                  >
+                    Chính sách bảo mật
                   </Link>
                 </span>
               </Checkbox>
             </div>
 
+            {/* Submit button */}
             <Button
               type="submit"
-              disabled={IsSubmit || loading}
+              disabled={!isFormValid || loading}
               isLoading={loading}
               color="primary"
-              className="w-full font-medium"
+              className="w-full font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
               size="lg"
             >
               {loading ? "Đang xử lý..." : "Đăng Ký"}
             </Button>
 
-            <div className="text-sm text-center">
-              <p className="text-default-500">
+            {/* Login link */}
+            <div className="text-center">
+              <p className="text-gray-600">
                 Bạn đã có tài khoản?{" "}
                 <Link
                   href="/login"
-                  className="font-medium text-primary hover:text-primary-500"
+                  className="font-semibold text-blue-600 hover:text-blue-500 transition-colors"
                 >
                   Đăng Nhập Ngay
                 </Link>

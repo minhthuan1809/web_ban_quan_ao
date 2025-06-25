@@ -4,10 +4,15 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
+  Input,
+  Button,
+  Select,
+  SelectItem,
+  Progress,
+  Card
 } from "@nextui-org/react";
-import React, { useState } from "react";
-import { Input, Button, Select, SelectItem } from "@nextui-org/react";
-import { UserPlus, Edit3, User } from "lucide-react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { UserPlus, Edit3, User, Mail, Phone, MapPin, Users, Camera, Upload, Check, ArrowRight, ArrowLeft } from "lucide-react";
 import InputAddress from "@/app/components/ui/InputAddress";
 import { CreateUser_API, UpdateUser_API } from "@/app/_service/user";
 import ImgUpload from "@/app/components/ui/ImgUpload";
@@ -18,8 +23,21 @@ import InputGmail from "@/app/components/ui/InputGmail";
 import InputGender from "@/app/components/ui/InputGender";
 import { uploadToCloudinary } from "@/app/_util/upload_img_cloudinary";
 
+interface User {
+  id: number;
+  fullName: string;
+  email: string;
+  phone: string;
+  address: string;
+  district: string;
+  ward: string;
+  roleId: number;
+  avatarUrl: string;
+  gender: string;
+}
+
 interface ModalAddUseProps {
-  editUser: any;
+  editUser: User | null;
   isOpen: boolean;
   onClose: () => void;
   modalMode: 'add' | 'edit';
@@ -38,9 +56,24 @@ const initialFormData = {
   address: "",
   district: "",
   ward: "",
-  roleId: "",
+  roleId: 1,
   gender: "",
   avatarUrl: "",
+};
+
+interface ValidationRule {
+  required: boolean;
+  message: string;
+  pattern?: RegExp;
+  minLength?: number;
+}
+
+const VALIDATION_RULES: Record<string, ValidationRule> = {
+  fullName: { required: true, message: 'Họ tên không được để trống' },
+  email: { required: true, pattern: /\S+@\S+\.\S+/, message: 'Email không hợp lệ' },
+  password: { required: true, minLength: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự' },
+  phone: { required: true, message: 'Số điện thoại không được để trống' },
+  gender: { required: true, message: 'Vui lòng chọn giới tính' },
 };
 
 export default function ModalAddUse({
@@ -57,206 +90,411 @@ export default function ModalAddUse({
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [step, setStep] = useState(1);
 
-  const resetForm = () => {
+  // Memoized values
+  const isEditMode = modalMode === 'edit';
+  const headerConfig = useMemo(() => ({
+    icon: isEditMode ? <Edit3 className="w-5 h-5 text-purple-600" /> : <UserPlus className="w-5 h-5 text-blue-600" />,
+    title: isEditMode ? "Chỉnh sửa thông tin người dùng" : "Thêm người dùng mới",
+    subtitle: isEditMode ? "Cập nhật thông tin người dùng" : "Điền thông tin để tạo tài khoản mới",
+    buttonText: isEditMode ? "Cập nhật" : "Thêm mới",
+    bgColor: isEditMode ? 'bg-purple-100' : 'bg-blue-100'
+  }), [isEditMode]);
+
+  // Set preview when editing
+  useEffect(() => {
+    if (isEditMode && editUser?.avatarUrl) {
+      setPreview(editUser.avatarUrl);
+    }
+  }, [isEditMode, editUser]);
+
+  // Reset form
+  const resetForm = useCallback(() => {
     setFormData(initialFormData);
     setFile(null);
     setPreview(null);
-  };
+    setErrors({});
+    setStep(1);
+    setUploadProgress(0);
+  }, [setFormData]);
 
-  const handleImageUpload = async () => {
+  // Validation
+  const validateField = useCallback((field: string, value: any) => {
+    const rule = VALIDATION_RULES[field];
+    if (!rule) return '';
+
+    if (rule.required && !value?.trim()) {
+      return rule.message;
+    }
+    
+    if (field === 'email' && value && rule.pattern && !rule.pattern.test(value)) {
+      return rule.message;
+    }
+    
+    if (field === 'password' && modalMode === 'add' && value && rule.minLength && value.length < rule.minLength) {
+      return rule.message;
+    }
+    
+    return '';
+  }, [modalMode]);
+
+  const validateForm = useCallback(() => {
+    const newErrors: Record<string, string> = {};
+    
+    Object.keys(VALIDATION_RULES).forEach(field => {
+      if (field === 'password' && isEditMode) return; // Skip password validation in edit mode
+      
+      const error = validateField(field, formData[field]);
+      if (error) newErrors[field] = error;
+    });
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, [formData, validateField, isEditMode]);
+
+  // Image upload
+  const handleImageUpload = useCallback(async () => {
     if (!file) return "";
-    const newUploadedImages = await uploadToCloudinary([file], process.env.NEXT_PUBLIC_FOLDER || "");
-    return newUploadedImages.length > 0 ? newUploadedImages[0] : "";
-  };
+    
+    setUploadProgress(0);
+    const interval = setInterval(() => {
+      setUploadProgress(prev => Math.min(prev + 10, 90));
+    }, 100);
+    
+    try {
+      const uploadedImages = await uploadToCloudinary([file], process.env.NEXT_PUBLIC_FOLDER || "");
+      setUploadProgress(100);
+      clearInterval(interval);
+      return uploadedImages.length > 0 ? uploadedImages[0] : "";
+    } catch (error) {
+      clearInterval(interval);
+      setUploadProgress(0);
+      throw error;
+    }
+  }, [file]);
 
-  const handleSuccess = () => {
+  // Submit handlers
+  const handleSuccess = useCallback(() => {
     setLoading(false);
     resetForm();
-    toast.success(modalMode === "add" ? "Thêm người dùng thành công!" : "Cập nhật người dùng thành công!");
+    toast.success(`✅ ${isEditMode ? "Cập nhật" : "Thêm"} người dùng thành công!`);
     setReload(!reload);
     onClose();
-  };
+  }, [isEditMode, resetForm, setReload, reload, onClose]);
 
-  const handleError = () => {
+  const handleError = useCallback((message?: string) => {
     setLoading(false);
-    toast.error(modalMode === "add" ? "Thêm người dùng thất bại!" : "Cập nhật người dùng thất bại!");
-  };
+    setUploadProgress(0);
+    toast.error(message || `❌ ${isEditMode ? "Cập nhật" : "Thêm"} người dùng thất bại!`);
+  }, [isEditMode]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
+    if (!validateForm()) {
+      toast.error("Vui lòng điền đầy đủ thông tin!");
+      return;
+    }
+
     setLoading(true);
     try {
-      const avatarUrl = await handleImageUpload();
-      if (avatarUrl) {
-        formData.avatarUrl = avatarUrl;
+      let finalData = { ...formData };
+      
+      if (file) {
+        const avatarUrl = await handleImageUpload();
+        if (avatarUrl) finalData.avatarUrl = avatarUrl;
       }
       
-      const res = await CreateUser_API(formData, accessToken);
+      const apiCall = isEditMode 
+        ? UpdateUser_API(editUser!.id, finalData, accessToken)
+        : CreateUser_API(finalData, accessToken);
+      
+      const res = await apiCall;
       res.status === 200 ? handleSuccess() : handleError();
     } catch (error) {
       handleError();
     }
-  };
-  
-  const handleEdit = async () => {
-    setLoading(true);
-    try {
-      const avatarUrl = await handleImageUpload();
-      if (avatarUrl) {
-        formData.avatarUrl = avatarUrl;
-      }
+  }, [validateForm, formData, file, handleImageUpload, isEditMode, editUser, accessToken, handleSuccess, handleError]);
+
+  // Step navigation
+  const nextStep = useCallback(() => {
+    if (step === 1) {
+      const basicFields = ['fullName', 'email'];
+      if (modalMode === 'add') basicFields.push('password');
       
-      const res = await UpdateUser_API(editUser.id, formData, accessToken);
-      res.status === 200 ? handleSuccess() : handleError();
-    } catch (error) {
-      handleError();
+      const basicErrors: Record<string, string> = {};
+      basicFields.forEach(field => {
+        const error = validateField(field, formData[field]);
+        if (error) basicErrors[field] = error;
+      });
+      
+      if (Object.keys(basicErrors).length > 0) {
+        setErrors(basicErrors);
+        return;
+      }
     }
-  };
+    setStep(2);
+  }, [step, modalMode, validateField, formData]);
 
-  const modalConfig = {
-    isOpen,
-    onClose,
-    placement: "center" as const,
-    size: "2xl" as const,
-    scrollBehavior: "inside" as const,
-    classNames: {
-      base: "bg-background",
-      header: "border-b border-border",
-      body: "py-6",
-      footer: "border-t border-border",
-      closeButton: "hover:bg-default-100",
-      backdrop: "bg-background/80 backdrop-blur-md",
-    },
-  };
+  const prevStep = useCallback(() => setStep(1), []);
 
-  const headerIcon = modalMode === "add" ? <UserPlus className="w-5 h-5 text-primary" /> : <Edit3 className="w-5 h-5 text-primary" />;
-  const headerTitle = modalMode === "add" ? "Thêm người dùng mới" : "Chỉnh sửa thông tin người dùng";
-  const buttonText = modalMode === "add" ? "Thêm người dùng" : "Lưu thay đổi";
-  const handleAction = modalMode === "add" ? handleSubmit : handleEdit;
+  // Form field handlers
+  const updateField = useCallback((field: string, value: any) => {
+    setFormData({ ...formData, [field]: value });
+    if (errors[field]) {
+      setErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  }, [formData, setFormData, errors]);
+
+  const handleAddressChange = useCallback((addressData: any) => {
+    setFormData({
+      ...formData,
+      address: addressData.city.cityName,
+      district: addressData.district.districtName,
+      ward: addressData.ward.wardName,
+    });
+  }, [formData, setFormData]);
 
   return (
-    <div className="h-[80vh] overflow-hidden">
-      <Modal {...modalConfig}>
-        <ModalContent>
-          <ModalHeader className="text-xl font-bold">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                {headerIcon}
+    <Modal 
+      isOpen={isOpen}
+      onClose={() => {
+        resetForm();
+        onClose();
+      }}
+      placement="center"
+      size="3xl"
+      scrollBehavior="inside"
+      classNames={{
+        base: "bg-white shadow-2xl",
+        header: "border-b border-gray-200 bg-gradient-to-r from-blue-50 to-purple-50",
+        body: "py-6",
+        footer: "border-t border-gray-200 bg-gray-50/50",
+        backdrop: "bg-black/60 backdrop-blur-sm",
+      }}
+    >
+      <ModalContent>
+        <ModalHeader className="pb-4">
+          <div className="flex items-center justify-between w-full">
+            <div className="flex items-center gap-4">
+              <div className={`p-3 rounded-xl shadow-md ${headerConfig.bgColor}`}>
+                {headerConfig.icon}
               </div>
-              {headerTitle}
+              <div>
+                <h2 className="text-xl font-bold text-gray-800">{headerConfig.title}</h2>
+                <p className="text-sm text-gray-500">{headerConfig.subtitle}</p>
+              </div>
             </div>
-          </ModalHeader>
-          
-          <ModalBody className="space-y-4">
-            <div className="w-full flex justify-center items-center h-[150px]">
-              <ImgUpload
-                setPreview={setPreview}
-                preview={preview}
-                setFile={setFile}
-              />
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span>Bước {step}/2</span>
+              <Progress value={(step / 2) * 100} className="w-20" size="sm" />
+            </div>
+          </div>
+        </ModalHeader>
+        
+        <ModalBody className="space-y-6">
+          {/* Upload Progress */}
+          {uploadProgress > 0 && uploadProgress < 100 && (
+            <Card className="p-4 bg-blue-50 border border-blue-200">
+              <div className="flex items-center gap-3">
+                <Upload className="w-5 h-5 text-blue-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-blue-800">Đang tải ảnh...</p>
+                  <Progress value={uploadProgress} className="mt-2" color="primary" />
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {step === 1 && (
+            <div className="space-y-6">
+              {/* Avatar Upload */}
+              <Card className="p-6 bg-gradient-to-br from-gray-50 to-blue-50 border border-gray-200">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center justify-center gap-2">
+                    <Camera className="w-5 h-5" />
+                    Ảnh đại diện
+                  </h3>
+                  <ImgUpload
+                    setPreview={setPreview}
+                    preview={preview}
+                    setFile={setFile}
+                  />
+                  <p className="text-sm text-gray-500 mt-3">Tải lên ảnh đại diện (tuỳ chọn)</p>
+                </div>
+              </Card>
+
+              {/* Basic Information */}
+              <div className="space-y-5">
+                <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <User className="w-5 h-5" />
+                  Thông tin cơ bản
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <Input
+                    label="Họ và tên"
+                    placeholder="Nhập họ và tên đầy đủ"
+                    value={formData.fullName}
+                    onChange={(e) => updateField('fullName', e.target.value)}
+                    variant="bordered"
+                    isRequired
+                    isInvalid={!!errors.fullName}
+                    errorMessage={errors.fullName}
+                    startContent={<User className="w-4 h-4 text-gray-400" />}
+                  />
+                  
+                  <div>
+                    <InputGmail
+                      label="Email"
+                      placeholder="example@email.com"
+                      value={formData.email}
+                      onChange={(value) => updateField('email', value)}
+                    />
+                    {errors.email && (
+                      <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                    )}
+                  </div>
+                </div>
+
+                {modalMode === "add" && (
+                  <div>
+                    <InputPassword
+                      label="Mật khẩu"
+                      placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                      value={formData.password}
+                      onChange={(value) => updateField('password', value)}
+                    />
+                    {errors.password && (
+                      <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Thông tin liên hệ & vai trò
+              </h3>
+
+              <div className="space-y-5">
+                <div>
+                  <InputPhone
+                    label="Số điện thoại"
+                    placeholder="Nhập số điện thoại"
+                    value={formData.phone}
+                    onChange={(value) => updateField('phone', value)}
+                  />
+                  {errors.phone && (
+                    <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Địa chỉ <span className="text-red-500">*</span>
+                  </label>
+                  <InputAddress onChange={handleAddressChange} />
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <Select
+                    label="Vai trò"
+                    placeholder="Chọn vai trò"
+                    selectedKeys={[formData.roleId.toString()]}
+                    onSelectionChange={(keys) => {
+                      const selected = Array.from(keys)[0] as string;
+                      updateField('roleId', Number(selected));
+                    }}
+                    variant="bordered"
+                    startContent={<Users className="w-4 h-4 text-gray-400" />}
+                  >
+                    <SelectItem key="1" value="1">
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Người dùng
+                      </div>
+                    </SelectItem>
+                    <SelectItem key="2" value="2">
+                      <div className="flex items-center gap-2">
+                        <Users className="w-4 h-4" />
+                        Quản trị viên
+                      </div>
+                    </SelectItem>
+                  </Select>
+
+                  <div>
+                    <InputGender
+                      label="Giới tính"
+                      placeholder="Chọn giới tính"
+                      value={formData.gender}
+                      onChange={(value) => updateField('gender', value)}
+                    />
+                    {errors.gender && (
+                      <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </ModalBody>
+        
+        <ModalFooter className="gap-3 pt-6">
+          <div className="flex justify-between w-full">
+            <div className="flex gap-2">
+              {step > 1 && (
+                <Button
+                  variant="bordered"
+                  onPress={prevStep}
+                  startContent={<ArrowLeft className="w-4 h-4" />}
+                  className="font-medium"
+                >
+                  Quay lại
+                </Button>
+              )}
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                label="Họ và tên"
-                placeholder="Nhập họ và tên đầy đủ"
-                type="text"
-                value={formData.fullName}
-                labelPlacement="outside"
-                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                variant="bordered"
-                isRequired
-                startContent={<User className="w-4 h-4 text-default-400" />}
-                classNames={{
-                  label: "text-default-700 font-medium",
-                  input: "text-default-800",
+            <div className="flex gap-2">
+              <Button
+                variant="light"
+                onPress={() => {
+                  resetForm();
+                  onClose();
                 }}
-              />
-              <InputGmail
-                label="Email"
-                placeholder="example@email.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e })}
-              />
+              >
+                Hủy
+              </Button>
+              
+              {step < 2 ? (
+                <Button
+                  color="primary"
+                  onPress={nextStep}
+                  endContent={<ArrowRight className="w-4 h-4" />}
+                  className="font-medium"
+                >
+                  Tiếp theo
+                </Button>
+              ) : (
+                <Button
+                  color="primary"
+                  onPress={handleSubmit}
+                  isLoading={loading}
+                  startContent={!loading && <Check className="w-4 h-4" />}
+                  className="font-medium"
+                >
+                  {loading ? "Đang xử lý..." : headerConfig.buttonText}
+                </Button>
+              )}
             </div>
-
-            {modalMode === "add" && (
-              <InputPassword
-                label="Mật khẩu"
-                placeholder="Nhập mật khẩu"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e })}
-              />
-            )}
-
-            <InputPhone
-              label="Số điện thoại"
-              placeholder="Nhập số điện thoại"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e })}
-            />
-
-            <InputAddress
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  address: e.city.cityName,
-                  district: e.district.districtName,
-                  ward: e.ward.wardName,
-                })
-              }
-            />
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2 -mt-4">
-                Vai trò
-              </label>
-              <Select
-                placeholder="Chọn vai trò"
-                size="sm"
-                value={formData.roleId}
-                onChange={(e) => setFormData({ ...formData, roleId: Number(e.target.value) })}
-                variant="bordered"
-                labelPlacement="outside"
-                classNames={{
-                  label: "text-default-700 font-medium",
-                  trigger: "h-12",
-                }}>
-                <SelectItem key={1} value="USER">
-                  Người dùng
-                </SelectItem>
-                <SelectItem key={2} value="ADMIN">
-                  Quản trị viên
-                </SelectItem>
-              </Select>
-            </div>
-
-            <InputGender
-              label="Giới tính"
-              placeholder="Nhập giới tính"
-              value={formData.gender}
-              onChange={(e) => setFormData({ ...formData, gender: e })}
-            />
-          </ModalBody>
-          
-          <ModalFooter className="gap-3">
-            <Button
-              color="danger"
-              variant="bordered"
-              onPress={onClose}
-              className="font-medium">
-              Hủy bỏ
-            </Button>
-            <Button
-              color="primary"
-              onPress={handleAction}
-              isLoading={loading}
-              className="font-semibold px-6">
-              {buttonText}
-            </Button>
-          </ModalFooter>
-        </ModalContent>
-      </Modal>
-    </div>
+          </div>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
   );
 }
