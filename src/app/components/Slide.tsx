@@ -42,14 +42,21 @@ export default function Slide() {
   }, []);
 
   const goToSlide = (index: number) => {
+    console.log('Go to slide:', index); // Debug log
     setCurrentSlide(index);
   };
 
-  const goToPrevious = () => {
+  const goToPrevious = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Previous slide'); // Debug log
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
-  const goToNext = () => {
+  const goToNext = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Next slide'); // Debug log
     setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
@@ -60,7 +67,7 @@ export default function Slide() {
           <div
             key={slide.id}
             className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-              index === currentSlide ? 'opacity-100' : 'opacity-0'
+              index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
             }`}
           >
             <Image
@@ -71,7 +78,7 @@ export default function Slide() {
               priority={index === 0}
             />
             <div className="absolute inset-0 bg-black/40" />
-            <div className="absolute bottom-4 sm:bottom-8 md:bottom-12 lg:bottom-20 left-4 sm:left-8 md:left-12 lg:left-20 text-white max-w-xl p-4">
+            <div className="absolute bottom-4 sm:bottom-8 md:bottom-12 lg:bottom-20 left-4 sm:left-8 md:left-12 lg:left-20 text-white max-w-xl p-4 z-20">
               <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-6xl font-bold mb-2 sm:mb-4">
                 {slide.title}
               </h2>
@@ -88,7 +95,8 @@ export default function Slide() {
         {/* Navigation arrows */}
         <button
           onClick={goToPrevious}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition-all duration-300 z-30 backdrop-blur-sm"
+          style={{ zIndex: 50 }}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -96,7 +104,8 @@ export default function Slide() {
         </button>
         <button
           onClick={goToNext}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full transition-all duration-300 z-30 backdrop-blur-sm"
+          style={{ zIndex: 50 }}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -104,16 +113,27 @@ export default function Slide() {
         </button>
         
         {/* Dots indicator */}
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-30">
           {slides.map((_, index) => (
             <button
               key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-3 h-3 rounded-full transition-colors duration-300 ${
-                index === currentSlide ? 'bg-white' : 'bg-white/50 hover:bg-white/70'
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                goToSlide(index);
+              }}
+              className={`w-4 h-4 rounded-full transition-all duration-300 ${
+                index === currentSlide 
+                  ? 'bg-white scale-125' 
+                  : 'bg-white/50 hover:bg-white/70 hover:scale-110'
               }`}
             />
           ))}
+        </div>
+
+        {/* Current slide indicator for debug */}
+        <div className="absolute top-4 left-4 bg-black/50 text-white px-2 py-1 rounded text-sm z-30">
+          {currentSlide + 1} / {slides.length}
         </div>
       </div>
     </div>
