@@ -115,6 +115,9 @@ export class AuthService {
    */
   static async login(credentials: LoginRequest): Promise<AuthResponse> {
     try {
+      console.log('AuthService.login called with:', { ...credentials, password: '***' });
+      console.log('API_URL:', API_URL);
+      console.log('Full URL will be:', `${API_URL}/auth/login`);
       const response: AxiosResponse<AuthResponse> = await authApiClient.post('/auth/login', credentials);
       
       // Store tokens securely

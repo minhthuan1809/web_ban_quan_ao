@@ -19,18 +19,22 @@ export default function PageLogin() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Starting login process...', { email: gmail, password: password.length > 0 ? '***' : 'empty' });
     try {
       setLoading(true);
+      console.log('Calling API with URL:', process.env.NEXT_PUBLIC_API_URL);
       const response = await authLogin_API({
         email: gmail,
         password: password,
       });
+      console.log('Login response:', response);
       setCookie("token", JSON.stringify(response), {
         maxAge: rememberMe ? 30 * 24 * 60 * 60 : undefined, // 30 days if remember me is checked
       });
       toast.success("Đăng nhập thành công");
       router.push("/");
     } catch (error) {
+      console.error('Login error details:', error);
       toast.error("Đăng nhập thất bại");
       console.error(error);
     } finally {

@@ -1,5 +1,4 @@
 'use client'
-
 import { NextUIProvider } from '@nextui-org/react'
 import { ThemeProvider } from 'next-themes'
 import { ToastContainer } from 'react-toastify'

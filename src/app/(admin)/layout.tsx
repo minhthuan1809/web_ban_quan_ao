@@ -430,7 +430,7 @@ export default function Layout({children}: {children: React.ReactNode}) {
                                 </div>
                             ) : (
                                 <Link
-                                    href={item.href}
+                                    href={item.href || ""}
                                     className={cn(
                                         "flex items-center px-4 py-3 rounded-lg transition-all duration-200 group",
                                         pathname === item.href || pathname.startsWith(item.href + "/")
