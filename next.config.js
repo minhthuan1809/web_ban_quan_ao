@@ -1,18 +1,35 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    domains: [
-      "images.unsplash.com",
-      'plus.unsplash.com',
-      'lh3.googleusercontent.com',
-      'res.cloudinary.com',
-      'plus.unsplash.com',
-      'images.unsplash.com',
-      'plus.unsplash.com',
-      'strivend.vn',
-      'aobongdathietke.vn',
-      'file.hstatic.net',
-
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'plus.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'strivend.vn',
+      },
+      {
+        protocol: 'https',
+        hostname: 'aobongdathietke.vn',
+      },
+      {
+        protocol: 'https',
+        hostname: 'file.hstatic.net',
+      },
     ],
   },
 };

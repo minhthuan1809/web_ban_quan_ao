@@ -169,7 +169,7 @@ export default function InputPassword({
         isInvalid={!!passwordValidation.error}
         errorMessage={passwordValidation.error}
         autoComplete={autoComplete}
-        spellCheck={false}
+        spellCheck={false as any}
       />
 
       {/* Password Strength Indicator */}

@@ -197,7 +197,7 @@ export default function InputGmail({
         isInvalid={!!emailValidation.error && !!value}
         errorMessage={emailValidation.error && value ? emailValidation.error : ""}
         autoComplete={autoComplete}
-        spellCheck={false}
+        spellCheck={false as any}
       />
 
       {/* Domain suggestions for focused state */}

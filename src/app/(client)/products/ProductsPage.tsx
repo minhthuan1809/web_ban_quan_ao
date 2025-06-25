@@ -60,15 +60,15 @@ export default function ProductsPage({filter} : {filter: any}) {
           let sortedProducts = [...res.data.data];
           
           if (sort === "price") {
-            sortedProducts.sort((a, b) => a.price - b.price);
+            sortedProducts.sort((a: any, b: any) => a.price - b.price);
           } else if (sort === "-price") {
-            sortedProducts.sort((a, b) => b.price - a.price);
+            sortedProducts.sort((a: any, b: any) => b.price - a.price);
           } else if (sort === "createdAt") {
-            sortedProducts.sort((a, b) => b.createdAt - a.createdAt);
+            sortedProducts.sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
           }
           
           setProducts(sortedProducts);
-          setTotal(res.data.metadata.total_page);
+          setTotal((res.data as any).metadata?.total_page || 1);
         }
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -79,7 +79,7 @@ export default function ProductsPage({filter} : {filter: any}) {
 
     const timeout = setTimeout(() => {
       fetchProducts();
-    }, 500);
+    }, 300);
 
     return () => clearTimeout(timeout);
   }, [page, limit, filter, searchParams, sort]);
@@ -119,6 +119,7 @@ export default function ProductsPage({filter} : {filter: any}) {
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
                 className="w-[140px] sm:w-[180px]"
+                aria-label="Sắp xếp sản phẩm"
                 classNames={{
                   trigger: "border-border",
                   value: "text-default-700"

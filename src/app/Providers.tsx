@@ -83,7 +83,7 @@ const toastConfig = {
 
 // Theme configuration
 const themeConfig = {
-  attribute: "class",
+  attribute: "class" as const,
   defaultTheme: "system",
   enableSystem: true,
   enableColorScheme: true,
@@ -121,16 +121,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           
           {/* Global keyboard shortcuts */}
           <div className="sr-only">
-            <button 
-              onClick={() => {
-                const theme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-                document.documentElement.classList.toggle('dark');
-              }}
-              accessKey="t"
-              aria-label="Toggle theme (Alt+T)"
-            >
-              Toggle theme
-            </button>
+            <span aria-label="Toggle theme (Alt+T)">
+              Theme toggle available via keyboard shortcut Alt+T
+            </span>
           </div>
         </NextUIProvider>
       </ThemeProvider>

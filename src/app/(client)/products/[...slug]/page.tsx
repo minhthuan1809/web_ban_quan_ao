@@ -1,6 +1,6 @@
 "use client";
 import { getProductDetail_API, getProducts_API, getVariantDetail_API } from "@/app/_service/products";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Suspense, lazy } from "react";
 import {
   Star,
   Plus,
@@ -17,13 +17,15 @@ import RenderTextEditer from "@/app/_util/ui/RenderTextEditer";
 import GalleryImg from "@/app/components/GalleryImg";
 import { toast } from "react-toastify";
 import ShareSocial from "@/app/components/ShareSocial ";
-import EvaluateComment from "@/app/components/EvaluateCommet";
-import ProductCarousel from "@/app/components/category/ProductCarousel";
-import InstructChooseSize from "@/app/(client)/_modal/InstructChooseSize";
 import { CreateCard_API } from "@/app/_service/Card";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { Button, Card, CardBody, Chip } from "@nextui-org/react";
 import { calculateDiscountedPrice } from "@/app/_util/CalculateCartPrice";
+
+// Lazy load heavy components
+const EvaluateComment = lazy(() => import("@/app/components/EvaluateCommet"));
+const ProductCarousel = lazy(() => import("@/app/components/category/ProductCarousel"));
+const InstructChooseSize = lazy(() => import("@/app/(client)/_modal/InstructChooseSize"));
 
 export default function ProductDetailPage({
   params,
@@ -453,7 +455,9 @@ if(userInfo){
         <div className="mt-8">
           <Card className="shadow-small">
             <CardBody className="p-6">
-              <EvaluateComment />
+              <Suspense fallback={<div className="h-32 flex items-center justify-center">Đang tải đánh giá...</div>}>
+                <EvaluateComment />
+              </Suspense>
             </CardBody>
           </Card>
         </div>
@@ -462,11 +466,16 @@ if(userInfo){
         <div className="mt-8">
           <Card className="shadow-small">
             <CardBody className="p-6">
-              <ProductCarousel title="Sản phẩm liên quan" data={relatedProducts} />
+              <Suspense fallback={<div className="h-48 flex items-center justify-center">Đang tải sản phẩm liên quan...</div>}>
+                <ProductCarousel title="Sản phẩm liên quan" data={relatedProducts} />
+              </Suspense>
             </CardBody>
           </Card>
         </div>
-        <InstructChooseSize isOpen={isOpen} onClose={() => setIsOpen(false)} />
+        
+        <Suspense fallback={null}>
+          <InstructChooseSize isOpen={isOpen} onClose={() => setIsOpen(false)} />
+        </Suspense>
       </div>
     </div>
   );

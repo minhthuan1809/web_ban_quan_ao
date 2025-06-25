@@ -1,11 +1,8 @@
 import axios from "axios";
-import useAuthInfor from '@/app/customHooks/AuthInfor';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const { accessToken } = useAuthInfor();
 
-
-export const createEvaluate_API = async (data: any) => {
+export const createEvaluate_API = async (data: any, accessToken: string) => {
   const res = await axios.post(`${API_URL}/reviews/create`, data, {
     headers: {
       "Authorization": `Bearer ${accessToken}`,
@@ -22,20 +19,19 @@ export const getReviews_API = async (page: number, pageSize: number = 10, search
   params.append('page', page.toString());
   params.append('search', searchValue);
   params.append('productId', JSON.stringify({productId : productId}));
-  const { accessToken } = useAuthInfor();
-      const response = await axios.get(`${API_URL}/reviews?${params.toString()}`, {
-          headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${accessToken}`,
-          },
-      });
-      return response.data;
+  
+  const response = await axios.get(`${API_URL}/reviews?${params.toString()}`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+  return response.data;
 }
 
 
 // trả lời đánh giá
 
-export const createAnswer_API = async (data: any) => {
+export const createAnswer_API = async (data: any, accessToken: string) => {
   const res = await axios.post(`${API_URL}/answers`, data, {
     headers: {
       "Authorization": `Bearer ${accessToken}`,
@@ -45,7 +41,7 @@ export const createAnswer_API = async (data: any) => {
   return res;
 }
 
-export const updateAnswer_API = async (id: number, data: any) => {
+export const updateAnswer_API = async (id: number, data: any, accessToken: string) => {
   const res = await axios.put(`${API_URL}/answers/${id}`, data, {
     headers: {
       "Authorization": `Bearer ${accessToken}`,

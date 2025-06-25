@@ -3,7 +3,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import 'suneditor/dist/css/suneditor.min.css';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
-import { Providers } from "./providers";
+import { Providers } from "./Providers";
 
 // Optimized font loading
 const inter = Inter({ 
@@ -236,12 +236,12 @@ export default function RootLayout({
           <div className="text-center p-8">
             <h1 className="text-2xl font-bold text-gray-800 mb-4">Đã xảy ra lỗi</h1>
             <p className="text-gray-600 mb-4">Vui lòng tải lại trang hoặc thử lại sau.</p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+            <a 
+              href="/" 
+              className="inline-block bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
             >
-              Tải lại trang
-            </button>
+              Về trang chủ
+            </a>
           </div>
         </div>
       </body>

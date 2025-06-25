@@ -1,3 +1,4 @@
+"use client"
 import React, { useEffect, useState } from 'react';
 import { Star, ThumbsUp } from 'lucide-react';
 import { getReviews_API } from '../_service/Evaluate';
@@ -51,16 +52,25 @@ export default function SimpleEvaluateComment() {
   const [ratingCounts, setRatingCounts] = useState<{ [key: number]: number }>({});
   const [imageCount, setImageCount] = useState(0);
   const [metadata, setMetadata] = useState<ReviewResponse['metadata'] | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const params = useParams();
   const _params = params.slug;
-  const productId = _params[1];
+  const productId = _params && Array.isArray(_params) ? _params[1] : null;
   const [page, setPage] = useState(1);
   const totalPage = metadata?.total_page || 1;
 
+  // Tránh setState trong render
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
   useEffect(() => {
+    if (!productId) return;
+    
     const fetchReviews = async () => {
       try {
+        setLoading(true);
         const response = await getReviews_API(page, 10, '', productId);
         const reviewsData = response.data;
         const metadata = response.metadata;
@@ -85,10 +95,20 @@ export default function SimpleEvaluateComment() {
         setImageCount(imgCount);
       } catch (error) {
         console.error('Error fetching reviews:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchReviews();
   }, [productId, page]);
+
+  if (!productId) {
+    return <div>Không tìm thấy thông tin sản phẩm</div>;
+  }
+
+  if (loading) {
+    return <div className="bg-white p-4 text-center">Đang tải đánh giá...</div>;
+  }
 
   const renderStars = (rating: number) => {
     return Array.from({ length: 5 }, (_, index) => (
@@ -128,9 +148,13 @@ export default function SimpleEvaluateComment() {
         
         <div className="text-sm text-gray-600">
           <div>
-            {[5, 4, 3, 2, 1].map(rating => (
-              ratingCounts[rating] ? `${rating} Sao (${ratingCounts[rating]})${rating > 1 ? ' • ' : ''}` : ''
-            ))}
+            {[5, 4, 3, 2, 1].map(rating => 
+              ratingCounts[rating] ? (
+                <span key={rating}>
+                  {rating} Sao ({ratingCounts[rating]}){rating > 1 ? ' • ' : ''}
+                </span>
+              ) : null
+            )}
           </div>
           <div className="mt-1">Có Hình Ảnh/Video ({imageCount})</div>
         </div>
@@ -141,20 +165,29 @@ export default function SimpleEvaluateComment() {
           <div key={review.id} className="pb-5 border-b border-gray-100 last:border-b-0">
             <div className="flex gap-3">
               <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-sm overflow-hidden">
-                {review.user.avatarUrl ? (
+                {review.user?.avatarUrl ? (
                   <img 
                     src={review.user.avatarUrl}
-                    alt={review.user.fullName}
+                    alt={review.user?.fullName || 'User'}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Hiển thị chữ cái đầu nếu ảnh không load được
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = (review.user?.fullName?.charAt(0)?.toUpperCase() || '?');
+                      }
+                    }}
                   />
                 ) : (
-                  review.user.fullName.charAt(0).toUpperCase()
+                  (review.user?.fullName?.charAt(0)?.toUpperCase() || '?')
                 )}
               </div>
               
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium text-gray-900">{review.user.fullName}</span>
+                  <span className="text-sm font-medium text-gray-900">{review.user?.fullName || 'Người dùng'}</span>
                   <div className="flex gap-1">
                     {renderStars(review.rating)}
                   </div>
@@ -176,6 +209,10 @@ export default function SimpleEvaluateComment() {
                           src={image} 
                           alt={`Ảnh ${index + 1}`}
                           className="w-full h-full object-cover rounded"
+                          onError={(e) => {
+                            // Ẩn ảnh nếu không load được
+                            (e.target as HTMLImageElement).style.display = 'none';
+                          }}
                         />
                       </div>
                     ))}
@@ -205,9 +242,7 @@ export default function SimpleEvaluateComment() {
           <Pagination
             total={totalPage}
             page={page}
-            onChange={(page) => {
-              setPage(page as number);
-            }}
+            onChange={handlePageChange}
           />
         )}
       </div>

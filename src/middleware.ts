@@ -189,12 +189,15 @@ function createResponse(
 export function middleware(request: NextRequest): NextResponse {
   const pathname = request.nextUrl.pathname;
   
-  // Skip middleware for static files and API routes (except auth)
+  // Skip middleware for static files and API routes
   if (
     pathname.startsWith('/_next/') ||
     pathname.startsWith('/api/') ||
     pathname.includes('.') ||
-    pathname.startsWith('/favicon')
+    pathname.startsWith('/favicon') ||
+    pathname.includes('__nextjs') ||
+    pathname.includes('webpack-hmr') ||
+    pathname.includes('static')
   ) {
     return NextResponse.next();
   }

@@ -1,3 +1,4 @@
+"use client"
 import CardProduct from '@/app/components/CardProduct' 
 import React from 'react'
 import { Swiper, SwiperSlide } from 'swiper/react'

@@ -48,7 +48,7 @@ export default function ProductPage() {
           });
           
           setProducts(processedData.reverse())
-          setTotalPage(response.data.metadata.total_page)
+          setTotalPage((response.data as any).metadata?.total_page || 1)
         } else {
           toast.error("Đã có lỗi xảy ra !")
         }
@@ -72,7 +72,7 @@ export default function ProductPage() {
         toast.error("Không tìm thấy ảnh sản phẩm");
         return;
       }
-      const deleteRes = await deleteProduct_API(product.id, accessToken);
+      const deleteRes = await deleteProduct_API(product.id, accessToken || "");
       if (deleteRes.status === 204) {
         toast.success("Xóa sản phẩm thành công")
         setIsRefetch(prev => !prev)

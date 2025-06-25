@@ -32,16 +32,6 @@ interface UserData {
   updatedAt: number;
 }
 
-interface UserResponse {
-  data: UserData[];
-  metadata: {
-    page: number;
-    page_size: number;
-    total: number;
-    total_page: number;
-    ranger: { from: number; to: number; }
-  }
-}
 
 const INITIAL_FORM_DATA = {
   fullName: '',
@@ -62,7 +52,7 @@ const FILTER_OPTIONS = [
 ];
 
 export default function PageUser() {        
-  const [users, setUsers] = useState<UserResponse | null>(null);
+  const [users, setUsers] = useState<any | null>(null);
   const { accessToken } = useAuthInfor();
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [editUser, setEditUser] = useState<UserData | null>(null);
@@ -75,10 +65,11 @@ export default function PageUser() {
 
   // Fetch users
   const fetchUsers = useCallback(async () => {
+    if (!accessToken) return;
     setLoading(true);
     try {
       const res = await getUserById_API(accessToken);
-      setUsers(res.data);
+      setUsers(res.data as any);
     } catch (error) {
       toast.error('Lỗi tải danh sách người dùng!');
     } finally {
@@ -94,8 +85,8 @@ export default function PageUser() {
   const filteredUsers = useMemo(() => {
     if (!users?.data) return [];
     
-    return users.data.filter(user => {
-      const matchesSearch = !searchQuery || 
+      return users.data.filter((user: any)   => {
+        const matchesSearch = !searchQuery || 
         user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.phone.includes(searchQuery);
@@ -141,10 +132,10 @@ export default function PageUser() {
       cancelButtonText: 'Hủy'
     });
     
-    if (result.isConfirmed) {
+    if (result.isConfirmed && accessToken) {
       setLoading(true);
       try {
-        await deleteUser_API(id, accessToken);
+        await deleteUser_API(id, accessToken!);
         toast.success('Xóa người dùng thành công!');
         setReload(!reload);
       } catch (error) {
@@ -487,17 +478,19 @@ export default function PageUser() {
       </Card>
 
       {/* Modal */}
-      <ModalAddUse
-        editUser={editUser as any}
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        modalMode={modalMode}
-        formData={formData}
-        setFormData={setFormData}
-        accessToken={accessToken}
-        reload={reload}
-        setReload={setReload}
-      />
+      {accessToken && (
+        <ModalAddUse
+          editUser={editUser as any}
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+          modalMode={modalMode}
+          formData={formData}
+          setFormData={setFormData}
+          accessToken={accessToken!}
+          reload={reload}
+          setReload={setReload}
+        />
+      )}
     </div>
   );
 }
