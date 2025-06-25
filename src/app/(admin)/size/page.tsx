@@ -8,6 +8,7 @@ import useAuthInfor from '@/app/customHooks/AuthInfor'
 import { toast } from 'react-toastify'
 import RenderTable from '../_conponents/RenderTable'
 import showConfirmDialog from '@/app/_util/Sweetalert2'
+import { SizeSkeleton } from '../_skeleton'
 
 interface SizeData {
   id: number;
@@ -159,9 +160,7 @@ export default function page() {
         />
         <CardBody>
           {loading ? (
-            <div className="flex justify-center items-center min-h-[400px]">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            </div>
+            <SizeSkeleton />
           ) : (
             <RenderTable 
               data={size} 

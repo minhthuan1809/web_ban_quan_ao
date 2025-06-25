@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 import ModalAddEditDiscount from './ModalAddEditDiscount';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
+import { DiscountSkeleton } from '../../_skeleton';
   
 interface Coupon {
   id: number;
@@ -149,7 +150,7 @@ export default function Code() {
         />
 
       {loading ? (
-      <Loading />
+      <DiscountSkeleton />
       ) : (
         <>
       

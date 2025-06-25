@@ -10,6 +10,7 @@ import { addColor_API, DeleteColor_API, GetAllColor_API, updateColor_API } from 
 import Modal_addEditColor from './Modal_addEditColor'
 import { EditIcon, PencilIcon, TrashIcon } from 'lucide-react'
 import showConfirmDialog from '@/app/_util/Sweetalert2'
+import { ColorSkeleton } from '../_skeleton'
 
 interface ColorData {
   id: number;
@@ -168,9 +169,7 @@ export default function page() {
         />
         <CardBody>
           {loading ? (
-            <div className="flex justify-center items-center min-h-[400px]">
-              <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            </div>
+            <ColorSkeleton />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left">

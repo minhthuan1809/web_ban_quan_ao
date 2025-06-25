@@ -9,6 +9,7 @@ import Loading from "@/app/_util/Loading";
 import ModalAddEditTeam from "./ModalAddEditTeam";
 import TitleSearchAdd from "@/app/components/ui/TitleSearchAdd";
 import showConfirmDialog from "@/app/_util/Sweetalert2";
+import { TeamSkeleton } from "../_skeleton";
 
 export default function Team() {
   const [teams, setTeams] = useState([]);
@@ -109,9 +110,7 @@ export default function Team() {
       />  
 
       {loading ? (
-        <div className="flex justify-center items-center min-h-[400px]">
-          <Loading/>
-        </div>
+        <TeamSkeleton />
       ) : teams.length === 0 ? (
         <div className="flex justify-center items-center min-h-[400px]">
           <p className="text-gray-500">Không có dữ liệu</p>

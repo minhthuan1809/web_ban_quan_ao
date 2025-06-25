@@ -9,6 +9,7 @@ import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
 import TitleSearchAdd from "@/app/components/ui/TitleSearchAdd";
+import { MaterialSkeleton } from "../_skeleton";
 
 export default function Material() {
   const [material, setMaterial] = useState([]);
@@ -144,7 +145,7 @@ export default function Material() {
         }}
       />  
       {/* render bảng */}
-      {loading ? <div className="flex justify-center items-center min-h-[400px]"><Loading/></div> : <RenderTable data={material} handleDelete={handleDeleteMaterial} handleEdit={handleEditMaterial} totalPage={totalPage} currentPage={currentPage} setCurrentPage={setCurrentPage} title="chất liệu"/>}
+      {loading ? <MaterialSkeleton /> : <RenderTable data={material} handleDelete={handleDeleteMaterial} handleEdit={handleEditMaterial} totalPage={totalPage} currentPage={currentPage} setCurrentPage={setCurrentPage} title="chất liệu"/>}
       {/*  modal thêm vật liệu */}
       <ModalAdd_Edit_Category_Material
         isOpen={loading ? false : isOpen}

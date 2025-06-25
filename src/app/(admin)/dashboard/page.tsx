@@ -18,6 +18,7 @@ import {
   PieChart,
   RefreshCw
 } from 'lucide-react'
+import { DashboardSkeleton as AdminDashboardSkeleton } from '../_skeleton'
 import { 
   getDashboardSummary,
   getDailyRevenue,
@@ -48,157 +49,9 @@ interface DashboardStats {
   topCustomers: UserStatResponse[];
 }
 
-// Loading Skeleton Components
-const StatsCardSkeleton = () => (
-  <Card className="border-none shadow-lg bg-content1">
-    <CardBody className="p-6">
-      <div className="flex items-center justify-between">
-        <div className="flex-1">
-          <Skeleton className="h-4 w-24 mb-2 rounded-lg" />
-          <Skeleton className="h-8 w-32 mb-3 rounded-lg" />
-          <div className="flex items-center space-x-2">
-            <Skeleton className="h-6 w-16 rounded-full" />
-            <Skeleton className="h-3 w-20 rounded-lg" />
-          </div>
-        </div>
-        <Skeleton className="w-14 h-14 rounded-xl" />
-      </div>
-    </CardBody>
-  </Card>
-)
 
-const ProductItemSkeleton = () => (
-  <div className="flex items-center space-x-4 p-4 bg-content2 rounded-xl">
-    <Skeleton className="w-10 h-10 rounded-lg flex-shrink-0" />
-    <div className="flex-1 min-w-0">
-      <Skeleton className="h-4 w-32 mb-2 rounded-lg" />
-      <Skeleton className="h-3 w-24 rounded-lg" />
-    </div>
-    <div className="text-right flex-shrink-0">
-      <Skeleton className="h-4 w-20 mb-1 rounded-lg" />
-      <Skeleton className="h-6 w-12 rounded-full" />
-    </div>
-  </div>
-)
 
-const CustomerItemSkeleton = () => (
-  <div className="flex items-center space-x-4 p-4 bg-content2 rounded-xl">
-    <Skeleton className="w-12 h-12 rounded-full flex-shrink-0" />
-    <div className="flex-1 min-w-0">
-      <Skeleton className="h-4 w-28 mb-1 rounded-lg" />
-      <Skeleton className="h-3 w-40 mb-1 rounded-lg" />
-      <Skeleton className="h-3 w-20 rounded-lg" />
-    </div>
-    <div className="text-right flex-shrink-0">
-      <Skeleton className="h-4 w-24 mb-1 rounded-lg" />
-      <Skeleton className="h-6 w-16 rounded-full" />
-    </div>
-  </div>
-)
 
-const DashboardSkeleton = () => (
-  <div className="p-6 space-y-8 mx-auto">
-    {/* Header Skeleton */}
-    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-      <div>
-        <Skeleton className="h-8 w-60 mb-2 rounded-lg" />
-        <Skeleton className="h-4 w-80 rounded-lg" />
-      </div>
-      <div className="flex items-center space-x-4">
-        <Skeleton className="h-10 w-24 rounded-lg" />
-        <Skeleton className="h-10 w-24 rounded-lg" />
-        <Skeleton className="h-10 w-10 rounded-lg" />
-      </div>
-    </div>
-
-    {/* Period Selector Skeleton */}
-    <Card className="border-none shadow-lg bg-content1">
-      <CardBody className="p-6">
-        <div className="flex space-x-8">
-          <Skeleton className="h-6 w-20 rounded-lg" />
-          <Skeleton className="h-6 w-24 rounded-lg" />
-          <Skeleton className="h-6 w-20 rounded-lg" />
-        </div>
-      </CardBody>
-    </Card>
-
-    {/* Quick Stats Grid Skeleton */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <StatsCardSkeleton key={index} />
-      ))}
-    </div>
-
-    {/* Revenue Progress Skeleton */}
-    <Card className="border-none shadow-lg bg-content1">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between w-full">
-          <div>
-            <Skeleton className="h-6 w-48 mb-2 rounded-lg" />
-            <Skeleton className="h-4 w-40 rounded-lg" />
-          </div>
-          <Skeleton className="h-6 w-32 rounded-full" />
-        </div>
-      </CardHeader>
-      <CardBody className="pt-0">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-4 w-24 rounded-lg" />
-            <Skeleton className="h-4 w-32 rounded-lg" />
-          </div>
-          <Skeleton className="h-3 w-full rounded-full" />
-          <div className="flex justify-between">
-            <Skeleton className="h-3 w-20 rounded-lg" />
-            <Skeleton className="h-3 w-32 rounded-lg" />
-          </div>
-        </div>
-      </CardBody>
-    </Card>
-
-    {/* Analytics Grid Skeleton */}
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      {/* Top Products Skeleton */}
-      <Card className="border-none shadow-lg bg-content1">
-        <CardHeader className="pb-3">
-          <div className="flex items-center space-x-3">
-            <Skeleton className="w-10 h-10 rounded-lg" />
-            <div>
-              <Skeleton className="h-6 w-48 mb-1 rounded-lg" />
-              <Skeleton className="h-4 w-56 rounded-lg" />
-            </div>
-          </div>
-        </CardHeader>
-        <CardBody className="pt-0">
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <ProductItemSkeleton key={index} />
-            ))}
-          </div>
-        </CardBody>
-      </Card>
-
-      {/* Top Customers Skeleton */}
-      <Card className="border-none shadow-lg bg-content1">
-        <CardHeader className="pb-3">
-          <div className="flex items-center space-x-3">
-            <Skeleton className="w-10 h-10 rounded-lg" />
-            <div>
-              <Skeleton className="h-6 w-36 mb-1 rounded-lg" />
-              <Skeleton className="h-4 w-64 rounded-lg" />
-            </div>
-          </div>
-        </CardHeader>
-        <CardBody className="pt-0">
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <CustomerItemSkeleton key={index} />
-            ))}
-          </div>
-        </CardBody>
-      </Card>
-    </div>
-  </div>
-)
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
@@ -319,7 +172,7 @@ export default function DashboardPage() {
 
   // Show skeleton while loading
   if (loading) {
-    return <DashboardSkeleton />
+    return <AdminDashboardSkeleton />
   }
 
   const quickStats = [

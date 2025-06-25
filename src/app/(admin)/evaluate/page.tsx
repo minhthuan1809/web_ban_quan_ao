@@ -10,6 +10,7 @@ import Loading from '@/app/_util/Loading';
 import { createAnswer_API } from '@/app/_service/Evaluate';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { toast } from 'react-toastify';
+import { EvaluateSkeleton } from '../_skeleton';
 
 export default function EvaluatePage() {
     const [reviews, setReviews] = useState<any[]>([]);
@@ -22,7 +23,7 @@ export default function EvaluatePage() {
     const [isReplyModalOpen, setIsReplyModalOpen] = useState<boolean>(false);
     const [selectedReview, setSelectedReview] = useState<any>(null);
     const [replyText, setReplyText] = useState<string>('');
-    const { userInfo } = useAuthInfor();
+    const { user } = useAuthInfor();
     const [reload, setReload] = useState<boolean>(false);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [answerId, setAnswerId] = useState<number>(0);
@@ -81,7 +82,7 @@ export default function EvaluatePage() {
     };
     const handleUpdateAnswer = async (id: number) => {
         const data ={
-            userId: userInfo?.id,
+            userId: user?.id,
             answer: replyText,
             images: [],
             reviewId: selectedReview?.id
@@ -123,11 +124,11 @@ export default function EvaluatePage() {
             case "user":
                 return (
                     <User
-                        name={review.user.fullName}
-                        description={review.user.email}
+                        name={review.user?.fullName || "Người dùng"}
+                        description={review.user?.email || ""}
                         avatarProps={{
-                            src: review.user.avatarUrl ? review.user.avatarUrl : undefined,
-                            name: review.user.fullName?.charAt(0)
+                            src: review.user?.avatarUrl ? review.user.avatarUrl : undefined,
+                            name: review.user?.fullName?.charAt(0) || "U"
                         }}
                     />
                 );
@@ -225,9 +226,7 @@ export default function EvaluatePage() {
             />
 
             {loading ? (
-                <div className="flex justify-center items-center min-h-[400px]">
-                    <Loading />
-                </div>
+                <EvaluateSkeleton />
             ) : reviews.length === 0 ? (
                 <div className="flex justify-center items-center min-h-[400px]">
                     <p className="text-gray-500">Không có dữ liệu đánh giá</p>

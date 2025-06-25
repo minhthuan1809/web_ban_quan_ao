@@ -10,6 +10,7 @@ import { toast } from 'react-toastify';
 import Loading from '@/app/_util/Loading';
 import RenderTable from '../_conponents/RenderTable';
 import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
+import { CategorySkeleton } from '../_skeleton';
 
 interface Category {
     id: string;
@@ -128,7 +129,7 @@ export default function Category() {
     }
 
     if (loading) {
-        return <Loading/>
+        return <CategorySkeleton/>
     }
 
     

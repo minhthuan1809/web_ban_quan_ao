@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import RenderProductTable from './RenderProductTable';
 import ModalAdd_Edit_Product from '../_modal/ModalAdd_Edit_Product';
+import { ProductSkeleton } from '../_skeleton';
 
 export default function ProductPage() {
   const { accessToken } = useAuthInfor()
@@ -108,6 +109,10 @@ export default function ProductPage() {
       toast.error(error instanceof Error ? error.message : "Có lỗi xảy ra khi xóa sản phẩm");
     }
   };
+
+  if (loading) {
+    return <ProductSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-background">

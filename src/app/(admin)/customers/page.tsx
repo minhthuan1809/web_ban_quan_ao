@@ -15,6 +15,7 @@ import Loading from '@/app/_util/Loading';
 import { toast } from 'react-toastify';
 import ModalAddUse from './ModalAddUse';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
+import { CustomerSkeleton } from '../_skeleton';
 
 interface UserData {
   id: number;
@@ -160,37 +161,7 @@ export default function PageUser() {
 
   // Loading skeleton
   if (loading && !users) {
-    return (
-      <div className="p-4 md:p-6 space-y-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
-        <Card className="p-6 shadow-xl border-0 bg-white/70 backdrop-blur-md">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Skeleton className="w-12 h-12 rounded-lg" />
-              <div className="space-y-2">
-                <Skeleton className="w-48 h-6 rounded" />
-                <Skeleton className="w-32 h-4 rounded" />
-              </div>
-            </div>
-            <Skeleton className="w-40 h-10 rounded-lg" />
-          </div>
-        </Card>
-        <Card className="p-6 shadow-xl border-0 bg-white/70 backdrop-blur-md">
-          <div className="space-y-4">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="flex items-center gap-4 p-4">
-                <Skeleton className="w-10 h-10 rounded-full" />
-                <div className="flex-1 space-y-2">
-                  <Skeleton className="w-48 h-4 rounded" />
-                  <Skeleton className="w-32 h-3 rounded" />
-                </div>
-                <Skeleton className="w-20 h-6 rounded-full" />
-                <Skeleton className="w-16 h-8 rounded" />
-              </div>
-            ))}
-          </div>
-        </Card>
-      </div>
-    );
+    return <CustomerSkeleton />;
   }
 
   return (

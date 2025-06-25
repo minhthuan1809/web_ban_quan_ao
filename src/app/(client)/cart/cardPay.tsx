@@ -25,7 +25,7 @@ export default function CardPay({
   const [feeShip, setFeeShip] = useState<number>(
     Number(process.env.NEXT_PUBLIC_FEE_SHIP || 0)
   );
-  const { userInfo } = useAuthInfor();
+  const { user : userInfo, accessToken } = useAuthInfor();
   const [address, setAddress] = useState<any>({
     city: {
       cityId: 0,
@@ -42,7 +42,7 @@ export default function CardPay({
     detail: "",
   });
   const [name, setName] = useState<string>(userInfo?.fullName || "");
-  const [phone, setPhone] = useState<string>(userInfo?.phoneNumber || "");
+  const [phone, setPhone] = useState<string>(userInfo?.phone || "");
   const [note, setNote] = useState<string>("");
   const [discountCode, setDiscountCode] = useState<any>({
     code: "",
@@ -91,10 +91,10 @@ const handlePayment = async () => {
 
 
   if(paymentMethod === 6 ) {
-    const res = await createOrderWithPaymentMethod6_API(calculateTotalAfterDiscount(), userInfo?.id);
+    const res = await createOrderWithPaymentMethod6_API(calculateTotalAfterDiscount(), userInfo?.id || 0, accessToken);
     if(res.status === 200) {
       try {
-        const res = await createOrder_API(orderData , userInfo?.id);
+        const res = await createOrder_API(orderData , userInfo?.id || 0, accessToken);
         if (res.status === 200) {
           router.push(res.data); 
         } else {
@@ -109,7 +109,7 @@ const handlePayment = async () => {
     }
   } else {
     try {
-      const res = await createOrder_API(orderData , userInfo?.id);
+      const res = await createOrder_API(orderData , userInfo?.id || 0, accessToken);
       if (res.status === 200) {
         toast.success("Đặt hàng thành công");
         router.push("/history-order"); 

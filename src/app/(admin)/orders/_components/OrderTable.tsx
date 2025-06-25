@@ -7,6 +7,7 @@
   import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
   import Loading from '@/app/_util/Loading';
   import { Pagination } from '@nextui-org/react';
+  import useAuthInfor from '@/app/customHooks/AuthInfor';
   import type { AdminOrder as Order, AdminOrderItem as OrderItem, AdminOrderTableProps as OrderTableProps } from '../../../../types/order';  
 
 
@@ -43,10 +44,12 @@
     const [page, setPage] = useState<number>(0);
     const [total, setTotal] = useState<number>(0);
 
+    const { accessToken } = useAuthInfor();
+
     const fetchOrders = useCallback(async (loading = true) => {
       setLoading(loading);
       try {
-        const res = await getOrder_API(page, searchQuery);
+        const res = await getOrder_API(page, searchQuery, accessToken);
         let filteredOrders = res.data.content;
 
         // Lọc đơn hàng dựa trên mode
@@ -110,7 +113,7 @@
       
       setUpdatingOrderId(orderId);
       try {
-        await updateOrderStatus_API(orderId, newStatus);
+        await updateOrderStatus_API(orderId, newStatus, accessToken);
         await fetchOrders(); // Refresh orders after update
       } catch (error) {
         console.error("Lỗi khi cập nhật trạng thái:", error);

@@ -9,6 +9,7 @@ import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 import ModalSentMail from '../../_modal/ModalSentMail';
 import type { AdminContact as Contact } from '../../../../types/contact'; 
 import ModalDetalMail from '../../_modal/ModalDetalMail';
+import { ContactSkeleton } from '../../_skeleton';
 
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -92,6 +93,10 @@ export default function ContactsPage() {
     setSelectedContact(contact);
     setIsMailModalOpen(true);
   };
+
+  if (loading) {
+    return <ContactSkeleton />;
+  }
 
   return (
     <div className="p-4">
