@@ -20,6 +20,42 @@ export interface ApiMeta {
   version?: string;
 }
 
+// Dashboard and Statistics Types
+export interface RevenueStatResponse {
+  totalRevenue: number;
+  totalOrders: number;
+  period: string;
+  periodType: 'DAILY' | 'MONTHLY' | 'YEARLY';
+}
+
+export interface ProductSalesResponse {
+  productId: number;
+  productName: string;
+  totalQuantitySold: number;
+  totalRevenue: number;
+  period: string;
+  periodType: 'DAILY' | 'MONTHLY' | 'YEARLY';
+}
+
+export interface UserStatResponse {
+  userId: number;
+  fullName: string;
+  email: string;
+  totalSpent: number;
+  totalOrders: number;
+}
+
+export interface DashboardSummaryResponse {
+  todayRevenue: number;
+  todayOrders: number;
+  monthRevenue: number;
+  monthOrders: number;
+  yearRevenue: number;
+  yearOrders: number;
+  topProducts: ProductSalesResponse[];
+  topCustomers: UserStatResponse[];
+}
+
 // Pagination Types
 export interface PaginationParams {
   page?: number;

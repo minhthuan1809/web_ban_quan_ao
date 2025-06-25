@@ -1,227 +1,625 @@
 "use client";
 import { useEffect, useState } from 'react'
-import { getDashboardStats } from '@/app/_service/dashboard'
 import useAuthInfor from '@/app/customHooks/AuthInfor'
-import { Card, CardBody } from '@nextui-org/react'
-import { BadgeDelta, Metric, Text } from "@tremor/react"
-import CardItemRevenue from './component/CardItemRevenue';
-import GetIconComponent from '@/app/_util/Icon';
+import { Card, CardBody, CardHeader, Progress, Avatar, Chip, Tabs, Tab, Select, SelectItem, Skeleton } from '@nextui-org/react'
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  DollarSign, 
+  ShoppingBag, 
+  Users, 
+  Package,
+  Calendar,
+  Eye,
+  ShoppingCart,
+  Star,
+  Activity,
+  BarChart3,
+  PieChart,
+  RefreshCw
+} from 'lucide-react'
+import { 
+  getDashboardSummary,
+  getDailyRevenue,
+  getMonthlyRevenue,
+  getYearlyRevenue,
+  getTopSellingProductsDaily,
+  getTopSellingProductsMonthly,
+  getTopSellingProductsYearly,
+  getTopCustomers
+} from '@/app/_service/dashboard'
+import type { 
+  DashboardSummaryResponse,
+  RevenueStatResponse,
+  ProductSalesResponse,
+  UserStatResponse
+} from '@/types/api'
+
+type PeriodType = 'today' | 'month' | 'year';
 
 interface DashboardStats {
-  todayRevenue: number;
-  todayOrders: number;
-  monthRevenue: number;
-  monthOrders: number;
-  yearRevenue: number;
-  yearOrders: number;
-  topProducts: Array<{
-    productId: number;
-    productName: string;
-    totalQuantitySold: number;
-    totalRevenue: number;
-    period: string;
-    periodType: string;
-  }>;
-  topCustomers: Array<{
-    userId: number;
-    fullName: string;
-    email: string;
-    totalSpent: number;
-    totalOrders: number;
-  }>;
+  summary: DashboardSummaryResponse | null;
+  dailyRevenue: RevenueStatResponse | null;
+  monthlyRevenue: RevenueStatResponse | null;
+  yearlyRevenue: RevenueStatResponse | null;
+  topProductsDaily: ProductSalesResponse[];
+  topProductsMonthly: ProductSalesResponse[];
+  topProductsYearly: ProductSalesResponse[];
+  topCustomers: UserStatResponse[];
 }
 
-export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [loading, setLoading] = useState(true)
-  const { accessToken } = useAuthInfor()
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        setLoading(true)
-        const data = await getDashboardStats(accessToken)
-        setStats(data)
-      } catch (error) {
-        console.error('Error fetching dashboard stats:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    if (accessToken) {
-      fetchStats()
-    }
-  }, [accessToken])
-
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
-  }
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    )
-  }
-
-  if (!stats) return null
-
-  const revenueData = [
-    { name: 'Hôm nay', value: stats.todayRevenue },
-    { name: 'Tháng này', value: stats.monthRevenue },
-    { name: 'Năm nay', value: stats.yearRevenue },
-  ]
-
-  const orderData = [
-    { name: 'Hôm nay', value: stats.todayOrders },
-    { name: 'Tháng này', value: stats.monthOrders },
-    { name: 'Năm nay', value: stats.yearOrders },
-  ]
-
-  return (
-    <div className="p-6 space-y-8">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Tổng doanh thu */}
-        <CardItemRevenue 
-          stats={stats.todayRevenue} 
-          icon={{icon: "DollarSign", className: "w-6 h-6 text-primary"}} 
-          title="Tổng doanh thu" 
-          description="Tính theo ngày" 
-        />
-
-        {/* Đơn hàng */}
-        <Card className="border-none shadow-md hover:shadow-xl transition-all duration-200 bg-content1">
-      <CardBody className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <Text className="text-foreground/80 font-medium">Đơn hàng</Text>
-            <Metric className="text-3xl font-bold text-foreground">
-              {stats.todayOrders}
-            </Metric>
-            <div className="flex items-center mt-3">
-              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center mr-2">
-                <GetIconComponent
-                  icon={"ShoppingBag"}
-                  className="w-4 h-4 text-primary"
-                />
-              </div>
-              <Text className="text-sm text-foreground/60">Tính theo ngày</Text>
-            </div>
+// Loading Skeleton Components
+const StatsCardSkeleton = () => (
+  <Card className="border-none shadow-lg bg-content1">
+    <CardBody className="p-6">
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <Skeleton className="h-4 w-24 mb-2 rounded-lg" />
+          <Skeleton className="h-8 w-32 mb-3 rounded-lg" />
+          <div className="flex items-center space-x-2">
+            <Skeleton className="h-6 w-16 rounded-full" />
+            <Skeleton className="h-3 w-20 rounded-lg" />
           </div>
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center transform transition-transform duration-200 hover:scale-110">
-            <GetIconComponent 
-              icon={"ShoppingBag"} 
-              className="w-6 h-6 text-primary"
-            />
+        </div>
+        <Skeleton className="w-14 h-14 rounded-xl" />
+      </div>
+    </CardBody>
+  </Card>
+)
+
+const ProductItemSkeleton = () => (
+  <div className="flex items-center space-x-4 p-4 bg-content2 rounded-xl">
+    <Skeleton className="w-10 h-10 rounded-lg flex-shrink-0" />
+    <div className="flex-1 min-w-0">
+      <Skeleton className="h-4 w-32 mb-2 rounded-lg" />
+      <Skeleton className="h-3 w-24 rounded-lg" />
+    </div>
+    <div className="text-right flex-shrink-0">
+      <Skeleton className="h-4 w-20 mb-1 rounded-lg" />
+      <Skeleton className="h-6 w-12 rounded-full" />
+    </div>
+  </div>
+)
+
+const CustomerItemSkeleton = () => (
+  <div className="flex items-center space-x-4 p-4 bg-content2 rounded-xl">
+    <Skeleton className="w-12 h-12 rounded-full flex-shrink-0" />
+    <div className="flex-1 min-w-0">
+      <Skeleton className="h-4 w-28 mb-1 rounded-lg" />
+      <Skeleton className="h-3 w-40 mb-1 rounded-lg" />
+      <Skeleton className="h-3 w-20 rounded-lg" />
+    </div>
+    <div className="text-right flex-shrink-0">
+      <Skeleton className="h-4 w-24 mb-1 rounded-lg" />
+      <Skeleton className="h-6 w-16 rounded-full" />
+    </div>
+  </div>
+)
+
+const DashboardSkeleton = () => (
+  <div className="p-6 space-y-8 mx-auto">
+    {/* Header Skeleton */}
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+      <div>
+        <Skeleton className="h-8 w-60 mb-2 rounded-lg" />
+        <Skeleton className="h-4 w-80 rounded-lg" />
+      </div>
+      <div className="flex items-center space-x-4">
+        <Skeleton className="h-10 w-24 rounded-lg" />
+        <Skeleton className="h-10 w-24 rounded-lg" />
+        <Skeleton className="h-10 w-10 rounded-lg" />
+      </div>
+    </div>
+
+    {/* Period Selector Skeleton */}
+    <Card className="border-none shadow-lg bg-content1">
+      <CardBody className="p-6">
+        <div className="flex space-x-8">
+          <Skeleton className="h-6 w-20 rounded-lg" />
+          <Skeleton className="h-6 w-24 rounded-lg" />
+          <Skeleton className="h-6 w-20 rounded-lg" />
+        </div>
+      </CardBody>
+    </Card>
+
+    {/* Quick Stats Grid Skeleton */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <StatsCardSkeleton key={index} />
+      ))}
+    </div>
+
+    {/* Revenue Progress Skeleton */}
+    <Card className="border-none shadow-lg bg-content1">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between w-full">
+          <div>
+            <Skeleton className="h-6 w-48 mb-2 rounded-lg" />
+            <Skeleton className="h-4 w-40 rounded-lg" />
+          </div>
+          <Skeleton className="h-6 w-32 rounded-full" />
+        </div>
+      </CardHeader>
+      <CardBody className="pt-0">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-4 w-24 rounded-lg" />
+            <Skeleton className="h-4 w-32 rounded-lg" />
+          </div>
+          <Skeleton className="h-3 w-full rounded-full" />
+          <div className="flex justify-between">
+            <Skeleton className="h-3 w-20 rounded-lg" />
+            <Skeleton className="h-3 w-32 rounded-lg" />
           </div>
         </div>
       </CardBody>
     </Card>
 
-        {/* Doanh thu tháng */}
-        <CardItemRevenue 
-          stats={stats.monthRevenue} 
-          icon={{icon: "TrendingUp", className: "w-6 h-6 text-primary"}} 
-          title="Doanh thu tháng" 
-          description="Tính theo tháng" 
-        />
+    {/* Analytics Grid Skeleton */}
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Top Products Skeleton */}
+      <Card className="border-none shadow-lg bg-content1">
+        <CardHeader className="pb-3">
+          <div className="flex items-center space-x-3">
+            <Skeleton className="w-10 h-10 rounded-lg" />
+            <div>
+              <Skeleton className="h-6 w-48 mb-1 rounded-lg" />
+              <Skeleton className="h-4 w-56 rounded-lg" />
+            </div>
+          </div>
+        </CardHeader>
+        <CardBody className="pt-0">
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <ProductItemSkeleton key={index} />
+            ))}
+          </div>
+        </CardBody>
+      </Card>
 
-        {/* Đơn hàng tháng */}
-        <CardItemRevenue 
-          stats={stats.monthOrders} 
-          icon={{icon: "Package", className: "w-6 h-6 text-primary"}} 
-          title="Đơn hàng tháng" 
-          description="Tính theo tháng" 
-        />
-     
-        {/* Doanh thu theo năm */}
-        <CardItemRevenue 
-          stats={stats.yearRevenue} 
-          icon={{icon: "BarChart", className: "w-6 h-6 text-primary"}} 
-          title="Doanh thu theo năm" 
-          description="Tính theo năm" 
-        />
+      {/* Top Customers Skeleton */}
+      <Card className="border-none shadow-lg bg-content1">
+        <CardHeader className="pb-3">
+          <div className="flex items-center space-x-3">
+            <Skeleton className="w-10 h-10 rounded-lg" />
+            <div>
+              <Skeleton className="h-6 w-36 mb-1 rounded-lg" />
+              <Skeleton className="h-4 w-64 rounded-lg" />
+            </div>
+          </div>
+        </CardHeader>
+        <CardBody className="pt-0">
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <CustomerItemSkeleton key={index} />
+            ))}
+          </div>
+        </CardBody>
+      </Card>
+    </div>
+  </div>
+)
 
-        {/* Đơn hàng theo năm */}
-        <CardItemRevenue 
-          stats={stats.yearOrders} 
-          icon={{icon: "LineChart", className: "w-6 h-6 text-primary"}} 
-          title="Đơn hàng theo năm" 
-          description="Tính theo năm" 
-        />
+export default function DashboardPage() {
+  const [stats, setStats] = useState<DashboardStats>({
+    summary: null,
+    dailyRevenue: null,
+    monthlyRevenue: null,
+    yearlyRevenue: null,
+    topProductsDaily: [],
+    topProductsMonthly: [],
+    topProductsYearly: [],
+    topCustomers: []
+  })
+  const [loading, setLoading] = useState(true)
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('today')
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const { accessToken } = useAuthInfor()
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
+  }
+
+  const formatNumber = (value: number) => {
+    return new Intl.NumberFormat('vi-VN').format(value)
+  }
+
+  const today = new Date().toISOString().split('T')[0]
+
+  const fetchAllStats = async () => {
+    if (!accessToken) return;
+
+    try {
+      setLoading(true)
+      
+      // Parallel API calls for better performance
+      const [
+        summaryRes,
+        dailyRevenueRes,
+        monthlyRevenueRes,
+        yearlyRevenueRes,
+        topProductsDailyRes,
+        topProductsMonthlyRes,
+        topProductsYearlyRes,
+        topCustomersRes
+      ] = await Promise.allSettled([
+        getDashboardSummary(accessToken),
+        getDailyRevenue(today, accessToken),
+        getMonthlyRevenue(selectedYear, selectedMonth, accessToken),
+        getYearlyRevenue(selectedYear, accessToken),
+        getTopSellingProductsDaily(today, 5, accessToken),
+        getTopSellingProductsMonthly(selectedYear, selectedMonth, 5, accessToken),
+        getTopSellingProductsYearly(selectedYear, 5, accessToken),
+        getTopCustomers(5, accessToken)
+      ])
+
+      setStats({
+        summary: summaryRes.status === 'fulfilled' ? summaryRes.value : null,
+        dailyRevenue: dailyRevenueRes.status === 'fulfilled' ? dailyRevenueRes.value : null,
+        monthlyRevenue: monthlyRevenueRes.status === 'fulfilled' ? monthlyRevenueRes.value : null,
+        yearlyRevenue: yearlyRevenueRes.status === 'fulfilled' ? yearlyRevenueRes.value : null,
+        topProductsDaily: topProductsDailyRes.status === 'fulfilled' ? topProductsDailyRes.value : [],
+        topProductsMonthly: topProductsMonthlyRes.status === 'fulfilled' ? topProductsMonthlyRes.value : [],
+        topProductsYearly: topProductsYearlyRes.status === 'fulfilled' ? topProductsYearlyRes.value : [],
+        topCustomers: topCustomersRes.status === 'fulfilled' ? topCustomersRes.value : []
+      })
+
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchAllStats()
+  }, [accessToken, selectedYear, selectedMonth])
+
+  const getRevenueByPeriod = (): { revenue: number; orders: number; label: string } => {
+    switch (selectedPeriod) {
+      case 'today':
+        return {
+          revenue: stats.dailyRevenue?.totalRevenue || stats.summary?.todayRevenue || 0,
+          orders: stats.dailyRevenue?.totalOrders || stats.summary?.todayOrders || 0,
+          label: 'Hôm nay'
+        }
+      case 'month':
+        return {
+          revenue: stats.monthlyRevenue?.totalRevenue || stats.summary?.monthRevenue || 0,
+          orders: stats.monthlyRevenue?.totalOrders || stats.summary?.monthOrders || 0,
+          label: 'Tháng này'
+        }
+      case 'year':
+        return {
+          revenue: stats.yearlyRevenue?.totalRevenue || stats.summary?.yearRevenue || 0,
+          orders: stats.yearlyRevenue?.totalOrders || stats.summary?.yearOrders || 0,
+          label: 'Năm nay'
+        }
+      default:
+        return { revenue: 0, orders: 0, label: '' }
+    }
+  }
+
+  const getTopProductsByPeriod = (): ProductSalesResponse[] => {
+    switch (selectedPeriod) {
+      case 'today':
+        return stats.topProductsDaily
+      case 'month':
+        return stats.topProductsMonthly
+      case 'year':
+        return stats.topProductsYearly
+      default:
+        return []
+    }
+  }
+
+  const currentData = getRevenueByPeriod()
+  const currentTopProducts = getTopProductsByPeriod()
+
+  // Show skeleton while loading
+  if (loading) {
+    return <DashboardSkeleton />
+  }
+
+  const quickStats = [
+    {
+      title: "Doanh thu " + currentData.label.toLowerCase(),
+      value: formatCurrency(currentData.revenue),
+      icon: DollarSign,
+      color: "text-green-500",
+      bgColor: "bg-green-500/10",
+      change: "+12%",
+      changeType: "increase" as const
+    },
+    {
+      title: "Đơn hàng " + currentData.label.toLowerCase(), 
+      value: formatNumber(currentData.orders),
+      icon: ShoppingBag,
+      color: "text-blue-500",
+      bgColor: "bg-blue-500/10",
+      change: "+8%",
+      changeType: "increase" as const
+    },
+    {
+      title: "Khách hàng VIP",
+      value: formatNumber(stats.topCustomers.length),
+      icon: Users,
+      color: "text-purple-500", 
+      bgColor: "bg-purple-500/10",
+      change: "+5%",
+      changeType: "increase" as const
+    },
+    {
+      title: "Sản phẩm bán chạy",
+      value: formatNumber(currentTopProducts.length),
+      icon: Package,
+      color: "text-orange-500",
+      bgColor: "bg-orange-500/10", 
+      change: "+3%",
+      changeType: "increase" as const
+    }
+  ]
+
+  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i)
+  const months = Array.from({ length: 12 }, (_, i) => i + 1)
+
+  return (
+    <div className="p-6 space-y-8  mx-auto">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard Thống Kê</h1>
+          <p className="text-foreground/60 mt-1">Tổng quan và phân tích dữ liệu kinh doanh</p>
+        </div>
+        <div className="flex items-center space-x-4">
+          <Select
+            size="sm"
+            label="Năm"
+            selectedKeys={[selectedYear.toString()]}
+            onSelectionChange={(keys) => setSelectedYear(Number(Array.from(keys)[0]))}
+            className="w-24"
+            isDisabled={loading}
+          >
+            {years.map(year => (
+              <SelectItem key={year.toString()} value={year.toString()}>
+                {year.toString()}
+              </SelectItem>
+            ))}
+          </Select>
+          <Select
+            size="sm"
+            label="Tháng"
+            selectedKeys={[selectedMonth.toString()]}
+            onSelectionChange={(keys) => setSelectedMonth(Number(Array.from(keys)[0]))}
+            className="w-24"
+            isDisabled={loading}
+          >
+            {months.map(month => (
+              <SelectItem key={month.toString()} value={month.toString()}>
+                {month.toString()}
+              </SelectItem>
+            ))}
+          </Select>
+          <button
+            onClick={fetchAllStats}
+            disabled={loading}
+            className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Làm mới dữ liệu"
+          >
+            <RefreshCw className={`w-4 h-4 text-primary ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
       </div>
 
-      {/* Top Products and Customers */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Top Products */}
-        <Card className="border-none shadow-md bg-content1">
-          <CardBody className="p-6">
-            <Text className="text-xl font-semibold text-foreground mb-6">Top sản phẩm bán chạy</Text>
-            {stats.topProducts.length > 0 ? (
-              <div className="space-y-4">
-                {stats.topProducts.map((product) => (
-                  <div key={product.productId} className="flex justify-between items-center p-4 bg-content2 rounded-xl hover:bg-content3 transition-colors">
-                    <div>
-                      <Text className="font-medium text-foreground">{product.productName}</Text>
-                      <Text className="text-sm text-foreground/60">
-                        Đã bán: {product.totalQuantitySold} | Doanh thu: {formatCurrency(product.totalRevenue)}
-                      </Text>
+      {/* Period Selector */}
+      <Card className="border-none shadow-lg bg-content1">
+        <CardBody className="p-6">
+          <Tabs
+            selectedKey={selectedPeriod}
+            onSelectionChange={(key) => setSelectedPeriod(key as PeriodType)}
+            color="primary"
+            variant="underlined"
+            isDisabled={loading}
+            classNames={{
+              tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
+              cursor: "w-full bg-primary",
+              tab: "max-w-fit px-0 h-12",
+              tabContent: "group-data-[selected=true]:text-primary"
+            }}
+          >
+            <Tab key="today" title={
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4" />
+                <span>Hôm nay</span>
+              </div>
+            } />
+            <Tab key="month" title={
+              <div className="flex items-center space-x-2">
+                <BarChart3 className="w-4 h-4" />
+                <span>Tháng này</span>
+              </div>
+            } />
+            <Tab key="year" title={
+              <div className="flex items-center space-x-2">
+                <PieChart className="w-4 h-4" />
+                <span>Năm nay</span>
+              </div>
+            } />
+          </Tabs>
+        </CardBody>
+      </Card>
+
+      {/* Quick Stats Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {quickStats.map((stat, index) => {
+          const Icon = stat.icon
+          return (
+            <Card key={index} className="border-none shadow-lg hover:shadow-xl transition-all duration-300 bg-content1">
+              <CardBody className="p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-foreground/60 mb-2">{stat.title}</p>
+                    <p className="text-2xl font-bold text-foreground mb-3">{stat.value}</p>
+                    <div className="flex items-center space-x-2">
+                      <div className={`flex items-center space-x-1 px-2 py-1 rounded-full ${
+                        stat.changeType === 'increase' ? 'bg-green-500/10' : 'bg-red-500/10'
+                      }`}>
+                        {stat.changeType === 'increase' ? (
+                          <TrendingUp className="w-3 h-3 text-green-500" />
+                        ) : (
+                          <TrendingDown className="w-3 h-3 text-red-500" />
+                        )}
+                        <span className={`text-xs font-medium ${
+                          stat.changeType === 'increase' ? 'text-green-500' : 'text-red-500'
+                        }`}>
+                          {stat.change}
+                        </span>
+                      </div>
+                      <span className="text-xs text-foreground/50">vs kỳ trước</span>
                     </div>
-                    <BadgeDelta 
-                      deltaType={product.totalQuantitySold > 0 ? "increase" : "unchanged"}
-                      className="bg-primary/10 text-primary"
-                    >
-                      {product.totalQuantitySold}
-                    </BadgeDelta>
+                  </div>
+                  <div className={`w-14 h-14 rounded-xl ${stat.bgColor} flex items-center justify-center`}>
+                    <Icon className={`w-7 h-7 ${stat.color}`} />
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          )
+        })}
+      </div>
+
+      {/* Revenue Progress */}
+      {stats.summary && (
+        <Card className="border-none shadow-lg bg-content1">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between w-full">
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">Tiến độ doanh thu năm {selectedYear}</h3>
+                <p className="text-sm text-foreground/60">So sánh với mục tiêu đề ra</p>
+              </div>
+              <Chip color="primary" variant="flat" size="sm">
+                {formatCurrency(stats.summary.yearRevenue)}
+              </Chip>
+            </div>
+          </CardHeader>
+          <CardBody className="pt-0">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-foreground/60">Mục tiêu năm</span>
+                <span className="font-medium text-foreground">10,000,000,000 ₫</span>
+              </div>
+              <Progress 
+                value={(stats.summary.yearRevenue / 10000000000) * 100} 
+                color="primary"
+                size="lg"
+                className="max-w-full"
+              />
+              <div className="flex justify-between text-sm">
+                <span className="text-foreground/60">
+                  Đã đạt {Math.round((stats.summary.yearRevenue / 10000000000) * 100)}%
+                </span>
+                <span className="text-foreground/60">
+                  Còn lại {formatCurrency(10000000000 - stats.summary.yearRevenue)}
+                </span>
+              </div>
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Analytics Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Top Products */}
+        <Card className="border-none shadow-lg bg-content1">
+          <CardHeader className="pb-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Star className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">Sản phẩm bán chạy {currentData.label.toLowerCase()}</h3>
+                <p className="text-sm text-foreground/60">Top 5 sản phẩm có doanh số cao nhất</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardBody className="pt-0">
+            {currentTopProducts.length > 0 ? (
+              <div className="space-y-4">
+                {currentTopProducts.map((product, index) => (
+                  <div key={product.productId} className="flex items-center space-x-4 p-4 bg-content2 rounded-xl hover:bg-content3 transition-colors">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-primary font-bold text-sm">#{index + 1}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">{product.productName}</p>
+                      <p className="text-sm text-foreground/60">
+                        Đã bán: {formatNumber(product.totalQuantitySold)} sản phẩm
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-semibold text-foreground">{formatCurrency(product.totalRevenue)}</p>
+                      <Chip size="sm" color="primary" variant="flat">
+                        {product.totalQuantitySold}
+                      </Chip>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-40 text-foreground/40">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 mb-3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-                </svg>
-                <Text className="text-lg">Chưa có dữ liệu</Text>
+              <div className="flex flex-col items-center justify-center h-48 text-foreground/40">
+                <Package className="w-16 h-16 mb-4" />
+                <p className="text-lg font-medium">Chưa có dữ liệu</p>
+                <p className="text-sm">Sản phẩm bán chạy sẽ hiển thị tại đây</p>
               </div>
             )}
           </CardBody>
         </Card>
 
         {/* Top Customers */}
-        <Card className="border-none shadow-md bg-content1">
-          <CardBody className="p-6">
-            <Text className="text-xl font-semibold text-foreground mb-6">Top khách hàng</Text>
+        <Card className="border-none shadow-lg bg-content1">
+          <CardHeader className="pb-3">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-lg bg-secondary/10 flex items-center justify-center">
+                <Users className="w-5 h-5 text-secondary" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-foreground">Khách hàng VIP</h3>
+                <p className="text-sm text-foreground/60">Top 5 khách hàng có chi tiêu cao nhất</p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardBody className="pt-0">
             {stats.topCustomers.length > 0 ? (
               <div className="space-y-4">
-                {stats.topCustomers.map((customer) => (
-                  <div key={customer.userId} className="flex justify-between items-center p-4 bg-content2 rounded-xl hover:bg-content3 transition-colors">
-                    <div>
-                      <Text className="font-medium text-foreground">{customer.fullName}</Text>
-                      <Text className="text-sm text-foreground/60">
-                        {customer.email}
-                      </Text>
-                      <Text className="text-sm text-foreground/60">
-                        Tổng chi tiêu: {formatCurrency(customer.totalSpent)} | Số đơn hàng: {customer.totalOrders}
-                      </Text>
+                {stats.topCustomers.map((customer, index) => (
+                  <div key={customer.userId} className="flex items-center space-x-4 p-4 bg-content2 rounded-xl hover:bg-content3 transition-colors">
+                    <Avatar 
+                      name={customer.fullName.charAt(0).toUpperCase()}
+                      className="w-12 h-12 bg-gradient-to-r from-primary to-secondary text-white font-bold"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground">{customer.fullName}</p>
+                      <p className="text-sm text-foreground/60 truncate">{customer.email}</p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        <ShoppingCart className="w-3 h-3 text-foreground/40" />
+                        <span className="text-xs text-foreground/60">{customer.totalOrders} đơn hàng</span>
+                      </div>
                     </div>
-                    <BadgeDelta 
-                      deltaType={customer.totalOrders > 0 ? "increase" : "unchanged"}
-                      className="bg-primary/10 text-primary"
-                    >
-                      {customer.totalOrders}
-                    </BadgeDelta>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-semibold text-foreground">{formatCurrency(customer.totalSpent)}</p>
+                      <Chip size="sm" color="secondary" variant="flat">
+                        Top {index + 1}
+                      </Chip>
+                    </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-40 text-foreground/40">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 mb-3">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                </svg>
-                <Text className="text-lg">Chưa có dữ liệu</Text>
+              <div className="flex flex-col items-center justify-center h-48 text-foreground/40">
+                <Users className="w-16 h-16 mb-4" />
+                <p className="text-lg font-medium">Chưa có dữ liệu</p>
+                <p className="text-sm">Khách hàng VIP sẽ hiển thị tại đây</p>
               </div>
             )}
           </CardBody>

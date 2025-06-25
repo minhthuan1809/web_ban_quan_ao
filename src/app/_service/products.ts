@@ -127,7 +127,7 @@ export interface CreateProductData {
   categoryId: number;
   materialId: number;
   gender: 'MALE' | 'FEMALE' | 'UNISEX';
-  variants: Omit<ProductVariant, 'id' | 'productId'>[];
+  variants: Omit<ServiceProductVariant, 'id' | 'productId'>[];
 }
 
 export interface UpdateProductData extends Partial<CreateProductData> {

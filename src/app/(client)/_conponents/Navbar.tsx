@@ -52,7 +52,6 @@ export default function Navbar() {
   
 
   useEffect(() => {
-    console.log('Navbar useEffect - accessToken:', !!accessToken, 'hookUser:', !!hookUser);
     
     // Nếu có user từ hook, sử dụng luôn
     if (hookUser) {
@@ -69,7 +68,6 @@ export default function Navbar() {
     // Nếu không có user nhưng có accessToken, gọi API
     if (accessToken && !hookUser) {
       authGetUserInfo_API(accessToken).then((res: any) => {
-        console.log("API response:", res);
         
         if (res) {
           setUser(res);
@@ -86,7 +84,6 @@ export default function Navbar() {
 
     // Nếu không có gì, thử force refresh cookies
     if (!accessToken && !hookUser) {
-      console.log('No token or user, trying to refresh from cookies...');
       refreshFromCookies();
     }
   }, [accessToken, hookUser, refreshFromCookies]);
