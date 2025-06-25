@@ -5,11 +5,11 @@ import { useRouter } from 'next/navigation';
 import { getCategory_API } from '@/app/_service/category';
 
 interface Category {
-  id: number;
+  id: string;
   name: string;
-  slug: string;
-  createdAt: number;
-  updatedAt: number;
+  slug?: string;
+  createdAt: string;
+  updatedAt: string;
   isDeleted: boolean;
 }
 
@@ -27,7 +27,13 @@ export default function ChooseCategoryHeader() {
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const res = await getCategory_API("", 1, 8, "createdAt", "desc")
+      const res = await getCategory_API({
+        search: "",
+        page: 1,
+        pageSize: 8,
+        sort: "createdAt:desc",
+        filter: ""
+      })
       setCategories(res.data)
     }
     fetchCategories()

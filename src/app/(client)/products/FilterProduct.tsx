@@ -22,7 +22,7 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
   const [selectedSizes, setSelectedSizes] = useState<string[]>([])
   const [priceRange, setPriceRange] = useState([0, 4905500])
   const [isFilterExpanded, setIsFilterExpanded] = useState(true)
-  const [categories, setCategories] = useState([])
+  const [categories, setCategories] = useState<any[]>([])
   const [sizes, setSizes] = useState([])
 
   // Parse categories từ URL khi component mount
@@ -77,7 +77,13 @@ export default function FilterProduct({filter, setFilter} : {filter: any, setFil
 
   useEffect(() => {
     const fetchCategories = async () => {
-      const res = await getCategory_API("", 1, 100, "createdAt", "desc")
+      const res = await getCategory_API({
+        search: "",
+        page: 1,
+        pageSize: 100,
+        sort: "createdAt:desc",
+        filter: ""
+      })
         setCategories(res.data)
  
     }

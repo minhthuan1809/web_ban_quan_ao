@@ -11,8 +11,16 @@ import Loading from '@/app/_util/Loading';
 import RenderTable from '../_conponents/RenderTable';
 import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 
+interface Category {
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
+    isDeleted: boolean;
+}
+
 export default function Category() {
-    const [category, setCategory] = useState([]);
+    const [category, setCategory] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [searchValue, setSearchValue] = useState("");
@@ -28,9 +36,15 @@ export default function Category() {
     const fetchCategory = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await getCategory_API(searchValue, currentPage, rowsPerPage, "", "");
+            const response = await getCategory_API({
+                search: searchValue,
+                page: currentPage,
+                pageSize: rowsPerPage,
+                sort: "createdAt:desc",
+                filter: ""
+            });
             setCategory(response.data.reverse());
-            setTotalPage(response.metadata.total_page);
+            setTotalPage(response.pagination?.totalPages || 1);
         } catch (err: any) {
             toast.error(err.message);
         } finally {
@@ -47,6 +61,10 @@ export default function Category() {
 
     // xóa phân loại
     const handleDelete = async (id: string) => {
+        if (!accessToken) {
+            toast.error("Vui lòng đăng nhập lại");
+            return;
+        }
         try {
             setLoadingBtn(true);
             const response: any = await deleteCategory_API(id, accessToken);
@@ -67,7 +85,7 @@ export default function Category() {
     const handleAddCategory = async () => {
         try {
             setLoadingBtn(true);
-            const response: any = await addCategory_API(name, accessToken); 
+            const response: any = await addCategory_API(name, accessToken as string); 
             if (response.status === 200) {
                 toast.success("Thêm phân loại thành công");
                 setRefresh(!refresh);
@@ -92,7 +110,7 @@ export default function Category() {
     const handleFinishEdit = async () => {
         try {
             setLoadingBtn(true);
-            const response: any = await updateCategory_API(editCategory.id, name, accessToken);
+            const response: any = await updateCategory_API(editCategory.id as string, name, accessToken as string   );
             if (response.status === 200) {
                 toast.success("Sửa phân loại thành công");
                 setRefresh(!refresh);
@@ -130,7 +148,7 @@ export default function Category() {
             }}
           />
 
-            { loading ? <Loading/>: <RenderTable data={category} handleDelete={handleDelete} handleEdit={handleEdit} totalPage={totalPage} currentPage={currentPage} setCurrentPage={setCurrentPage} title="danh mục"/>}
+            { loading ? <Loading/>: <RenderTable data={category as any  } handleDelete={handleDelete} handleEdit={handleEdit} totalPage={totalPage} currentPage={currentPage} setCurrentPage={setCurrentPage} title="danh mục"/>}
             {/* modal thêm sửa danh mục */}
             <ModalAdd_Edit_Category_Material
                 isOpen={loading ? false : isOpen}

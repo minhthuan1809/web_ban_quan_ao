@@ -6,11 +6,11 @@ import { Input } from '@nextui-org/react';
 import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 
 interface Material {
-  id: number;
+  id: string;
   name: string;
-  slug: string;
-  createdAt: number;
-  updatedAt: number;
+    slug?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export default function InputCategory({ setCategory, category }: { setCategory: (category: string) => void, category: string }) {
@@ -27,13 +27,13 @@ export default function InputCategory({ setCategory, category }: { setCategory: 
   const fetchCategory = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getCategory_API(
-        searchTerm,
-        1,
-        10,
-        "",
-        ""
-      );
+      const response = await getCategory_API({
+        search: searchTerm,
+        page: 1,
+        pageSize: 10,
+        sort: "createdAt:desc",
+        filter: ""
+      });
       setCategoryList(response.data.reverse());
     } catch (err: any) {
       toast.error(err.message);
