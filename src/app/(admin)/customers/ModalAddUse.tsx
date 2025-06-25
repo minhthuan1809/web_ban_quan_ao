@@ -7,7 +7,7 @@ import {
 } from "@nextui-org/react";
 import React, { useState } from "react";
 import { Input, Button, Select, SelectItem } from "@nextui-org/react";
-import { UserPlus, Edit3, User, Mail, Phone, MapPin, Lock } from "lucide-react";
+import { UserPlus, Edit3, User } from "lucide-react";
 import InputAddress from "@/app/components/ui/InputAddress";
 import { CreateUser_API, UpdateUser_API } from "@/app/_service/user";
 import ImgUpload from "@/app/components/ui/ImgUpload";
@@ -18,89 +18,135 @@ import InputGmail from "@/app/components/ui/InputGmail";
 import InputGender from "@/app/components/ui/InputGender";
 import { uploadToCloudinary } from "@/app/_util/upload_img_cloudinary";
 
+interface ModalAddUseProps {
+  editUser: any;
+  isOpen: boolean;
+  onClose: () => void;
+  modalMode: 'add' | 'edit';
+  formData: any;
+  setFormData: (data: any) => void;
+  accessToken: string;
+  reload: boolean;
+  setReload: (reload: boolean) => void;
+}
+
+const initialFormData = {
+  fullName: "",
+  email: "",
+  password: "",
+  phone: "",
+  address: "",
+  district: "",
+  ward: "",
+  roleId: "",
+  gender: "",
+  avatarUrl: "",
+};
+
 export default function ModalAddUse({
+  editUser,
   isOpen,
   onClose,
   modalMode,
-  formData,
+  formData, 
   setFormData,
   accessToken,
-}: any) {
+  reload,
+  setReload,
+}: ModalAddUseProps) {
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
 
-  const handleSubmit = async () => {
-    if (!file) return;
+  const resetForm = () => {
+    setFormData(initialFormData);
+    setFile(null);
+    setPreview(null);
+  };
+
+  const handleImageUpload = async () => {
+    if (!file) return "";
     const newUploadedImages = await uploadToCloudinary([file], process.env.NEXT_PUBLIC_FOLDER || "");
-    formData.avatarUrl = newUploadedImages[0] || "";
+    return newUploadedImages.length > 0 ? newUploadedImages[0] : "";
+  };
+
+  const handleSuccess = () => {
+    setLoading(false);
+    resetForm();
+    toast.success(modalMode === "add" ? "Thêm người dùng thành công!" : "Cập nhật người dùng thành công!");
+    setReload(!reload);
+    onClose();
+  };
+
+  const handleError = () => {
+    setLoading(false);
+    toast.error(modalMode === "add" ? "Thêm người dùng thất bại!" : "Cập nhật người dùng thất bại!");
+  };
+
+  const handleSubmit = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await CreateUser_API(formData, accessToken);
-      if (res.status === 200) {
-        toast.success("Thêm người dùng thành công!");
-        onClose();
-      } else {
-        toast.error("Thêm người dùng thất bại!");
+      const avatarUrl = await handleImageUpload();
+      if (avatarUrl) {
+        formData.avatarUrl = avatarUrl;
       }
+      
+      const res = await CreateUser_API(formData, accessToken);
+      res.status === 200 ? handleSuccess() : handleError();
     } catch (error) {
-      toast.error("Có lỗi xảy ra khi thêm người dùng!");
-    } finally {
-      setLoading(false);
+      handleError();
+    }
+  };
+  
+  const handleEdit = async () => {
+    setLoading(true);
+    try {
+      const avatarUrl = await handleImageUpload();
+      if (avatarUrl) {
+        formData.avatarUrl = avatarUrl;
+      }
+      
+      const res = await UpdateUser_API(editUser.id, formData, accessToken);
+      res.status === 200 ? handleSuccess() : handleError();
+    } catch (error) {
+      handleError();
     }
   };
 
-  const handleEdit = async () => {
-    if (!file) return;
-    const newUploadedImages = await uploadToCloudinary([file], process.env.NEXT_PUBLIC_FOLDER || "");
-    formData.avatarUrl = newUploadedImages[0] || "";
-    try {
-      setLoading(true);
-      const res = await UpdateUser_API(formData, accessToken, formData.id);
-      if (res.status === 200) {
-        toast.success("Cập nhật người dùng thành công!");
-        onClose();
-      } else {
-        toast.error("Cập nhật người dùng thất bại!");
-      }
-    } catch (error) {
-      toast.error("Có lỗi xảy ra khi cập nhật người dùng!");
-    } finally {
-      setLoading(false);
-    }
+  const modalConfig = {
+    isOpen,
+    onClose,
+    placement: "center" as const,
+    size: "2xl" as const,
+    scrollBehavior: "inside" as const,
+    classNames: {
+      base: "bg-background",
+      header: "border-b border-border",
+      body: "py-6",
+      footer: "border-t border-border",
+      closeButton: "hover:bg-default-100",
+      backdrop: "bg-background/80 backdrop-blur-md",
+    },
   };
+
+  const headerIcon = modalMode === "add" ? <UserPlus className="w-5 h-5 text-primary" /> : <Edit3 className="w-5 h-5 text-primary" />;
+  const headerTitle = modalMode === "add" ? "Thêm người dùng mới" : "Chỉnh sửa thông tin người dùng";
+  const buttonText = modalMode === "add" ? "Thêm người dùng" : "Lưu thay đổi";
+  const handleAction = modalMode === "add" ? handleSubmit : handleEdit;
 
   return (
     <div className="h-[80vh] overflow-hidden">
-      <Modal
-        isOpen={isOpen}
-        onClose={onClose}
-        placement="center"
-        size="2xl"
-        scrollBehavior="inside"
-        classNames={{
-          base: "bg-background",
-          header: "border-b border-border",
-          body: "py-6",
-          footer: "border-t border-border",
-          closeButton: "hover:bg-default-100",
-          backdrop: "bg-background/80 backdrop-blur-md",
-        }}>
+      <Modal {...modalConfig}>
         <ModalContent>
           <ModalHeader className="text-xl font-bold">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/10 rounded-lg">
-                {modalMode === "add" ? (
-                  <UserPlus className="w-5 h-5 text-primary" />
-                ) : (
-                  <Edit3 className="w-5 h-5 text-primary" />
-                )}
+                {headerIcon}
               </div>
-              {modalMode === "add"
-                ? "Thêm người dùng mới"
-                : "Chỉnh sửa thông tin người dùng"}
+              {headerTitle}
             </div>
           </ModalHeader>
+          
           <ModalBody className="space-y-4">
             <div className="w-full flex justify-center items-center h-[150px]">
               <ImgUpload
@@ -109,16 +155,15 @@ export default function ModalAddUse({
                 setFile={setFile}
               />
             </div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label="Họ và tên"
                 placeholder="Nhập họ và tên đầy đủ"
                 type="text"
                 value={formData.fullName}
-                labelPlacement={"outside"}
-                onChange={(e) =>
-                  setFormData({ ...formData, fullName: e.target.value })
-                }
+                labelPlacement="outside"
+                onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                 variant="bordered"
                 isRequired
                 startContent={<User className="w-4 h-4 text-default-400" />}
@@ -151,16 +196,17 @@ export default function ModalAddUse({
               onChange={(e) => setFormData({ ...formData, phone: e })}
             />
 
-              <InputAddress
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    address: e.city.cityName,
-                    district: e.district.districtName,
-                    ward: e.ward.wardName,
-                  })
-                }
-              />
+            <InputAddress
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  address: e.city.cityName,
+                  district: e.district.districtName,
+                  ward: e.ward.wardName,
+                })
+              }
+            />
+            
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2 -mt-4">
                 Vai trò
@@ -169,9 +215,7 @@ export default function ModalAddUse({
                 placeholder="Chọn vai trò"
                 size="sm"
                 value={formData.roleId}
-                onChange={(e) =>
-                  setFormData({ ...formData, roleId: Number(e.target.value) })
-                }
+                onChange={(e) => setFormData({ ...formData, roleId: Number(e.target.value) })}
                 variant="bordered"
                 labelPlacement="outside"
                 classNames={{
@@ -194,6 +238,7 @@ export default function ModalAddUse({
               onChange={(e) => setFormData({ ...formData, gender: e })}
             />
           </ModalBody>
+          
           <ModalFooter className="gap-3">
             <Button
               color="danger"
@@ -204,10 +249,10 @@ export default function ModalAddUse({
             </Button>
             <Button
               color="primary"
-              onPress={modalMode === "add" ? handleSubmit : handleEdit}
+              onPress={handleAction}
               isLoading={loading}
               className="font-semibold px-6">
-              {modalMode === "add" ? "Thêm người dùng" : "Lưu thay đổi"}
+              {buttonText}
             </Button>
           </ModalFooter>
         </ModalContent>

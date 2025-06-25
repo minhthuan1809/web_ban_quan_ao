@@ -27,6 +27,7 @@ export const CreateUser_API = async (data: any, token: string) => {
                 'Authorization': `Bearer ${token}`,
             },
         });
+
         return response;
     } catch (error) {
         throw error;

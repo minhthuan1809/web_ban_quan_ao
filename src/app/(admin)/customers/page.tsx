@@ -49,6 +49,8 @@ export default function PageUser() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [editUser, setEditUser] = useState<User | null>(null);
+
+  const [reload, setReload] = useState(false);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -327,6 +329,7 @@ export default function PageUser() {
       </div>
 
       <ModalAddUse
+        editUser={editUser}
         isOpen={showModal}
         onClose={() => setShowModal(false)}
         modalMode={modalMode}
@@ -334,6 +337,8 @@ export default function PageUser() {
         setFormData={setFormData}
         onSubmit={handleModalSubmit}
         accessToken={accessToken}
+        reload={reload}
+        setReload={setReload}
       />
       
       {loading && <Loading />}
