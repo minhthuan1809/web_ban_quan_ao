@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 export default function pagePromotions() {
   const [coupons, setCoupons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const { userInfo } = useAuthInfor();
+  const { userInfo, accessToken } = useAuthInfor();
   const router = useRouter();
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export default function pagePromotions() {
           setLoading(false);
           return;
         }
-        const res = await getCouponById_API(userInfo.id);
+        const res = await getCouponById_API(userInfo.id.toString(), accessToken || undefined);
         setCoupons(res.data.content);
       } catch (error) {
         console.error("Error fetching coupons:", error);
@@ -29,7 +29,7 @@ export default function pagePromotions() {
       }
     };
     fetchCoupons();
-  }, [userInfo]);
+  }, [userInfo, accessToken]);
 
   if (loading) {
     return <Loading />;

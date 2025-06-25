@@ -1,10 +1,8 @@
 import axios from "axios";
-import useAuthInfor from "../customHooks/AuthInfor";
-let { accessToken } = useAuthInfor() || { accessToken: null };  
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export const GetAllCode_API = async (searchQuery: string, page: number) => {
+export const GetAllCode_API = async (searchQuery: string, page: number, accessToken: string) => {
     const res = await axios.get(`${API_URL}/coupons?search=${searchQuery}&page=${page}&size=10`, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -14,7 +12,7 @@ export const GetAllCode_API = async (searchQuery: string, page: number) => {
     return res.data;
 }
 
-export const createCoupon_API = async (data: any) => {
+export const createCoupon_API = async (data: any, accessToken: string) => {
     const res = await axios.post(`${API_URL}/coupons`, data, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -24,10 +22,7 @@ export const createCoupon_API = async (data: any) => {
     return res;
 }
 
-
-
-
-export const updateCoupon_API = async (id: string, data: any) => {
+export const updateCoupon_API = async (id: string, data: any, accessToken: string) => {
     const res = await axios.put(`${API_URL}/coupons/${id}`, data, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -37,7 +32,7 @@ export const updateCoupon_API = async (id: string, data: any) => {
     return res;
 }
 
-export const deleteCoupon_API = async (id: number) => {
+export const deleteCoupon_API = async (id: number, accessToken: string) => {
     const res = await axios.delete(`${API_URL}/coupons/${id}`, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
@@ -47,8 +42,8 @@ export const deleteCoupon_API = async (id: number) => {
 }
 
 // disable coupon
-export const disableCoupon_API = async (id: number) => {
-    const res = await axios.put(`${API_URL}/coupons/${id}/deactivate`, {
+export const disableCoupon_API = async (id: number, accessToken: string) => {
+    const res = await axios.put(`${API_URL}/coupons/${id}/deactivate`, {}, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
@@ -57,8 +52,8 @@ export const disableCoupon_API = async (id: number) => {
 }
 
 // enable coupon
-export const enableCoupon_API = async (id: number) => {
-    const res = await axios.put(`${API_URL}/coupons/${id}/activate`, {
+export const enableCoupon_API = async (id: number, accessToken: string) => {
+    const res = await axios.put(`${API_URL}/coupons/${id}/activate`, {}, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
@@ -67,12 +62,14 @@ export const enableCoupon_API = async (id: number) => {
 }
 
 // get {id} coupon
-
-export const getCouponById_API = async (id: string) => {
+export const getCouponById_API = async (id: string, accessToken?: string) => {
+    const headers: any = {};
+    if (accessToken) {
+        headers.Authorization = `Bearer ${accessToken}`;
+    }
+    
     const res = await axios.get(`${API_URL}/coupons/user/${id}`, {
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
+        headers,
     });
     return res;
 }

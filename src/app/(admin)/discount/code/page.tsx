@@ -1,5 +1,5 @@
 'use client'
-  import { deleteCoupon_API, disableCoupon_API, enableCoupon_API, GetAllCode_API } from '@/app/_service/discount';
+import { deleteCoupon_API, disableCoupon_API, enableCoupon_API, GetAllCode_API } from '@/app/_service/discount';
 import React, { useEffect, useState } from 'react'
 import { Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip, Pagination, Spinner, Switch } from "@nextui-org/react";
 import { format } from 'date-fns';
@@ -10,6 +10,7 @@ import Loading from '@/app/_util/Loading';
 import { toast } from 'react-toastify';
 import ModalAddEditDiscount from './ModalAddEditDiscount';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
+import useAuthInfor from '@/app/customHooks/AuthInfor';
   
 interface Coupon {
   id: number;
@@ -37,10 +38,11 @@ interface Coupon {
 
 
 export default function Code() {
+  const { accessToken } = useAuthInfor();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(0);
-  const [total, setTotal] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
+  const [total, setTotal] = useState<number>(1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null);  
@@ -59,8 +61,10 @@ export default function Code() {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        if (!accessToken) return;
+        
         setLoading(true);
-        const res = await GetAllCode_API(searchQuery , page);
+        const res = await GetAllCode_API(searchQuery, page, accessToken);
         if (res && res.content) {
           setCoupons(res.content);
           setTotal(res.totalPages || 1);
@@ -72,7 +76,7 @@ export default function Code() {
       }
     };
     fetchData();
-    }, [reload]);
+  }, [reload, accessToken, searchQuery, page]);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
@@ -88,6 +92,8 @@ export default function Code() {
   };
 
   const handleDelete = async (id: number) => {
+    if (!accessToken) return;
+    
     const result = await showConfirmDialog({
       title: 'Xác nhận xóa?',
       text: `Bạn có chắc chắn muốn xóa mã giảm giá này?`,
@@ -97,28 +103,30 @@ export default function Code() {
       cancelButtonText: 'Hủy'
     })  
     if (result.isConfirmed) {
-    try {
-      const res = await deleteCoupon_API(id);
-      if (res.status === 200) {
-        toast.success("Xóa mã giảm giá thành công");
-        setReload(!reload);
-      }
-    } catch (error) {
+      try {
+        const res = await deleteCoupon_API(id, accessToken);
+        if (res.status === 200) {
+          toast.success("Xóa mã giảm giá thành công");
+          setReload(!reload);
+        }
+      } catch (error) {
         console.error("Lỗi khi xóa mã giảm giá:", error);
       }
     }
   }
 
-  const handleToggle = async (id: number , isActive: boolean) => {
-    if(isActive){
-      const res = await disableCoupon_API(id );
-      if(res.status === 200){
+  const handleToggle = async (id: number, isActive: boolean) => {
+    if (!accessToken) return;
+    
+    if (isActive) {
+      const res = await disableCoupon_API(id, accessToken);
+      if (res.status === 200) {
         toast.success("Vô hiệu hóa mã giảm giá thành công");
         setReload(!reload);
       }
-    }else{
-      const res = await enableCoupon_API(id );
-      if(res.status === 200){
+    } else {
+      const res = await enableCoupon_API(id, accessToken);
+      if (res.status === 200) {
         toast.success("Kích hoạt mã giảm giá thành công");
         setReload(!reload);
       }

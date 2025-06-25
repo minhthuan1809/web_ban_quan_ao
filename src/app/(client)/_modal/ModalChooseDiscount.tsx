@@ -16,15 +16,21 @@ interface ModalChooseDiscountProps {
 export default function ModalChooseDiscount({ isOpen, onClose, setDiscountCode, discountCode, orderTotal, setDiscount}: ModalChooseDiscountProps) {
     const [discountList, setDiscountList] = useState<any[]>([]);
     const [search, setSearch] = useState('');
-    const { userInfo } = useAuthInfor();
+    const { userInfo, accessToken } = useAuthInfor();
 
     useEffect(() => {
         const fetchDiscountList = async () => {
-            const res = await getCouponById_API(userInfo?.id as string);
-            setDiscountList(res.data.content);
+            if (!userInfo?.id || !accessToken) return;
+            
+            try {
+                const res = await getCouponById_API(String(userInfo.id), accessToken);
+                setDiscountList(res.data.content);
+            } catch (error) {
+                console.error('Error fetching discount list:', error);
+            }
         }
         fetchDiscountList();
-    }, [userInfo?.id]);
+    }, [userInfo?.id, accessToken]);
 
     // Lọc mã giảm giá hợp lệ
     const validDiscounts = discountList?.filter(discount => {

@@ -9,8 +9,8 @@ import useAuthInfor from '@/app/customHooks/AuthInfor'
 
 export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onSuccess }: any) {
   const isEditing = !!initialData?.id
-  const [isLoading, setIsLoading] = useState(false)
   const { accessToken } = useAuthInfor()
+  const [isLoading, setIsLoading] = useState(false)
   
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
@@ -30,10 +30,13 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
   }
 
   const handleSubmit = async () => {
-    
+    if (!accessToken) {
+      toast.error('Không có quyền truy cập');
+      return;
+    }
+
+    setIsLoading(true)
     try {
-      setIsLoading(true)
-      
       // Chuyển đổi date string thành ISO format
       const validFromDate = new Date(validFrom)
       validFromDate.setHours(0, 0, 0, 0)
@@ -61,12 +64,12 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
       
       let res;
       if (isEditing) {
-        res = await updateCoupon_API(initialData.id, data);
+        res = await updateCoupon_API(initialData.id, data, accessToken);
         if (res.status === 200) {
           toast.success('Cập nhật mã giảm giá thành công')
         }
       } else {
-        res = await createCoupon_API(data)
+        res = await createCoupon_API(data, accessToken)
         if (res.status === 200) {
           toast.success('Thêm mã giảm giá thành công')
         }
