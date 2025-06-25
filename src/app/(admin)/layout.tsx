@@ -188,7 +188,6 @@ export default function Layout({children}: {children: React.ReactNode}) {
             try {
                 if (!accessToken) {
                     setUser_Zustand(null);
-                    deleteCookie("token");
                     router.push("/login");
                     return;
                 }
@@ -198,13 +197,11 @@ export default function Layout({children}: {children: React.ReactNode}) {
                     setUser_Zustand(res);
                 } else {
                     setUser_Zustand(null);
-                    deleteCookie("token");
                     router.push("/login");
                 }
             } catch (error) {
                 console.error("Error getting user info:", error);
                 setUser_Zustand(null);
-                deleteCookie("token");
                 router.push("/login");
             } finally {
                 setIsLoading(false);
@@ -219,7 +216,6 @@ export default function Layout({children}: {children: React.ReactNode}) {
         setIsLoadingBtnLogout(true);
         try {
             router.push("/login");
-            deleteCookie("token");
             setUser_Zustand(null);
             if (accessToken) {
                 await authLogout_API(accessToken);

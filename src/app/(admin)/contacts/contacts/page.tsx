@@ -1,6 +1,7 @@
 "use client";
 
 import { getContacts_API } from '@/app/_service/contact';
+import useAuthInfor from '@/app/customHooks/AuthInfor';
 import React, { useEffect, useState } from 'react';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Chip, Tooltip, Button, Modal, ModalContent, ModalHeader, ModalBody, Card, CardBody } from "@nextui-org/react";
 import { Eye, Mail, Send, User } from "lucide-react";
@@ -19,16 +20,19 @@ export default function ContactsPage() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const rowsPerPage = 10;
+  const { accessToken } = useAuthInfor();
 
   useEffect(() => {
     const fetchContacts = async () => {
+      if (!accessToken) return;
+      
       setLoading(true);
       try {
         const res = await getContacts_API({
           page: page - 1,
           size: rowsPerPage,
           search: searchValue
-          });
+          }, accessToken);
         setContacts(res.content);
         setTotalPages(res.totalPages);
       } catch (error) { 
@@ -39,7 +43,7 @@ export default function ContactsPage() {
     };
     
     fetchContacts();
-  }, [page, searchValue]);
+  }, [page, searchValue, accessToken]);
 
   const getStatusColor = (status: string) => {
     switch(status) {

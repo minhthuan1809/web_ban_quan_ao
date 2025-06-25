@@ -3,6 +3,7 @@ import { Button, Input, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { sendMail_API } from '@/app/_service/contact';
+import useAuthInfor from '@/app/customHooks/AuthInfor';
 
 interface Contact {
   id: number;
@@ -29,6 +30,7 @@ export default function ModalSentMail({
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("PENDING");
+  const { accessToken, userInfo } = useAuthInfor();
 
   useEffect(() => {
     if (contactData && isOpen) {
@@ -52,13 +54,23 @@ export default function ModalSentMail({
   };
 
   const handleSendMail = async () => {
+    if (!accessToken || !userInfo?.id) {
+      toast.error("Vui lòng đăng nhập lại");
+      return;
+    }
+    
     try {
       setLoading(true);
-      const res = await sendMail_API(contactData?.id || 0,{
-        "replyMessage": content,  // nội dung email
-        "newStatus": status, // trạng thái mới
-        "sendEmail": true // gửi email
-      });
+      const res = await sendMail_API(
+        contactData?.id || 0,
+        {
+          "replyMessage": content,  // nội dung email
+          "newStatus": status, // trạng thái mới
+          "sendEmail": true // gửi email
+        }, 
+        accessToken, 
+        userInfo.id.toString()
+      );
       if (res.status === 200) {
         toast.success("Gửi email thành công");  
         onOpenChange(false);
@@ -68,6 +80,7 @@ export default function ModalSentMail({
       }
     } catch (error) {
       console.error("Lỗi khi gửi email:", error);
+      toast.error("Có lỗi xảy ra khi gửi email");
     } finally {
       setLoading(false);
     }

@@ -71,19 +71,22 @@ export interface AuthUser {
   address: string;
   district: string;
   ward: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   isVerify: boolean;
   role: {
     id: number;
     name: string;
+    createdAt: number;
+    updatedAt: number;
+    isDeleted: boolean;
   };
   cartId?: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: number;
+  updatedAt?: number | null;
 }
 
 export interface AuthResponse {
-  user: AuthUser;
+  userInfo: AuthUser;
   accessToken: string;
   refreshToken?: string;
   expiresIn: number;
@@ -128,7 +131,7 @@ export class AuthService {
         }
         
         // Store user info
-        localStorage.setItem('user', JSON.stringify(response.data.user));
+        localStorage.setItem('user', JSON.stringify(response.data.userInfo));
       }
       
       return response.data;

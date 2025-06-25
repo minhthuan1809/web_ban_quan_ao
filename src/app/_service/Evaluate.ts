@@ -20,12 +20,12 @@ export const getReviews_API = async (page: number, pageSize: number = 10, search
   params.append('search', searchValue);
   params.append('productId', JSON.stringify({productId : productId}));
   
-  const response = await axios.get(`${API_URL}/reviews?${params.toString()}`, {
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  });
-  return response.data;
+      const response = await axios.get(`${API_URL}/reviews?${params.toString()}`, {
+          headers: {
+              'Content-Type': 'application/json',
+          },
+      });
+      return response.data;
 }
 
 

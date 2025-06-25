@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react'
 import { getHistoryContact_API } from '@/app/_service/contact';
+import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Chip, Tooltip, Button, Input } from "@nextui-org/react";
 import { Eye, Mail, User } from "lucide-react";
 import { Contact } from '../typecontact';
@@ -13,11 +14,15 @@ export default function HistoryContact() {
     const [totalPages, setTotalPages] = useState(1);
     const rowsPerPage = 10;
     const [searchValue, setSearchValue] = useState("");
+    const { accessToken, userInfo } = useAuthInfor();
+    
     useEffect(() => {
         const fetchHistoryContact = async () => {
+            if (!accessToken || !userInfo?.email) return;
+            
             setLoading(true);
             try {
-                const res = await getHistoryContact_API(searchValue);
+                const res = await getHistoryContact_API(searchValue, accessToken, userInfo.email);
                 setContacts(res.content);
                 setTotalPages(res.totalPages);
             } catch (error) {
@@ -27,7 +32,7 @@ export default function HistoryContact() {
             }
         }
         fetchHistoryContact();
-    }, [page]);
+    }, [page, searchValue, accessToken, userInfo]);
 
     const getStatusColor = (status: string) => {
         switch(status) {

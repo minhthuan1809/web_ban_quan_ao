@@ -1,13 +1,10 @@
 import axios from "axios";
-import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { Contact } from '@/app/(admin)/contacts/typecontact';
-
-const { accessToken , userInfo } = useAuthInfor();
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // admin
-export const getContacts_API = async (data: any) => {
+export const getContacts_API = async (data: any, accessToken: string) => {
     const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/contacts?page=${data.page}&size=${data.size}&search=${data.search}`, {
         headers: {
             "Authorization": `Bearer ${accessToken}`
@@ -17,19 +14,21 @@ export const getContacts_API = async (data: any) => {
 }
 
 // client
-export const createContact_API = async (data: any) => {
+export const createContact_API = async (data: any, accessToken?: string) => {
+    const headers: any = {};
+    if (accessToken) {
+        headers["Authorization"] = `Bearer ${accessToken}`;
+    }
+    
     const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/contacts`, data, {
-        headers: {
-            "Authorization": `Bearer ${accessToken}`
-        }
+        headers
     });
     return res;
 }
 
-
 // send mail
-export const sendMail_API = async (id: number, data: any) => {
-    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/contacts/${id}/reply?adminId=${userInfo?.id}`, data, {
+export const sendMail_API = async (id: number, data: any, accessToken: string, adminId: string) => {
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/contacts/${id}/reply?adminId=${adminId}`, data, {
         headers: {
             "Authorization": `Bearer ${accessToken}`
         }
@@ -37,11 +36,9 @@ export const sendMail_API = async (id: number, data: any) => {
         return res;
 }
 
-
 // history contact
-  export const getHistoryContact_API = async (searchValue: string) => {
-  
-    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/contacts/history?email=${userInfo?.email}&search=${searchValue}`, {
+export const getHistoryContact_API = async (searchValue: string, accessToken: string, userEmail: string) => {
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/contacts/history?email=${userEmail}&search=${searchValue}`, {
             headers: {
             "Authorization": `Bearer ${accessToken}`,
             "Content-Type": "application/json"

@@ -28,9 +28,35 @@ export default function PageLogin() {
         password: password,
       });
       console.log('Login response:', response);
-      setCookie("token", JSON.stringify(response), {
-        maxAge: rememberMe ? 30 * 24 * 60 * 60 : undefined, // 30 days if remember me is checked
-      });
+      
+            // Sử dụng response từ API và map cho đúng interface
+      const tokenData = {
+        accessToken: response.accessToken,
+        tokenType: response.tokenType,
+        userInfo: response.userInfo, // API trả về 'user', hook cần 'userInfo'
+        expiresIn: response.expiresIn,
+        issuedAt: Date.now()
+      };
+      
+      const cookieOptions = {
+        maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60, // 30 days or 1 day
+        httpOnly: false,
+        secure: false,
+        sameSite: 'lax' as const
+      };
+      
+      // Lưu token data đầy đủ
+      setCookie("token", JSON.stringify(tokenData), cookieOptions);
+      setCookie("accessToken", response.accessToken, cookieOptions);
+      setCookie("user", JSON.stringify(response.userInfo), cookieOptions);
+      
+      // Backup vào localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('token', JSON.stringify(tokenData));
+        localStorage.setItem('accessToken', response.accessToken);
+        localStorage.setItem('user', JSON.stringify(response.userInfo));
+      }
+      
       toast.success("Đăng nhập thành công");
       router.push("/");
     } catch (error) {

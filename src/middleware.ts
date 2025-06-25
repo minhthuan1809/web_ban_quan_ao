@@ -74,6 +74,23 @@ function parseAuthToken(request: NextRequest): AuthResult {
   };
 
   try {
+    // Kiểm tra format mới (accessToken và user riêng biệt)
+    const accessTokenCookie = request.cookies.get('accessToken');
+    const userCookie = request.cookies.get('user');
+    
+    if (accessTokenCookie?.value && userCookie?.value) {
+      const userData = JSON.parse(userCookie.value);
+      const isAdmin = userData.role?.name?.trim().toLowerCase() === 'admin';
+      
+      return {
+        isAuthenticated: true,
+        isAdmin,
+        user: userData,
+        accessToken: accessTokenCookie.value
+      };
+    }
+
+    // Fallback: Kiểm tra format cũ (token đầy đủ)
     const tokenCookie = request.cookies.get('token');
     
     if (!tokenCookie?.value) {
@@ -154,14 +171,20 @@ function createResponse(
   // Handle public auth routes (login, register, etc.)
   if (matchesPath(pathname, PUBLIC_AUTH_PATHS)) {
     if (auth.isAuthenticated) {
-      // Redirect authenticated users away from auth pages
+      // Người dùng đã đăng nhập không được phép truy cập các trang auth
       const returnUrl = request.nextUrl.searchParams.get('returnUrl');
-      const redirectUrl = returnUrl && returnUrl.startsWith('/') 
-        ? returnUrl 
-        : auth.isAdmin 
-          ? REDIRECT_PATHS.dashboard 
-          : REDIRECT_PATHS.home;
       
+      let redirectUrl: string;
+      
+      if (returnUrl && returnUrl.startsWith('/')) {
+        redirectUrl = returnUrl;
+      } else if (auth.isAdmin) {
+        redirectUrl = REDIRECT_PATHS.dashboard;
+      } else {
+        redirectUrl = REDIRECT_PATHS.home;
+      }
+      
+      console.log(`Redirecting authenticated user from ${pathname} to ${redirectUrl}`);
       return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
   }
@@ -204,6 +227,9 @@ export function middleware(request: NextRequest): NextResponse {
 
   // Parse authentication data
   const auth = parseAuthToken(request);
+  
+  // Debug logging
+  console.log(`Middleware: ${pathname} - Auth: ${auth.isAuthenticated}, Admin: ${auth.isAdmin}`);
   
   // Log access attempts for admin routes (for security monitoring)
   if (matchesPath(pathname, ADMIN_PATHS) && !auth.isAdmin) {

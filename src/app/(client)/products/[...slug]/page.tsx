@@ -456,7 +456,7 @@ if(userInfo){
           <Card className="shadow-small">
             <CardBody className="p-6">
               <Suspense fallback={<div className="h-32 flex items-center justify-center">Đang tải đánh giá...</div>}>
-                <EvaluateComment />
+              <EvaluateComment />
               </Suspense>
             </CardBody>
           </Card>
@@ -467,14 +467,14 @@ if(userInfo){
           <Card className="shadow-small">
             <CardBody className="p-6">
               <Suspense fallback={<div className="h-48 flex items-center justify-center">Đang tải sản phẩm liên quan...</div>}>
-                <ProductCarousel title="Sản phẩm liên quan" data={relatedProducts} />
+              <ProductCarousel title="Sản phẩm liên quan" data={relatedProducts} />
               </Suspense>
             </CardBody>
           </Card>
         </div>
         
         <Suspense fallback={null}>
-          <InstructChooseSize isOpen={isOpen} onClose={() => setIsOpen(false)} />
+        <InstructChooseSize isOpen={isOpen} onClose={() => setIsOpen(false)} />
         </Suspense>
       </div>
     </div>

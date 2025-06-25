@@ -11,7 +11,6 @@ import {
   Home,
   Package,
   Tag,
-  Newspaper,
   Phone,
   History
 } from "lucide-react";
@@ -48,44 +47,57 @@ export default function Navbar() {
   // zustand
   const {setUser_Zustand} = useUserStore()
   // hook
-  const { accessToken } = useAuthInfor() || { accessToken: null }; // Add null check
+  const { accessToken, user: hookUser, refreshFromCookies } = useAuthInfor() 
   const router = useRouter();
   
 
   useEffect(() => {
-    if (!accessToken) {
-      setUser(null);
-      setUser_Zustand(null);
-      deleteCookie("token");
+    console.log('Navbar useEffect - accessToken:', !!accessToken, 'hookUser:', !!hookUser);
+    
+    // Nếu có user từ hook, sử dụng luôn
+    if (hookUser) {
+      setUser(hookUser);
+      setUser_Zustand(hookUser);
+      
+      // Redirect admin
+      if (hookUser.role?.name?.trim().toLowerCase() === 'admin') {
+        router.push("/admin");
+      }
       return;
     }
 
-    authGetUserInfo_API(accessToken).then((res: any) => {
-      if (res) {
-        setUser(res);
-        setCookie("token", JSON.stringify({"accessToken": accessToken, "userInfo": res}));
-        //đẩy về admin nếu là admin
-        if (res.role.name.trim().toLowerCase() === 'admin') {
-          router.push("/admin");
+    // Nếu không có user nhưng có accessToken, gọi API
+    if (accessToken && !hookUser) {
+      authGetUserInfo_API(accessToken).then((res: any) => {
+        console.log("API response:", res);
+        
+        if (res) {
+          setUser(res);
+          setCookie("user", JSON.stringify(res));
+          //đẩy về admin nếu là admin
+          if (res.role.name.trim().toLowerCase() === 'admin') {
+            router.push("/admin");
+          }
+        
+          setUser_Zustand(res);
         }
-      
-        setUser_Zustand(res);
-      }
-      else {
-        setUser(null);
-        setUser_Zustand(null);
-        deleteCookie("token");
-        router.push("/login");
-      }
-    });
-  }, [accessToken]);
+      });
+    }
+
+    // Nếu không có gì, thử force refresh cookies
+    if (!accessToken && !hookUser) {
+      console.log('No token or user, trying to refresh from cookies...');
+      refreshFromCookies();
+    }
+  }, [accessToken, hookUser, refreshFromCookies]);
 
   const handleLogout = () => {
     if (!accessToken) return;
     router.push("/login");
-    deleteCookie("token");
-    authLogout_API(accessToken).then((res: any) => {
 
+    authLogout_API(accessToken).then((res: any) => {
+        deleteCookie("accessToken");
+        deleteCookie("user");
     });
   };
 

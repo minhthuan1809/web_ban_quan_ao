@@ -1,11 +1,14 @@
 "use client";
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
 
 // TypeScript interfaces
 export interface UserRole {
   id: number;
   name: string;
+  createdAt?: number;
+  updatedAt?: number;
+  isDeleted?: boolean;
   permissions?: string[];
 }
 
@@ -18,240 +21,167 @@ export interface AuthUser {
   address: string;
   district: string;
   ward: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
   isVerify: boolean;
   role: UserRole;
   cartId?: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface TokenData {
-  accessToken: string;
-  refreshToken?: string;
-  userInfo: AuthUser;
-  expiresIn?: number;
-  tokenType?: string;
-  issuedAt?: number;
-}
-
-export interface AuthState {
-  accessToken: string | null;
-  userInfo: AuthUser | null;
-  isAuthenticated: boolean;
-  isAdmin: boolean;
-  isLoading: boolean;
-  error: string | null;
+  createdAt: number;
+  updatedAt?: number | null;
 }
 
 // Custom hook for authentication information
 const useAuthInfor = () => {
-  const [authState, setAuthState] = useState<AuthState>({
-    accessToken: null,
-    userInfo: null,
-    isAuthenticated: false,
-    isAdmin: false,
-    isLoading: true,
-    error: null
-  });
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
-  /**
-   * Parse token from cookie with enhanced validation
-   */
-  const parseTokenFromCookie = useCallback((): TokenData | null => {
-    try {
-      const tokenCookie = getCookie('token');
-      
-      if (!tokenCookie) {
-        return null;
+  // Khởi tạo từ cookie khi component mount
+  useEffect(() => {
+    console.log('AuthInfor: Checking cookies...');
+    
+    const tokenFromCookie = getCookie('accessToken');
+    const userFromCookie = getCookie('user');
+    
+    console.log('accessToken cookie:', tokenFromCookie);
+    console.log('user cookie:', userFromCookie);
+
+    if (tokenFromCookie) {
+      console.log('Setting accessToken from cookie');
+      setAccessToken(tokenFromCookie as string);
+    } else {
+      console.log('No accessToken cookie found');
+    }
+
+    if (userFromCookie) {
+      try {
+        const userData = JSON.parse(userFromCookie as string);
+        console.log('Setting user from cookie:', userData);
+        setUser(userData);
+      } catch (error) {
+        console.error('Error parsing user data from cookie:', error);
+        deleteCookie('user');
       }
-
-      const tokenData: TokenData = JSON.parse(tokenCookie as string);
-      
-      // Validate token structure
-      if (!tokenData.accessToken || !tokenData.userInfo) {
-        console.warn('Invalid token structure');
-        return null;
-      }
-
-      // Check token expiration
-      if (tokenData.expiresIn && Date.now() > tokenData.expiresIn) {
-        console.warn('Token has expired');
-        deleteCookie('token');
-        return null;
-      }
-
-      return tokenData;
-    } catch (error) {
-      console.error('Error parsing auth token:', error);
-      // Clear invalid token
-      deleteCookie('token');
-      return null;
+    } else {
+      console.log('No user cookie found');
     }
   }, []);
 
-  /**
-   * Update authentication state
-   */
-  const updateAuthState = useCallback((tokenData: TokenData | null) => {
-    if (!tokenData) {
-      setAuthState({
-        accessToken: null,
-        userInfo: null,
-        isAuthenticated: false,
-        isAdmin: false,
-        isLoading: false,
-        error: null
-      });
-      return;
-    }
-
-    const isAdmin = tokenData.userInfo.role?.name?.trim().toLowerCase() === 'admin';
-
-    setAuthState({
-      accessToken: tokenData.accessToken,
-      userInfo: tokenData.userInfo,
-      isAuthenticated: true,
-      isAdmin,
-      isLoading: false,
-      error: null
-    });
-  }, []);
-
-  /**
-   * Login - save token and update state
-   */
-  const login = useCallback((tokenData: TokenData) => {
-    try {
-      // Add issued timestamp
-      const tokenWithTimestamp = {
-        ...tokenData,
-        issuedAt: Date.now()
-      };
-
-      setCookie('token', JSON.stringify(tokenWithTimestamp), {
+  // Function để set accessToken mới
+  const setAccessTokenNew = useCallback((token: string | null) => {
+    setAccessToken(token);
+    if (token) {
+      setCookie('accessToken', token, {
         maxAge: 60 * 60 * 24 * 7, // 7 days
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'lax',
         path: '/'
       });
-
-      updateAuthState(tokenWithTimestamp);
-    } catch (error) {
-      console.error('Error during login:', error);
-      setAuthState(prev => ({
-        ...prev,
-        error: 'Lỗi đăng nhập',
-        isLoading: false
-      }));
-    }
-  }, [updateAuthState]);
-
-  /**
-   * Logout - clear token and reset state
-   */
-  const logout = useCallback(() => {
-    try {
-      deleteCookie('token');
-      
-      // Clear localStorage items if any
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-      }
-
-      setAuthState({
-        accessToken: null,
-        userInfo: null,
-        isAuthenticated: false,
-        isAdmin: false,
-        isLoading: false,
-        error: null
-      });
-    } catch (error) {
-      console.error('Error during logout:', error);
+    } else {
+      deleteCookie('accessToken');
     }
   }, []);
 
-  /**
-   * Refresh user information
-   */
-  const refreshUserInfo = useCallback(() => {
-    setAuthState(prev => ({ ...prev, isLoading: true }));
-    const tokenData = parseTokenFromCookie();
-    updateAuthState(tokenData);
-  }, [parseTokenFromCookie, updateAuthState]);
+  // Function để set user mới
+  const setUserNew = useCallback((userData: AuthUser | null) => {
+    setUser(userData);
+    if (userData) {
+      setCookie('user', JSON.stringify(userData), {
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
+      });
+    } else {
+      deleteCookie('user');
+    }
+  }, []);
 
-  /**
-   * Update user information in token
-   */
-  const updateUserInfo = useCallback((updatedUser: Partial<AuthUser>) => {
-    const currentToken = parseTokenFromCookie();
+  // Function để clear tất cả data
+  const clearAuthData = useCallback(() => {
+    setAccessToken(null);
+    setUser(null);
+    deleteCookie('accessToken');
+    deleteCookie('user');
+    deleteCookie('token'); // Clear old token format if exists
+  }, []);
+
+  // Function để force refresh từ cookies
+  const refreshFromCookies = useCallback(() => {
+    console.log('Force refreshing from cookies...');
     
-    if (!currentToken) return;
-
-    const updatedTokenData = {
-      ...currentToken,
-      userInfo: {
-        ...currentToken.userInfo,
-        ...updatedUser
+    // Thử nhiều cách để lấy cookie
+    const methods = [
+      () => getCookie('accessToken'),
+      () => document.cookie.split(';').find(c => c.trim().startsWith('accessToken='))?.split('=')[1],
+      () => {
+        if (typeof window !== 'undefined') {
+          return localStorage.getItem('accessToken');
+        }
+        return null;
       }
-    };
+    ];
 
-    setCookie('token', JSON.stringify(updatedTokenData), {
-      maxAge: 60 * 60 * 24 * 7,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      path: '/'
-    });
+    let foundToken = null;
+    let foundUser = null;
 
-    updateAuthState(updatedTokenData);
-  }, [parseTokenFromCookie, updateAuthState]);
+    // Thử lấy accessToken
+    for (const method of methods) {
+      try {
+        const token = method();
+        if (token) {
+          foundToken = token;
+          console.log('Found token via method:', method.toString());
+          break;
+        }
+      } catch (e) {
+        console.log('Method failed:', e);
+      }
+    }
 
-  /**
-   * Check if user has specific permission
-   */
-  const hasPermission = useCallback((permission: string): boolean => {
-    if (!authState.userInfo?.role) return false;
-    
-    // Admin has all permissions
-    if (authState.isAdmin) return true;
-    
-    return authState.userInfo.role.permissions?.includes(permission) || false;
-  }, [authState.userInfo?.role, authState.isAdmin]);
+    // Thử lấy user
+    const userMethods = [
+      () => getCookie('user'),
+      () => {
+        const cookie = document.cookie.split(';').find(c => c.trim().startsWith('user='));
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : null;
+      },
+      () => {
+        if (typeof window !== 'undefined') {
+          return localStorage.getItem('user');
+        }
+        return null;
+      }
+    ];
 
-  // Initialize auth state on mount
-  useEffect(() => {
-    const tokenData = parseTokenFromCookie();
-    updateAuthState(tokenData);
-  }, [parseTokenFromCookie, updateAuthState]);
+    for (const method of userMethods) {
+      try {
+        const userStr = method();
+        if (userStr) {
+          foundUser = JSON.parse(userStr);
+          console.log('Found user via method:', method.toString());
+          break;
+        }
+      } catch (e) {
+        console.log('User method failed:', e);
+      }
+    }
 
-  // Memoized computed values
-  const computedValues = useMemo(() => ({
-    isGuest: !authState.isAuthenticated,
-    isVerified: authState.userInfo?.isVerify || false,
-    userName: authState.userInfo?.fullName || '',
-    userEmail: authState.userInfo?.email || '',
-    userRole: authState.userInfo?.role?.name || '',
-    hasCart: !!authState.userInfo?.cartId
-  }), [authState]);
+    if (foundToken) {
+      setAccessToken(foundToken);
+    }
+    if (foundUser) {
+      setUser(foundUser);
+    }
 
-  // Return complete auth state and methods
+    console.log('Refresh result - Token:', !!foundToken, 'User:', !!foundUser);
+  }, []);
+
   return {
-    // State
-    ...authState,
-    ...computedValues,
-    
-    // Methods
-    login,
-    logout,
-    refreshUserInfo,
-    updateUserInfo,
-    hasPermission,
-    
-    // Raw token data for advanced use cases
-    getTokenData: parseTokenFromCookie
+    accessToken,
+    user,
+    setAccessToken: setAccessTokenNew,
+    setUser: setUserNew,
+    clearAuthData,
+    refreshFromCookies
   };
 };
 
