@@ -5,8 +5,6 @@ import { Eye } from "lucide-react";
 import showConfirmDialog from "@/app/_util/Sweetalert2";
 
 export default function HistoryPay() {
-    const [searchValue, setSearchValue] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
     
     // Dữ liệu giả
     const fakePaymentHistory = [
@@ -85,10 +83,8 @@ export default function HistoryPay() {
     };
 
     return (
-        <div className="w-full">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-border mb-4 gap-4">
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">Thanh toán</h1>
-            </div>
+        <div className="w-full p-4">
+         
             <Table
                 aria-label="Bảng lịch sử chuyển tiền"
             >

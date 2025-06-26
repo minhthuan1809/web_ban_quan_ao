@@ -19,6 +19,8 @@ import ImgUpload from "@/app/components/ui/ImgUpload";
 import { toast } from "react-toastify";
 import InputGender from "@/app/components/ui/InputGender";
 import { uploadToCloudinary } from "@/app/_util/upload_img_cloudinary";
+import InputGmail from "@/app/components/ui/InputGmail";
+import InputPhone from "@/app/components/ui/InputPhone";
 
 interface User {
   id: number;
@@ -110,7 +112,7 @@ export default function ModalAddUse({
 
   // Reset form
   const resetForm = useCallback(() => {
-    setFormData(initialFormData);
+    setFormData({ ...initialFormData, roleId: 1 });
     setFile(null);
     setPreview(null);
     setErrors({});
@@ -213,9 +215,10 @@ export default function ModalAddUse({
       handleError();
     }
   }, [validateForm, formData, file, handleImageUpload, isEditMode, editUser, accessToken, handleSuccess, handleError]);
-
   // Step navigation
   const nextStep = useCallback(() => {
+
+    
     if (step === 1) {
       const basicFields = ['fullName', 'email'];
       if (modalMode === 'add') basicFields.push('password');
@@ -226,13 +229,15 @@ export default function ModalAddUse({
         if (error) basicErrors[field] = error;
       });
       
+      
       if (Object.keys(basicErrors).length > 0) {
         setErrors(basicErrors);
         return;
       }
     }
+
     setStep(2);
-  }, [step, modalMode, validateField, formData]);
+  }, [step, modalMode, validateField, formData, errors]);
 
   const prevStep = useCallback(() => setStep(1), []);
 
@@ -334,42 +339,26 @@ export default function ModalAddUse({
                     label="Họ và tên"
                     placeholder="Nhập họ và tên đầy đủ"
                     value={formData.fullName}
+                    type="text"
+                    labelPlacement="outside"
+                    isRequired
                     onChange={(e) => updateField('fullName', e.target.value)}
                     variant="bordered"
-                    isRequired
                     isInvalid={!!errors.fullName}
                     errorMessage={errors.fullName}
                     startContent={<User className="w-4 h-4 text-gray-400" />}
                   />
                   
-                  <Input
-                      label="Email"
-                      placeholder="example@email.com"
-                      value={formData.email}
-                    onChange={(e) => updateField('email', e.target.value)}
-                    variant="bordered"
-                    isRequired
-                    isInvalid={!!errors.email}
-                    errorMessage={errors.email}
-                    startContent={<Mail className="w-4 h-4 text-gray-400" />}
-                    type="email"
-                  />
+
+                  <InputGmail
+                    label="Email"
+                    placeholder="example@email.com"
+                    value={formData.email}
+                    onChange={(value) => updateField('email', value)}
+                  />  
                 </div>
 
-                {modalMode === "add" && (
-                  <Input
-                      label="Mật khẩu"
-                      placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
-                      value={formData.password}
-                    onChange={(e) => updateField('password', e.target.value)}
-                    variant="bordered"
-                    isRequired
-                    isInvalid={!!errors.password}
-                    errorMessage={errors.password}
-                    startContent={<Key className="w-4 h-4 text-gray-400" />}
-                    type="password"
-                  />
-                )}
+            
               </div>
             </div>
           )}
@@ -382,17 +371,15 @@ export default function ModalAddUse({
               </h3>
 
               <div className="space-y-5">
-                <Input
-                    label="Số điện thoại"
-                    placeholder="Nhập số điện thoại"
-                    value={formData.phone}
-                  onChange={(e) => updateField('phone', e.target.value)}
-                  variant="bordered"
-                  isRequired
-                  isInvalid={!!errors.phone}
-                  errorMessage={errors.phone}
-                  startContent={<Phone className="w-4 h-4 text-gray-400" />}
-                  type="tel"
+                <InputPhone
+                  placeholder="Nhập số điện thoại"
+                  label="Số điện thoại"
+                  value={formData.phone}
+                  onChange={(value) => updateField('phone', value)}
+                  countryCode="+84"
+                  autoComplete="tel"
+                  className="w-full"
+                  onValidationChange={() => {}}
                 />
 
                 <div>
@@ -406,13 +393,14 @@ export default function ModalAddUse({
                   <Select
                     label="Vai trò"
                     placeholder="Chọn vai trò"
-                    selectedKeys={[formData.roleId.toString()]}
+                    selectedKeys={[(formData.roleId ?? 1).toString()]}
                     onSelectionChange={(keys) => {
                       const selected = Array.from(keys)[0] as string;
                       updateField('roleId', Number(selected));
                     }}
                     variant="bordered"
-                    startContent={<Users className="w-4 h-4 text-gray-400" />}
+                    startContent={<Users className="w-4 h-4 text-black" />}
+                    renderValue={() => (formData.roleId === 2 ? 'Quản trị viên' : 'Người dùng')}
                   >
                     <SelectItem key="1" value="1">
                       <div className="flex items-center gap-2">

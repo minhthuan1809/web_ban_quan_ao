@@ -79,9 +79,10 @@ export const UpdateUser_API = async (id: number, data: UserUpdateData, token: st
     const payload = {
       ...data,
       isAdmin: true,
+      token: token,
     };
     
-    const response = await apiClient.put(`/auth/update-profile/${id}`, payload, {
+    const response = await apiClient.put(`/auth/update-profile`, payload, {
       headers: {
         'Authorization': `Bearer ${token}`,
       },

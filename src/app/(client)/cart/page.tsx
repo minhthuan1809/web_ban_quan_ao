@@ -14,7 +14,7 @@ import { ShoppingBag } from 'lucide-react';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
 
 export default function Page() {
-    const { userInfo } = useAuthInfor();
+    const { user } = useAuthInfor();
     const [cartItems, setCartItems] = useState<any[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [cartData, setCartData] = useState<any>(null);
@@ -23,11 +23,11 @@ export default function Page() {
     useEffect(() => {
         const fetchCard = async () => {
             try {
-                if (!userInfo) {
+                if (!user) {
                     router.push('/login');
                     return;
                 }
-                const res = await GetCard_API(userInfo.id);
+                const res = await GetCard_API(user.id);
                 if (res.data) {
                     setCartData(res.data);
                     if (res.data.cartItems) {
@@ -99,7 +99,7 @@ export default function Page() {
         }, 0);
     }
 
-    if (!userInfo) {
+    if (!user) {
         return null; // hoặc có thể return một component loading
     }
 

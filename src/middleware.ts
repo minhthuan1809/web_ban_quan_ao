@@ -109,7 +109,7 @@ function parseAuthToken(request: NextRequest): AuthResult {
  * Check if path matches any patterns in the given array
  */
 function matchesPath(pathname: string, paths: readonly string[]): boolean {
-  return paths.some(path => pathname === path);
+  return paths.some(path => pathname === path || pathname.startsWith(path + '/'));
 }
 
 /**
@@ -126,11 +126,9 @@ function createResponse(
     if (!auth.isAuthenticated) {
       return NextResponse.redirect(new URL('/login', request.url));
     }
-    
     if (!auth.isAdmin) {
       return NextResponse.rewrite(new URL(REDIRECT_PATHS.unauthorized, request.url));
     }
-    
     // Redirect /admin to dashboard
     if (pathname === '/admin') {
       return NextResponse.redirect(new URL(REDIRECT_PATHS.dashboard, request.url));
@@ -145,6 +143,7 @@ function createResponse(
       loginUrl.searchParams.set('returnUrl', pathname);
       return NextResponse.redirect(loginUrl);
     }
+    // Cho phép cả user và admin truy cập, không chặn user thường
   }
 
   // Handle public auth routes (login, register, etc.)

@@ -4,10 +4,10 @@ import { getHistoryContact_API } from '@/app/_service/contact';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Chip, Tooltip, Button, Input } from "@nextui-org/react";
 import { Eye, Mail, User } from "lucide-react";
-import { Contact } from '../typecontact';
+import { AdminContact } from '@/types/contact';
 
 export default function HistoryContact() {
-    const [contacts, setContacts] = useState<Contact[]>([]);
+    const [contacts, setContacts] = useState<AdminContact[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -39,10 +39,8 @@ export default function HistoryContact() {
                 return "warning";
             case "PROCESSING":
                 return "primary";
-            case "RESOLVED":
+            case "COMPLETED":
                 return "success";
-            case "REJECTED":
-                return "danger";
             default:
                 return "default";
         }
@@ -111,7 +109,7 @@ export default function HistoryContact() {
                                 <Chip color={getStatusColor(contact.status) as any} variant="flat" size="sm">
                                     {contact.status === "PENDING" ? "Chờ xử lý" : 
                                     contact.status === "PROCESSING" ? "Đang xử lý" :
-                                    contact.status === "COMPLETED" ? "Đã xử lý" : "Từ chối"}
+                                    contact.status === "COMPLETED" ? "Đã xử lý" : "Khác"}
                                 </Chip>
                             </TableCell>
                             <TableCell>

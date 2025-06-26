@@ -25,7 +25,7 @@ const useAuthInfor = () => {
 
     if (userFromCookie) {
       try {
-        const userData = JSON.parse(userFromCookie as string);
+        const userData = JSON.parse(decodeURIComponent(userFromCookie as string));
         setUser(userData);
       } catch (error) {
         console.error('Error parsing user data from cookie:', error);
@@ -71,7 +71,6 @@ const useAuthInfor = () => {
     setUser(null);
     deleteCookie('accessToken');
     deleteCookie('user');
-    deleteCookie('token'); // Clear old token format if exists
   }, []);
 
   // Function để force refresh từ cookies

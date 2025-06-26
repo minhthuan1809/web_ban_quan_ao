@@ -9,7 +9,8 @@ import {
 } from "@nextui-org/react";
 import { 
   User, UserPlus, Edit3, Trash2, Users, Search, Filter, 
-  MoreVertical, Shield, ShieldCheck, Mail, Phone, MapPin 
+  MoreVertical, Shield, ShieldCheck, Mail, Phone, MapPin, Plus,
+  ChevronDown
 } from 'lucide-react';
 import Loading from '@/app/_util/Loading';
 import { toast } from 'react-toastify';
@@ -143,7 +144,7 @@ export default function PageUser() {
       district: user.district,
       ward: user.ward,
       gender: user.gender,
-      roleId: user.roleId
+      roleId: user.roleId ?? 1
     });
     setShowModal(true);
   }, []);
@@ -192,6 +193,17 @@ export default function PageUser() {
   return (
     <div className="p-4 md:p-6 space-y-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
       {/* Mobile View */}
+
+      <div>
+        <Button
+          color="primary"
+          variant="flat"
+          onPress={handleAdd}
+          startContent={<Plus className="w-4 h-4" />}
+        >
+          Thêm người dùng
+        </Button>
+      </div>
       <div className="block lg:hidden space-y-4">
         {filteredUsers.map((user: UserData) => {
           const roleConfig = getRoleConfig(user.roleId);
