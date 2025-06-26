@@ -12,14 +12,11 @@ import {
   Card
 } from "@nextui-org/react";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { UserPlus, Edit3, User, Mail, Phone, MapPin, Users, Camera, Upload, Check, ArrowRight, ArrowLeft } from "lucide-react";
+import { UserPlus, Edit3, User, Mail, Phone, MapPin, Users, Camera, Upload, Check, ArrowRight, ArrowLeft, Key } from "lucide-react";
 import InputAddress from "@/app/components/ui/InputAddress";
 import { CreateUser_API, UpdateUser_API } from "@/app/_service/user";
 import ImgUpload from "@/app/components/ui/ImgUpload";
 import { toast } from "react-toastify";
-import InputPassword from "@/app/components/ui/InputPassword";
-import InputPhone from "@/app/components/ui/InputPhone";
-import InputGmail from "@/app/components/ui/InputGmail";
 import InputGender from "@/app/components/ui/InputGender";
 import { uploadToCloudinary } from "@/app/_util/upload_img_cloudinary";
 
@@ -345,31 +342,33 @@ export default function ModalAddUse({
                     startContent={<User className="w-4 h-4 text-gray-400" />}
                   />
                   
-                  <div>
-                    <InputGmail
+                  <Input
                       label="Email"
                       placeholder="example@email.com"
                       value={formData.email}
-                      onChange={(value) => updateField('email', value)}
-                    />
-                    {errors.email && (
-                      <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                    )}
-                  </div>
+                    onChange={(e) => updateField('email', e.target.value)}
+                    variant="bordered"
+                    isRequired
+                    isInvalid={!!errors.email}
+                    errorMessage={errors.email}
+                    startContent={<Mail className="w-4 h-4 text-gray-400" />}
+                    type="email"
+                  />
                 </div>
 
                 {modalMode === "add" && (
-                  <div>
-                    <InputPassword
+                  <Input
                       label="Mật khẩu"
                       placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
                       value={formData.password}
-                      onChange={(value) => updateField('password', value)}
-                    />
-                    {errors.password && (
-                      <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-                    )}
-                  </div>
+                    onChange={(e) => updateField('password', e.target.value)}
+                    variant="bordered"
+                    isRequired
+                    isInvalid={!!errors.password}
+                    errorMessage={errors.password}
+                    startContent={<Key className="w-4 h-4 text-gray-400" />}
+                    type="password"
+                  />
                 )}
               </div>
             </div>
@@ -383,17 +382,18 @@ export default function ModalAddUse({
               </h3>
 
               <div className="space-y-5">
-                <div>
-                  <InputPhone
+                <Input
                     label="Số điện thoại"
                     placeholder="Nhập số điện thoại"
                     value={formData.phone}
-                    onChange={(value) => updateField('phone', value)}
-                  />
-                  {errors.phone && (
-                    <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                  )}
-                </div>
+                  onChange={(e) => updateField('phone', e.target.value)}
+                  variant="bordered"
+                  isRequired
+                  isInvalid={!!errors.phone}
+                  errorMessage={errors.phone}
+                  startContent={<Phone className="w-4 h-4 text-gray-400" />}
+                  type="tel"
+                />
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -428,17 +428,17 @@ export default function ModalAddUse({
                     </SelectItem>
                   </Select>
 
-                  <div>
-                    <InputGender
+                  <Input
                       label="Giới tính"
-                      placeholder="Chọn giới tính"
+                    placeholder="Nam/Nữ/Khác"
                       value={formData.gender}
-                      onChange={(value) => updateField('gender', value)}
-                    />
-                    {errors.gender && (
-                      <p className="text-red-500 text-sm mt-1">{errors.gender}</p>
-                    )}
-                  </div>
+                    onChange={(e) => updateField('gender', e.target.value)}
+                    variant="bordered"
+                    isRequired
+                    isInvalid={!!errors.gender}
+                    errorMessage={errors.gender}
+                    startContent={<User className="w-4 h-4 text-gray-400" />}
+                  />
                 </div>
               </div>
             </div>

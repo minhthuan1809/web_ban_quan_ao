@@ -5,7 +5,6 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import React, { useEffect, useState } from 'react';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Chip, Tooltip, Button, Modal, ModalContent, ModalHeader, ModalBody, Card, CardBody } from "@nextui-org/react";
 import { Eye, Mail, Send, User } from "lucide-react";
-import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 import ModalSentMail from '../../_modal/ModalSentMail';
 import type { AdminContact as Contact } from '../../../../types/contact'; 
 import ModalDetalMail from '../../_modal/ModalDetalMail';
@@ -100,14 +99,7 @@ export default function ContactsPage() {
 
   return (
     <div className="p-4">
-      <TitleSearchAdd
-        title={{
-          title: "Liên hệ",
-          search: "Tìm kiếm liên hệ...",
-        }}
-        onSearch={(value) => setSearchValue(value)}
- 
-      />  
+
       <Table
         aria-label="Bảng danh sách liên hệ"
         bottomContent={

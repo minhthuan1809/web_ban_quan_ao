@@ -1,5 +1,4 @@
 "use client"
-import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd'
 import React, { useState, useEffect }  from 'react'
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip, Button } from "@nextui-org/react";
 import { Eye } from "lucide-react";
@@ -87,13 +86,9 @@ export default function HistoryPay() {
 
     return (
         <div className="w-full">
-            <TitleSearchAdd 
-                title={{
-                    title: "Lịch sử chuyển tiền",
-                    search: "Tìm kiếm lịch sử chuyển tiền...",
-                }}  
-                onSearch={(value) => setSearchValue(value)}
-            />
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-border mb-4 gap-4">
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">Thanh toán</h1>
+            </div>
             <Table
                 aria-label="Bảng lịch sử chuyển tiền"
             >

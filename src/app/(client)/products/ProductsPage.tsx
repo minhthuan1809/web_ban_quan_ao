@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { Filter, Grid, List, Search } from 'lucide-react';
 import { getProducts_API } from '@/app/_service/products';
-import Loading from '@/app/_util/Loading';
 import { Input, Select, SelectItem } from '@nextui-org/react';
 import CardProduct from '@/app/components/CardProduct';  
 import { useRouter, useSearchParams } from 'next/navigation';
+import { ProductGridSkeleton } from '../_skeleton';
 
 export default function ProductsPage({filter} : {filter: any}) {
   const router = useRouter();
@@ -85,7 +85,7 @@ export default function ProductsPage({filter} : {filter: any}) {
   }, [page, limit, filter, searchParams, sort]);
 
   if (loading) {
-    return <Loading />;
+    return <ProductGridSkeleton />;
   }
 
   return (

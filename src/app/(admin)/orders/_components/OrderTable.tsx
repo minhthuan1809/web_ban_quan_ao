@@ -4,7 +4,6 @@
   import { Eye } from 'lucide-react'
   import React, { useCallback, useEffect, useState } from 'react'
   import { format } from 'date-fns';
-  import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
   import Loading from '@/app/_util/Loading';
   import { Pagination } from '@nextui-org/react';
   import useAuthInfor from '@/app/customHooks/AuthInfor';
@@ -128,14 +127,9 @@
 
     return (
       <div className='mx-auto px-2 sm:px-4 py-4 sm:py-8'>
-        <TitleSearchAdd
-          title={{
-            title: title,
-            search: "Tìm kiếm đơn hàng...",
-          }}
-          onSearch={(value) => setSearchQuery(value)}
-          onAdd={() => {}}  
-        />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-border mb-4 gap-4">
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">{title}</h1>
+        </div>
 
         {loading ? (
           <Loading />

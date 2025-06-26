@@ -1,5 +1,6 @@
 "use client";
 import { addTeam_API, deleteTeam_API, getTeam_API } from "@/app/_service/category";
+import type { Team } from '@/types/product';
 import React, { useCallback, useEffect, useState } from "react";
 import { Button, Input, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell } from "@nextui-org/react";
 import { Plus, Search, Pencil, Trash2 } from "lucide-react";
@@ -7,15 +8,15 @@ import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
 import ModalAddEditTeam from "./ModalAddEditTeam";
-import TitleSearchAdd from "@/app/components/ui/TitleSearchAdd";
 import showConfirmDialog from "@/app/_util/Sweetalert2";
 import { TeamSkeleton } from "../_skeleton";
+import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore';
 
 export default function Team() {
-  const [teams, setTeams] = useState([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchValue, setSearchValue] = useState("");
+  const { search: searchValue, type: searchType, setType, setSearch } = useAdminSearchStore();
   const limit = 10;
   const [isOpen, setIsOpen] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);
@@ -33,16 +34,20 @@ export default function Team() {
     if (!accessToken) return;
     try {
       setLoading(true);
-      const response = await getTeam_API(
-        searchValue,
-        currentPage,
-        limit,
-        "",
-        ""
-      );
-      
-      setTeams(response.data.reverse());
-      setTotalPage(response.metadata.total_page);
+      const response = await getTeam_API({
+        search: searchValue,
+        page: currentPage,
+        pageSize: limit,
+        sort: "createdAt:desc",
+        filter: ""
+      });
+      // Đảm bảo id là string cho đồng bộ
+      const teamsData = (response.data as any[]).map((team) => ({
+        ...team,
+        id: typeof team.id === 'number' ? String(team.id) : team.id
+      }));
+      setTeams(teamsData.reverse());
+      setTotalPage(response.pagination?.totalPages || 1);
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -50,12 +55,20 @@ export default function Team() {
     }
   }, [accessToken, currentPage, limit, refresh, searchValue]);
 
+  // Set type khi vào trang team
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fetchTeams();
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [fetchTeams]);
+    setType('team');
+  }, [setType]);
+
+  // debounce search
+  useEffect(() => {
+    if (searchType === 'team' || searchType === '') {
+      const timer = setTimeout(() => {
+        fetchTeams();
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [fetchTeams, searchValue, searchType]);
 
   const handleDeleteTeam = async (id: string) => {
     const result = await showConfirmDialog({
@@ -69,7 +82,7 @@ export default function Team() {
     if (result.isConfirmed) {
     try {
       setLoadingBtn(true);
-      const response: any = await deleteTeam_API(id, accessToken);
+      const response: any = await deleteTeam_API(id || "", accessToken || "");
       if (response.status === 204) {
         toast.success("Xóa đội bóng thành công");
         setRefresh(!refresh);
@@ -95,19 +108,22 @@ export default function Team() {
 
   return (
     <div className="p-6 w-full">
-      <TitleSearchAdd
-        title={{
-          title: "Đội Bóng",
-          search: "Tìm kiếm đội bóng...",
-          btn: "Thêm đội bóng"
-        }}
-        onSearch={(value) => setSearchValue(value)}
-        onAdd={() => {
-          setIsOpen(true)
-          setEditTeam(null)
-          setName("")
-        }}
-      />  
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-border mb-4 gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <Button
+            color="primary"
+            className="h-[40px] font-medium w-full sm:w-auto"
+            startContent={<Plus size={18} />}
+            onClick={() => {
+              setIsOpen(true)
+              setEditTeam(null)
+              setName("")
+            }}
+          >
+            Thêm đội bóng
+          </Button>
+        </div>
+      </div>
 
       {loading ? (
         <TeamSkeleton />
@@ -159,7 +175,7 @@ export default function Team() {
       )}
 
       <ModalAddEditTeam
-        id={editTeam?.id || ""}
+        id={editTeam && editTeam.id != null ? String(editTeam.id) : ""}
         form={{
           name,
           league,
