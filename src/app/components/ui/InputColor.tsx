@@ -32,7 +32,7 @@ export default function InputColor({ setColor, color }: { setColor: (color: stri
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
-      const res = await GetAllColor_API(searchQuery, currentPage, accessToken)
+      const res = await GetAllColor_API(searchQuery, currentPage, accessToken || undefined)
       setColorList(res.data)
     } catch (error: any) {
       toast.error(error.message || 'Có lỗi xảy ra')

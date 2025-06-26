@@ -58,7 +58,8 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
         "validFrom": validFromISO,
         "validTo": validToISO,
         "userSpecific": userSpecific,
-        "userIds": userIds
+        "userIds": userIds,
+        "isAdmin": true
       }
 
       
@@ -148,8 +149,13 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
                 <Input
                   label="Mã giảm giá"
                   value={code}
-                  onChange={handleCodeChange}
-                  placeholder="Nhập mã giảm giá (viết hoa)"
+                  onChange={e => {
+                    const val = e.target.value
+                      .toUpperCase()
+                      .replace(/[^A-Z0-9_]/g, "");
+                    setCode(val);
+                  }}
+                  placeholder="Nhập mã giảm giá (A-Z, 0-9, _)"
                   variant="bordered"
                   labelPlacement="outside"
                   isRequired

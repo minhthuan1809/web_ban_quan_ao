@@ -1,0 +1,10 @@
+export { default as HomeSkeleton } from './HomeSkeleton';
+export { default as ProductSkeleton } from './ProductSkeleton';
+export { default as ProductGridSkeleton } from './ProductGridSkeleton';
+export { default as ProductDetailSkeleton } from './ProductDetailSkeleton';
+export { default as CartSkeleton } from './CartSkeleton';
+export { default as ProfileSkeleton } from './ProfileSkeleton';
+export { default as OrderHistorySkeleton } from './OrderHistorySkeleton';
+export { default as ContactSkeleton } from './ContactSkeleton';
+export { default as NewsSkeleton } from './NewsSkeleton';
+export { default as PromotionsSkeleton } from './PromotionsSkeleton'; 

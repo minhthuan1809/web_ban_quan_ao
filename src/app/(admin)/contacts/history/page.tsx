@@ -5,7 +5,6 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Pagination, Chip, Tooltip, Button, Input } from "@nextui-org/react";
 import { Eye, Mail, User } from "lucide-react";
 import { Contact } from '../typecontact';
-import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 
 export default function HistoryContact() {
     const [contacts, setContacts] = useState<Contact[]>([]);
@@ -74,14 +73,8 @@ export default function HistoryContact() {
     };
 
     return (
-        <div className="w-full">
-            <TitleSearchAdd
-                title={{
-                    title: "Lịch sử liên hệ",
-                    search: "Tìm kiếm lịch sử liên hệ...",
-                }}
-                onSearch={(value) => setSearchValue(value)}
-            />
+        <div className="w-full p-4">
+          
             <Table
                 aria-label="Bảng lịch sử liên hệ"
             >

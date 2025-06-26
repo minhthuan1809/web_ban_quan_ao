@@ -9,8 +9,8 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { toast } from 'react-toastify';
 import Loading from '@/app/_util/Loading';
 import RenderTable from '../_conponents/RenderTable';
-import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 import { CategorySkeleton } from '../_skeleton';
+import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore';
 
 interface Category {
     id: string;
@@ -23,9 +23,13 @@ interface Category {
 export default function Category() {
     const [category, setCategory] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
+<<<<<<< HEAD
     const [currentPage, setCurrentPage] = useState(0);
     const [searchValue, setSearchValue] = useState("");
     const rowsPerPage = 10;
+=======
+    const [currentPage, setCurrentPage] = useState(1);
+>>>>>>> f0c633c967f0243bc80136c41a5c34cb4db6afa3
     const [refresh, setRefresh] = useState(false);
     const [editCategory, setEditCategory] = useState<any>(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -33,6 +37,7 @@ export default function Category() {
     const [loadingBtn, setLoadingBtn] = useState(false);
     const [totalPage, setTotalPage] = useState(0);
     const { accessToken } = useAuthInfor();
+    const { search: searchValue, type: searchType } = useAdminSearchStore();
 
     const fetchCategory = useCallback(async () => {
         try {
@@ -40,7 +45,7 @@ export default function Category() {
             const response = await getCategory_API({
                 search: searchValue,
                 page: currentPage,
-                pageSize: rowsPerPage,
+                pageSize: 20,
                 sort: "createdAt:desc",
                 filter: ""
             });
@@ -53,12 +58,14 @@ export default function Category() {
         }
         }, [currentPage, searchValue, refresh, accessToken]);
 
-    useEffect(() => {   
-        const time = setTimeout(() => {
-            fetchCategory();
-        }, 1000);
-        return () => clearTimeout(time);
-    }, [fetchCategory,searchValue]);
+    useEffect(() => {
+        if (searchType === 'category' || searchType === '') {
+            const timer = setTimeout(() => {
+                fetchCategory();
+            }, 400);
+            return () => clearTimeout(timer);
+        }
+    }, [fetchCategory, searchValue, searchType]);
 
     // xóa phân loại
     const handleDelete = async (id: string) => {
@@ -135,19 +142,22 @@ export default function Category() {
     
     return (
         <div className="p-6 w-full">
-          <TitleSearchAdd
-            title={{
-              title: "Danh Mục",
-              search: "Tìm kiếm phân loại...",
-              btn: "Thêm Danh Mục"
-            }}
-            onSearch={(value) => setSearchValue(value)}
-            onAdd={() => {
-                setEditCategory(null)
-                setName("")
-                setIsOpen(true)
-            }}
-          />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-border mb-4 gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+              <Button
+                color="primary"
+                className="h-[40px] font-medium w-full sm:w-auto"
+                startContent={<Plus size={18} />}
+                onClick={() => {
+                  setIsOpen(true)
+                  setEditCategory(null)
+                  setName("")
+                }}
+              >
+                Thêm danh mục
+              </Button>
+            </div>
+          </div>
 
             { loading ? <Loading/>: <RenderTable data={category as any  } handleDelete={handleDelete} handleEdit={handleEdit} totalPage={totalPage} currentPage={currentPage} setCurrentPage={setCurrentPage} title="danh mục"/>}
             {/* modal thêm sửa danh mục */}

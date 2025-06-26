@@ -109,7 +109,7 @@ function parseAuthToken(request: NextRequest): AuthResult {
  * Check if path matches any patterns in the given array
  */
 function matchesPath(pathname: string, paths: readonly string[]): boolean {
-  return paths.some(path => pathname.startsWith(path) || pathname.includes(path));
+  return paths.some(path => pathname === path);
 }
 
 /**

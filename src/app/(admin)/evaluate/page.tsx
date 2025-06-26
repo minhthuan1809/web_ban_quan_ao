@@ -1,6 +1,5 @@
 "use client"
 import { getReviews_API, updateAnswer_API } from '@/app/_service/Evaluate';
-import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
 import React, { useEffect, useState } from 'react'
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, User, Chip, Tooltip, Button, Pagination, Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Input } from "@nextui-org/react";
 import { Star, MessageCircle, Send } from 'lucide-react';
@@ -27,6 +26,7 @@ export default function EvaluatePage() {
     const [reload, setReload] = useState<boolean>(false);
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [answerId, setAnswerId] = useState<number>(0);
+    const { accessToken } = useAuthInfor();
     useEffect(() => {
         const fetchEvaluate = async () => {
             setLoading(true);
@@ -63,12 +63,12 @@ export default function EvaluatePage() {
 
     const handleSubmitReply = async () => {
         const data ={
-            userId: userInfo?.id,
+            userId: user?.id,
             answer: replyText,
             images: [],
             reviewId: selectedReview?.id
           } 
-        const res = await createAnswer_API(data);
+        const res = await createAnswer_API(data, accessToken || "");
         if(res.status === 200){
             toast.success(isEditing ? "Sửa phản hồi thành công" : "Trả lời đánh giá thành công");
             setIsReplyModalOpen(false);
@@ -80,6 +80,8 @@ export default function EvaluatePage() {
             setReplyText('');
         }
     };
+
+    
     const handleUpdateAnswer = async (id: number) => {
         const data ={
             userId: user?.id,
@@ -87,7 +89,7 @@ export default function EvaluatePage() {
             images: [],
             reviewId: selectedReview?.id
           } 
-        const res = await updateAnswer_API(id, data);
+        const res = await updateAnswer_API(id, data, accessToken || "");
         if(res.status === 200){
             toast.success("Sửa phản hồi thành công");
             setIsReplyModalOpen(false);
@@ -217,13 +219,7 @@ export default function EvaluatePage() {
 
     return (
         <div className='p-4'>
-            <TitleSearchAdd
-                title={{
-                    title: "Đánh Giá",
-                    search: "Tìm kiếm đánh giá...",
-                }}
-                onSearch={(value) => setSearchValue(value)}
-            />
+        
 
             {loading ? (
                 <EvaluateSkeleton />

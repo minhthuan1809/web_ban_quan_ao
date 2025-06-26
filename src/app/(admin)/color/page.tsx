@@ -1,7 +1,6 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { Button, Card, CardBody, Pagination, Input, Modal, ModalContent, ModalFooter, ModalHeader } from "@nextui-org/react"
-import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd'
 import { ModalBody } from '@nextui-org/react'
 import useAuthInfor from '@/app/customHooks/AuthInfor'
 import { toast } from 'react-toastify'
@@ -11,6 +10,8 @@ import Modal_addEditColor from './Modal_addEditColor'
 import { EditIcon, PencilIcon, TrashIcon } from 'lucide-react'
 import showConfirmDialog from '@/app/_util/Sweetalert2'
 import { ColorSkeleton } from '../_skeleton'
+import { Plus } from 'lucide-react'
+import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore'
 
 interface ColorData {
   id: number;
@@ -34,7 +35,7 @@ interface Metadata {
 
 export default function page() {
   const [color, setColor] = useState<ColorData[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
+  const { search: searchValue, type: searchType } = useAdminSearchStore()
   const [isOpen, setIsOpen] = useState(false)
   const [name, setName] = useState("")
   const [code, setCode] = useState("")
@@ -54,32 +55,33 @@ export default function page() {
   const [loading, setLoading] = useState(false)
   const { accessToken } = useAuthInfor()
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    if (!accessToken) return;
+    setLoading(true);
     try {
-      setLoading(true)
-      const res = await GetAllColor_API(searchQuery, currentPage, accessToken)
-      setColor(res.data)
-      setMetadata(res.metadata)
-    } catch (error: any) {
-      toast.error(error.message || 'Có lỗi xảy ra')
+      const res = await GetAllColor_API(searchValue || "", currentPage, accessToken || "");
+      setColor(res.data);
+      setMetadata(res.metadata);
+    } catch (err: any) {
+      toast.error(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  }, [searchValue, currentPage, accessToken]);
 
   useEffect(() => {
-    if (accessToken) {
+    if (searchType === 'color' || searchType === '') {
       const timer = setTimeout(() => {
-        fetchData()
-      }, 500)
-      return () => clearTimeout(timer)
+        fetchData();
+      }, 400);
+      return () => clearTimeout(timer);
     }
-  }, [searchQuery, currentPage, accessToken])
+  }, [fetchData, searchType]);
 
   const handleAddSize = async () => {
     try {
       setLoadingBtn(true)
-      const res = await addColor_API(name, code, accessToken)
+      const res = await addColor_API(name, code, accessToken || "")
       if (res.status === 200) {
         toast.success('Thêm màu sắc thành công')
         setIsOpen(false)
@@ -106,7 +108,7 @@ export default function page() {
     if (result.isConfirmed) {
             try {
         setLoadingBtn(true)
-        const res = await DeleteColor_API(id, accessToken)
+        const res = await DeleteColor_API(id, accessToken || "")
         if (res.status === 204 ) {
           toast.success('Xóa màu sắc thành công')
           fetchData()
@@ -132,7 +134,7 @@ export default function page() {
   const handleEditSize = async () => {
     try {
       setLoadingBtn(true)
-      const res = await updateColor_API(editColor?.id.toString() || "", name, code, accessToken)
+      const res = await updateColor_API(editColor?.id.toString() || "", name, code, accessToken || "")
       if (res.status === 200) {
         toast.success('Sửa màu sắc thành công')
         setIsOpen(false)
@@ -153,20 +155,22 @@ export default function page() {
   return (
     <div className="p-4">
       <Card className="shadow-sm border border-border rounded-lg bg-background">
-        <TitleSearchAdd 
-          title={{
-            title: "Quản lý màu sắc",
-            search: "Tìm kiếm màu sắc...",
-            btn: "Thêm màu sắc"
-          }}
-          onSearch={(value) => setSearchQuery(value)}
-          onAdd={() => {
-            setEditColor(null)
-            setName("")
-            setCode("")
-            setIsOpen(true)
-          }}
-        />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-border mb-4 gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            <Button
+              color="primary"
+              className="h-[40px] font-medium w-full sm:w-auto"
+              startContent={<Plus size={18} />}
+              onClick={() => {
+                setIsOpen(true)
+                setEditColor(null)
+                setName("")
+              }}
+            >
+              Thêm màu sắc
+            </Button>
+          </div>
+        </div>
         <CardBody>
           {loading ? (
             <ColorSkeleton />

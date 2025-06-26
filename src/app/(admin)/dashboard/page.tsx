@@ -287,18 +287,7 @@ export default function DashboardPage() {
                 <span>Hôm nay</span>
               </div>
             } />
-            <Tab key="month" title={
-              <div className="flex items-center space-x-2">
-                <BarChart3 className="w-4 h-4" />
-                <span>Tháng này</span>
-              </div>
-            } />
-            <Tab key="year" title={
-              <div className="flex items-center space-x-2">
-                <PieChart className="w-4 h-4" />
-                <span>Năm nay</span>
-              </div>
-            } />
+          
           </Tabs>
         </CardBody>
       </Card>

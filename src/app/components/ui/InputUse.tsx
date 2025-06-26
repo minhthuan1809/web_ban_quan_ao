@@ -43,7 +43,7 @@ export default function InputUse({ setUse, use }: any) {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true)
-      const res = await getUserById_API(accessToken)
+      const res = await getUserById_API(accessToken || "")
       
       setUseList(res.data.data)
     } catch (error: any) {
