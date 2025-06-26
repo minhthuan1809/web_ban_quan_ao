@@ -93,21 +93,22 @@ const handlePayment = async () => {
 
   if(paymentMethod === 6 ) {
     const res = await createOrderWithPaymentMethod6_API(calculateTotalAfterDiscount(), userInfo?.id || 0, accessToken);
-    if(res.status === 200) {
-      try {
-        const res = await createOrder_API(orderData , userInfo?.id || 0, accessToken);
-        if (res.status === 200) {
-          router.push(res.data); 
-        } else {
-          toast.error("Có lỗi xảy ra khi đặt hàng");
-        }
-      } catch (error) {
-        console.error("Lỗi đặt hàng:", error);
-        toast.error("Có lỗi xảy ra khi đặt hàng");
-      }
-    } else {
-      toast.error("Có lỗi xảy ra khi đặt hàng");
-    }
+    router.push(res.data);
+    // if(res.status === 200) {
+    //   try {
+    //     const res = await createOrder_API(orderData , userInfo?.id || 0, accessToken);
+    //     if (res.status === 200) {
+    //       router.push(res.data); 
+    //     } else {
+    //       toast.error("Có lỗi xảy ra khi đặt hàng");
+    //     }
+    //   } catch (error) {
+    //     console.error("Lỗi đặt hàng:", error);
+    //     toast.error("Có lỗi xảy ra khi đặt hàng");
+    //   }
+    // } else {
+    //   toast.error("Có lỗi xảy ra khi đặt hàng");
+    // }
   } else {
     try {
       const res = await createOrder_API(orderData , userInfo?.id || 0, accessToken);
