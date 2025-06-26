@@ -32,8 +32,9 @@ export default function InputCategoryteam({
         if (!accessToken) return;
         try {
           setLoading(true);
+          const search = typeof searchValue === 'string' ? searchValue : '';
           const response = await getTeam_API({
-            search: searchValue,
+            search,
             page: currentPage + 1, // API expects 1-based pagination
             pageSize: limit,
             sort: "createdAt:desc",

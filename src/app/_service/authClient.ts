@@ -82,6 +82,17 @@ export interface ChangePasswordRequest {
   confirmPassword: string;
 }
 
+export interface UpdateProfileRequest {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  district?: string;
+  ward?: string;
+  avatarUrl?: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+}
+
 // Auth Service Class
 export class AuthService {
   /**
@@ -233,12 +244,14 @@ export class AuthService {
   /**
    * Reset password
    */
-  static async resetPassword(data: ResetPasswordRequest): Promise<AxiosResponse<any>> {
+  static async resetPassword(token: string, newPassword: string): Promise<AxiosResponse<string>> {
     try {
-      const { token, newPassword } = data;
-      const response = await authApiClient.post(
-        `/auth/reset-password?token=${encodeURIComponent(token)}&newPassword=${encodeURIComponent(newPassword)}`
-      );
+      const response = await authApiClient.post('/auth/reset-password', null, {
+        params: {
+          token: token,
+          newPassword: newPassword
+        }
+      });
       return response;
     } catch (error) {
       console.error('Reset password failed:', error);
@@ -260,6 +273,36 @@ export class AuthService {
     } catch (error) {
       console.error('Change password failed:', error);
       throw new Error('Không thể thay đổi mật khẩu');
+    }
+  }
+
+  /**
+   * Update user profile
+   */
+  static async updateProfile(data: UpdateProfileRequest, accessToken: string): Promise<AxiosResponse<AuthUser>> {
+    try {
+      const response = await authApiClient.put('/auth/update-profile', data, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+        },
+      });
+      
+      // Update stored user info if successful
+      if (typeof window !== 'undefined' && response.data) {
+        const userInfo = JSON.stringify(response.data);
+        localStorage.setItem('user', userInfo);
+        setCookie('user', userInfo, {
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/'
+        });
+      }
+      
+      return response;
+    } catch (error) {
+      console.error('Update profile failed:', error);
+      throw new Error('Không thể cập nhật thông tin cá nhân');
     }
   }
 
@@ -340,7 +383,11 @@ export const authGetUserInfo_API = (accessToken: string) => AuthService.getUserI
 export const authLogout_API = (accessToken: string) => AuthService.logout(accessToken);
 export const authForgotPassword_API = (email: string) => AuthService.forgotPassword(email);
 export const authResetPassword_API = (token: string, password: string) => 
-  AuthService.resetPassword({ token, newPassword: password, confirmPassword: password });
+  AuthService.resetPassword(token, password);
+export const authUpdateProfile_API = (data: UpdateProfileRequest, accessToken: string) => 
+  AuthService.updateProfile(data, accessToken);
+export const authChangePassword_API = (data: ChangePasswordRequest, accessToken: string) => 
+  AuthService.changePassword(data, accessToken);
 
 // Export the API client
 export { authApiClient };

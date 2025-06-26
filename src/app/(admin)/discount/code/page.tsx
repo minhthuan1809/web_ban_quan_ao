@@ -4,9 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Button, Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip, Pagination, Spinner, Switch } from "@nextui-org/react";
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
-import { Pencil, Trash } from 'lucide-react';
-import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
-import Loading from '@/app/_util/Loading';
+import { Pencil, Trash, Plus } from 'lucide-react';
 import { toast } from 'react-toastify';
 import ModalAddEditDiscount from './ModalAddEditDiscount';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
@@ -43,7 +41,11 @@ export default function Code() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
+<<<<<<< HEAD
   const [total, setTotal] = useState<number>(1);
+=======
+  const [total, setTotal] = useState<number>(0);
+>>>>>>> 2c6b65deb3c2dc4f46adc89cb3adf563d96de6f2
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null);  
@@ -136,18 +138,21 @@ export default function Code() {
   
   return (
     <div className="p-6">
-          <TitleSearchAdd 
-          title={{
-            title: "Quản lý mã giảm giá",
-            search: "Tìm kiếm mã giảm giá...",
-            btn: "Thêm mã giảm giá"
-          }}
-            onSearch={(value) => setSearchQuery(value)}
-            onAdd={() => {
-              setEditCoupon(null);
-              setIsOpen(true);
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-border mb-4 gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+          <Button
+            color="primary"
+            className="h-[40px] font-medium w-full sm:w-auto"
+            startContent={<Plus size={18} />}
+            onClick={() => {
+              setIsOpen(true)
+              setEditCoupon(null)
             }}
-        />
+          >
+            Thêm mã giảm giá
+          </Button>
+        </div>
+      </div>
 
       {loading ? (
       <DiscountSkeleton />

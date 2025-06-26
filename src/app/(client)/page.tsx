@@ -4,18 +4,30 @@ import Slide from "../components/Slide";
 import ChooseCategoryHeader from "../components/category/ChooseCategoryHeader";
 import { getProducts_API } from "../_service/products";
 import ProductCarousel from "../components/category/ProductCarousel";
+import { HomeSkeleton } from "./_skeleton";
 
 export default function HomePage() {
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
 useEffect(() => {
   const fetchReviews = async () => {
+    try {
+      setLoading(true);
     const response = await getProducts_API('', 1, 10, {});
     setData(response.data.data);
+    } catch (error) {
+      console.error('Error fetching products:', error);
+    } finally {
+      setLoading(false);
+    }
   }
   fetchReviews();
 }, []);
 
+  if (loading) {
+    return <HomeSkeleton />;
+  }
 
   return (
     <main className="min-h-screen bg-background text-foreground">

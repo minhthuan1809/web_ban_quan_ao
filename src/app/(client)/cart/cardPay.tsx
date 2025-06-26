@@ -86,7 +86,8 @@ const handlePayment = async () => {
     "shippingCity": address.city.cityName,
     "note": note,
     "couponCode": discountCode.code,
-    "items": orderItems
+    "items": orderItems,
+    "isAdmin": false
   };
 
 

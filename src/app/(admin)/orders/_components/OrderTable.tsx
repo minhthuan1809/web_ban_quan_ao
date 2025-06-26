@@ -1,10 +1,9 @@
   "use client"
 
   import { getOrder_API, updateOrderStatus_API } from '@/app/_service/Oder';
-  import { Eye } from 'lucide-react'
+  import { Eye, PackageX } from 'lucide-react'
   import React, { useCallback, useEffect, useState } from 'react'
   import { format } from 'date-fns';
-  import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd';
   import Loading from '@/app/_util/Loading';
   import { Pagination } from '@nextui-org/react';
   import useAuthInfor from '@/app/customHooks/AuthInfor';
@@ -35,7 +34,7 @@
 
 
 
-  export default function OrderTable({ title, showStatusActions = true, mode }: OrderTableProps) {    
+  export default function OrderTable({ showStatusActions = true, mode }: OrderTableProps) {    
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
@@ -47,6 +46,11 @@
     const { accessToken } = useAuthInfor();
 
     const fetchOrders = useCallback(async (loading = true) => {
+      if (!accessToken) {
+        setLoading(false);
+        return;
+      }
+
       setLoading(loading);
       try {
         const res = await getOrder_API(page, searchQuery, accessToken);
@@ -78,23 +82,25 @@
       } finally {
         setLoading(false);
       }
-    }, []); 
+    }, [page, searchQuery, accessToken, mode]); 
 
     useEffect(() => {
       const timer = setTimeout(() => {
         fetchOrders(true);
-      }, 500);
+      }, accessToken ? 100 : 1000); // Wait longer if no token
       return () => clearTimeout(timer);
-    }, [page, mode , searchQuery]);
+    }, [page, mode, searchQuery, accessToken]);
 
 
     // chứ 2000 call api 1 lần 
     useEffect(() => {
+      if (!accessToken) return; // Don't start interval without token
+      
       const interval = setInterval(() => {
         fetchOrders(false);
       }, 2000);
       return () => clearInterval(interval);
-    }, [page, mode , searchQuery]);
+    }, [fetchOrders, accessToken]);
 
     const toggleOrderDetails = (orderId: number) => {
       setExpandedOrder(expandedOrder === orderId ? null : orderId);
@@ -128,19 +134,14 @@
 
     return (
       <div className='mx-auto px-2 sm:px-4 py-4 sm:py-8'>
-        <TitleSearchAdd
-          title={{
-            title: title,
-            search: "Tìm kiếm đơn hàng...",
-          }}
-          onSearch={(value) => setSearchQuery(value)}
-          onAdd={() => {}}  
-        />
-
         {loading ? (
           <Loading />
         ) : orders.length === 0 ? (
-          <div className="text-center py-10">Không có đơn hàng nào</div>
+          <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+            <PackageX className="w-16 h-16 mb-3 text-gray-300" />
+            <div className="text-lg font-semibold">Không có đơn hàng nào</div>
+            <div className="text-sm text-gray-400">Hãy thêm đơn hàng mới để bắt đầu quản lý!</div>
+          </div>
         ) : (
           <div className="overflow-x-auto">
             {/* Bảng cho màn hình lớn */}

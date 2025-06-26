@@ -1,7 +1,7 @@
 "use client"
-import { getUserById_API, deleteUser_API } from '@/app/_service/user';
+import { searchUsers_API, deleteUser_API } from '@/app/_service/user';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import {
   Table, TableHeader, TableColumn, TableBody, TableRow, TableCell,
   Button, Avatar, Card, Badge, Chip, Skeleton, Input, Dropdown, 
@@ -9,13 +9,15 @@ import {
 } from "@nextui-org/react";
 import { 
   User, UserPlus, Edit3, Trash2, Users, Search, Filter, 
-  MoreVertical, Shield, ShieldCheck, Mail, Phone, MapPin 
+  MoreVertical, Shield, ShieldCheck, Mail, Phone, MapPin, Plus,
+  ChevronDown
 } from 'lucide-react';
 import Loading from '@/app/_util/Loading';
 import { toast } from 'react-toastify';
 import ModalAddUse from './ModalAddUse';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
 import { CustomerSkeleton } from '../_skeleton';
+import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore';
 
 interface UserData {
   id: number;
@@ -57,30 +59,54 @@ export default function PageUser() {
   const { accessToken } = useAuthInfor();
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [editUser, setEditUser] = useState<UserData | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [filterRole, setFilterRole] = useState<'all' | '1' | '2'>('all');
   const [reload, setReload] = useState(false);
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const { search: searchQuery, type: searchType, setType } = useAdminSearchStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalPage, setTotalPage] = useState(1);
 
   // Fetch users
   const fetchUsers = useCallback(async () => {
     if (!accessToken) return;
     setLoading(true);
     try {
-      const res = await getUserById_API(accessToken);
-      setUsers(res.data as any);
-    } catch (error) {
-      toast.error('Lỗi tải danh sách người dùng!');
+      const response = await searchUsers_API(accessToken, {
+        search: searchQuery,
+        page: currentPage,
+        limit: limit
+      });
+      setUsers({ data: response.data.data });
+      setTotalPage((response.data as any)?.pagination?.totalPages || 1);
+    } catch (err: any) {
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
-  }, [accessToken]);
+  }, [accessToken, currentPage, limit, reload, searchQuery]);
 
+  // Set type khi vào trang customers
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers, reload]);
+    setType('user');
+  }, [setType]);
+
+  // Debounce search
+  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    // Chỉ call API khi type là 'user' hoặc rỗng
+    if (searchType === 'user' || searchType === '') {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        fetchUsers();
+      }, 400);
+    }
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [fetchUsers, reload, searchQuery, searchType]);
 
   // Filtered users
   const filteredUsers = useMemo(() => {
@@ -118,7 +144,7 @@ export default function PageUser() {
       district: user.district,
       ward: user.ward,
       gender: user.gender,
-      roleId: user.roleId
+      roleId: user.roleId ?? 1
     });
     setShowModal(true);
   }, []);
@@ -166,72 +192,18 @@ export default function PageUser() {
 
   return (
     <div className="p-4 md:p-6 space-y-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
-      {/* Header */}
-      <Card className="p-6 shadow-xl border-0 bg-white/70 backdrop-blur-md hover:shadow-2xl transition-all duration-300">
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-              <Users className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                Quản lý người dùng
-              </h1>
-              <p className="text-gray-600 font-medium">
-                Tổng cộng <span className="font-bold text-blue-600">{users?.metadata?.total || 0}</span> người dùng
-              </p>
-            </div>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Tìm kiếm người dùng..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                startContent={<Search className="w-4 h-4 text-gray-400" />}
-                className="w-full sm:w-64"
-                variant="bordered"
-                size="sm"
-              />
-              
-              <Dropdown>
-                <DropdownTrigger>
-                  <Button
-                    variant="bordered"
-                    size="sm"
-                    startContent={<Filter className="w-4 h-4" />}
-                    className="min-w-unit-20"
-                  >
-                    Lọc
-                  </Button>
-                </DropdownTrigger>
-                <DropdownMenu
-                  selectedKeys={[filterRole]}
-                  onSelectionChange={(keys) => setFilterRole(Array.from(keys)[0] as any)}
-                  selectionMode="single"
-                >
-                  {FILTER_OPTIONS.map(option => (
-                    <DropdownItem key={option.key}>{option.label}</DropdownItem>
-                  ))}
-                </DropdownMenu>
-              </Dropdown>
-            </div>
-            
-            <Button 
-              color="primary"
-              onPress={handleAdd}
-              startContent={<UserPlus className="w-4 h-4" />}
-              className="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
-              size="sm"
-            >
-              Thêm người dùng
-            </Button>
-          </div>
-        </div>
-      </Card>
-
       {/* Mobile View */}
+
+      <div>
+        <Button
+          color="primary"
+          variant="flat"
+          onPress={handleAdd}
+          startContent={<Plus className="w-4 h-4" />}
+        >
+          Thêm người dùng
+        </Button>
+      </div>
       <div className="block lg:hidden space-y-4">
         {filteredUsers.map((user: UserData) => {
           const roleConfig = getRoleConfig(user.roleId);

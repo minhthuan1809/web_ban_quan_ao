@@ -37,6 +37,7 @@ import {
 } from 'lucide-react';
 import { Avatar, Button, Tooltip, Dropdown, DropdownTrigger, DropdownMenu, DropdownItem } from '@nextui-org/react';
 import { toast } from 'react-toastify';
+import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore';
 
 interface MenuItem {
   name: string;
@@ -173,6 +174,40 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
     const { user_Zustand, setUser_Zustand } = useUserStore();
     const { accessToken, user, clearAuthData } = useAuthInfor();
     const [isLoading, setIsLoading] = useState(true);
+    const [title, setTitle] = useState('Dashboard');
+    const { resetSearch } = useAdminSearchStore();
+
+   
+
+    // Map tiếng Anh sang tiếng Việt cho tiêu đề
+    const titleMap: Record<string, string> = {
+      'Dashboard': 'Bảng điều khiển',
+      'Contacts': 'Liên hệ',
+      'Customers': 'Khách hàng',
+      'Products': 'Sản phẩm',
+      'Orders': 'Đơn hàng',
+      'Discount': 'Khuyến mãi',
+      'Category': 'Danh mục',
+      'Team': 'Đội bóng',
+      'Material': 'Chất liệu',
+      'Color': 'Màu sắc',
+      'Size': 'Kích cỡ',
+      'Evaluate': 'Đánh giá',
+      'Chờ Xác Nhận': 'Chờ xác nhận',
+      'Lịch Sử': 'Lịch sử',
+      'Thanh Toán': 'Thanh toán',
+      'Mã Giảm Giá': 'Mã giảm giá',
+      'Phân Loại': 'Phân loại',
+      'Tin Nhắn Mới': 'Tin nhắn mới',
+      'Sửa': 'Sửa',
+      'Thêm': 'Thêm',
+      'Sản Phẩm': 'Sản phẩm',
+      'Khách Hàng': 'Khách hàng',
+      'Đánh Giá': 'Đánh giá',
+      'Khuyến Mãi': 'Khuyến mãi',
+      'Danh Mục': 'Danh mục',
+      'Liên Hệ': 'Liên hệ',
+    };
 
     // Check mobile screen size
     useEffect(() => {
@@ -235,6 +270,34 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
         toast.error('Có lỗi xảy ra khi đăng xuất');
       }
     }, [clearAuthData, setUser_Zustand, router]);
+
+    // Set title on mount or pathname change
+    useEffect(() => {
+      // Tìm menu hoặc submenu khớp với pathname
+      let found = false;
+      for (const item of MENU_ITEMS) {
+        if (item.href && pathname.startsWith(item.href)) {
+          setTitle(item.name);
+          found = true;
+          break;
+        }
+        if (item.submenu) {
+          for (const sub of item.submenu) {
+            if (pathname.startsWith(sub.href)) {
+              setTitle(sub.name);
+              found = true;
+              break;
+            }
+          }
+        }
+        if (found) break;
+      }
+      if (!found) setTitle('Dashboard');
+    }, [pathname, setTitle]);
+
+    // Hook search Zustand ở đầu component
+    const search = useAdminSearchStore(state => state.search);
+    const setSearch = useAdminSearchStore(state => state.setSearch);
 
     // Loading state
     if (isLoading) {
@@ -481,7 +544,7 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
                     {/* Breadcrumb */}
                     <div className="hidden lg:block">
                         <h2 className="text-lg font-semibold text-gray-900 dark:text-white capitalize">
-                            {pathname.split('/').pop()?.replace(/([A-Z])/g, ' $1').trim() || 'Dashboard'}
+                            {titleMap[title] || title}
                         </h2>
                         <p className="text-sm text-gray-500">
                             Quản lý và điều hành hệ thống
@@ -490,9 +553,16 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
 
                     {/* Right Actions */}
                     <div className="flex items-center space-x-4">
-                        <Button isIconOnly variant="light" size="sm">
-                            <Search size={18} />
-                        </Button>
+                        <div className="relative w-48">
+                          <input
+                            type="text"
+                            placeholder="Tìm kiếm..."
+                            className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                          />
+                          <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                        </div>
                         
                         <div className="relative">
                             <Button isIconOnly variant="light" size="sm">

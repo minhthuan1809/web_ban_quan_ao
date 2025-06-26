@@ -40,7 +40,6 @@ interface ProductEvaluation {
   hoveredStar: number;
 }
 
-const { userInfo } = useAuthInfor();
 const ratingLabels = {
   1: "Rất không hài lòng",
   2: "Không hài lòng", 
@@ -50,6 +49,7 @@ const ratingLabels = {
 };
 
 export default function ModalEvaluate({ isOpen, onClose, dataOrder}: ModalEvaluateProps) {
+  const { user: userInfo } = useAuthInfor();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [evaluations, setEvaluations] = useState<ProductEvaluation[]>(
     dataOrder.orderItems.map(() => ({

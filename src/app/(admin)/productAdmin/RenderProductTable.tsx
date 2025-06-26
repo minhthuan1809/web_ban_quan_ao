@@ -79,24 +79,7 @@ export default function RenderProductTable({
 
   return (
     <div className="mx-auto px-2 sm:px-6 py-4 sm:py-6">
-      {/* Search Bar */}
-      <div className="bg-card rounded-lg shadow-sm border border-border p-3 sm:p-4 mb-4 sm:mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
-          <div className="w-full sm:flex-1">
-            <Input
-              type="text"
-              placeholder="Tìm kiếm sản phẩm..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              startContent={<Search className="text-default-400" size={20} />}
-              className="w-full"
-            />
-          </div>
-          <div className="text-sm text-muted-foreground mt-2 sm:mt-0">
-            Hiển thị {products.length} sản phẩm
-          </div>
-        </div>
-      </div>
+     
 
       {/* Products Table */}
       <div className="bg-card rounded-lg shadow-sm border border-border overflow-hidden">
@@ -533,7 +516,7 @@ export default function RenderProductTable({
       </div>
 
       {/* Pagination */}
-      {!loading && products.length > 1 && (
+      {!loading && totalPage > 1 && (
         <div className="flex justify-center mt-4 sm:mt-6">
           <Pagination
             isCompact

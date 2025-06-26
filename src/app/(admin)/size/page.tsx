@@ -1,14 +1,16 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { addSize_API, DeleteSize_API, GetAllSize_API, updateSize_API } from '@/app/_service/size'
 import { Card, CardBody } from "@nextui-org/react"
-import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd'
 import ModalAdd_Edit_Category_Material from '../_modal/ModalAdd_Edit_Category_Material'
 import useAuthInfor from '@/app/customHooks/AuthInfor'
 import { toast } from 'react-toastify'
 import RenderTable from '../_conponents/RenderTable'
 import showConfirmDialog from '@/app/_util/Sweetalert2'
 import { SizeSkeleton } from '../_skeleton'
+import { Button } from "@nextui-org/react"
+import { Plus } from "lucide-react"
+import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore'
 
 interface SizeData {
   id: number;
@@ -31,7 +33,7 @@ interface Metadata {
 
 export default function page() {
   const [size, setSize] = useState<SizeData[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
+  const { search: searchValue, type: searchType } = useAdminSearchStore()
   const [isOpen, setIsOpen] = useState(false)
   const [name, setName] = useState("")
   const [loadingBtn, setLoadingBtn] = useState(false)
@@ -50,32 +52,33 @@ export default function page() {
   const [loading, setLoading] = useState(false)
   const { accessToken } = useAuthInfor()
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
+    if (!accessToken) return;
+    setLoading(true);
     try {
-      setLoading(true)
-      const res = await GetAllSize_API(searchQuery, currentPage, accessToken)
-      setSize(res.data)
-      setMetadata(res.metadata)
-    } catch (error: any) {
-      toast.error(error.message || 'Có lỗi xảy ra')
+      const res = await GetAllSize_API(searchValue || "", currentPage, accessToken || "");
+      setSize(res.data);
+      setMetadata(res.metadata);
+    } catch (err: any) {
+      toast.error(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  }, [searchValue, currentPage, accessToken]);
 
   useEffect(() => {
-    if (accessToken) {
+    if (searchType === 'size' || searchType === '') {
       const timer = setTimeout(() => {
-        fetchData()
-      }, 500)
-      return () => clearTimeout(timer)
+        fetchData();
+      }, 400);
+      return () => clearTimeout(timer);
     }
-  }, [searchQuery, currentPage, accessToken])
+  }, [fetchData, searchType]);
 
   const handleAddSize = async () => {
     try {
       setLoadingBtn(true)
-      const res = await addSize_API(name, accessToken)
+      const res = await addSize_API(name, accessToken || "")
       if (res.status === 200) {
         toast.success('Thêm kích cỡ thành công')
         setIsOpen(false)
@@ -101,7 +104,7 @@ export default function page() {
     if (result.isConfirmed) {
         try {
       setLoadingBtn(true)
-      const res = await DeleteSize_API(id, accessToken)
+      const res = await DeleteSize_API(id, accessToken || "")
       if (res.status === 204 ) {
         toast.success('Xóa kích cỡ thành công')
         fetchData()
@@ -125,7 +128,7 @@ export default function page() {
   const handleEditSize = async () => {
     try {
       setLoadingBtn(true)
-      const res = await updateSize_API(editSize?.id.toString() || "", name, accessToken)
+      const res = await updateSize_API(editSize?.id.toString() || "", name, accessToken || "")
       if (res.status === 200) {
         toast.success('Sửa kích cỡ thành công')
         setIsOpen(false)
@@ -145,19 +148,22 @@ export default function page() {
   return (
     <div className="p-4">
       <Card className="shadow-sm border border-border rounded-lg bg-background">
-        <TitleSearchAdd 
-          title={{
-            title: "Quản lý kích cỡ",
-            search: "Tìm kiếm kích cỡ...",
-            btn: "Thêm kích cỡ"
-          }}
-          onSearch={(value) => setSearchQuery(value)}
-          onAdd={() => {
-            setEditSize(null)
-            setName("")
-            setIsOpen(true)
-          }}
-        />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-b border-border mb-4 gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+            <Button
+              color="primary"
+              className="h-[40px] font-medium w-full sm:w-auto"
+              startContent={<Plus size={18} />}
+              onClick={() => {
+                setIsOpen(true)
+                setEditSize(null)
+                setName("")
+              }}
+            >
+              Thêm kích cỡ
+            </Button>
+          </div>
+        </div>
         <CardBody>
           {loading ? (
             <SizeSkeleton />

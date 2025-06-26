@@ -27,14 +27,15 @@ export default function InputMateria({ setMaterial, material }: { setMaterial: (
   const fetchMaterial = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getmaterial_API(
-        searchTerm,
-        1,
-        10,
-        "",
-        ""
-      );
-      setMaterialList(response.data.reverse());
+      const search = typeof searchTerm === 'string' ? searchTerm : '';
+      const response = await getmaterial_API({
+        search,
+        page: 1,
+        pageSize: 10,
+        sort: "createdAt:desc",
+        filter: ""
+      });
+      setMaterialList(response.data.reverse() as unknown as Material[]);
     } catch (err: any) {
       toast.error(err.message);
     } finally {

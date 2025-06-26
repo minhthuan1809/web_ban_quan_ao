@@ -1,13 +1,10 @@
 "use client"
-import TitleSearchAdd from '@/app/components/ui/TitleSearchAdd'
 import React, { useState, useEffect }  from 'react'
 import { Table, TableHeader, TableColumn, TableBody, TableRow, TableCell, Chip, Button } from "@nextui-org/react";
 import { Eye } from "lucide-react";
 import showConfirmDialog from "@/app/_util/Sweetalert2";
 
 export default function HistoryPay() {
-    const [searchValue, setSearchValue] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
     
     // Dữ liệu giả
     const fakePaymentHistory = [
@@ -86,14 +83,8 @@ export default function HistoryPay() {
     };
 
     return (
-        <div className="w-full">
-            <TitleSearchAdd 
-                title={{
-                    title: "Lịch sử chuyển tiền",
-                    search: "Tìm kiếm lịch sử chuyển tiền...",
-                }}  
-                onSearch={(value) => setSearchValue(value)}
-            />
+        <div className="w-full p-4">
+         
             <Table
                 aria-label="Bảng lịch sử chuyển tiền"
             >

@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Plus } from 'lucide-react';
 import { deleteProduct_API, getProducts_API } from '@/app/_service/products';
 import { toast } from 'react-toastify';
@@ -7,6 +7,7 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import RenderProductTable from './RenderProductTable';
 import ModalAdd_Edit_Product from '../_modal/ModalAdd_Edit_Product';
 import { ProductSkeleton } from '../_skeleton';
+import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore';
 
 export default function ProductPage() {
   const { accessToken } = useAuthInfor()
@@ -18,54 +19,50 @@ export default function ProductPage() {
   const [limit, setLimit] = useState(30)
   const [isRefetch, setIsRefetch] = useState(false)
   const [edit, setEdit] = useState(false)
-  const [searchTerm, setSearchTerm] = useState("")
+  const { search: searchValue, type: searchType } = useAdminSearchStore();
   const [totalPage, setTotalPage] = useState(0)
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      setLoading(true);
-      try {
-        const response = await getProducts_API(searchTerm, page, limit, {})
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await getProducts_API(searchValue, page, limit, {})
+      
+      if (response.status === 200) {
+        const processedData = response.data.data.map((product: any) => {
+          return {
+            ...product,
+            categoryName: product.category?.name || 'Không có',
+            materialName: product.material?.name || 'Không có',
+            teamName: product.team?.name || 'Không có',
+            variants: Array.isArray(product.variants) ? product.variants.map((variant: any) => ({
+              ...variant,
+              size: variant.size || '',
+              color: variant.color || ''
+            })) : []
+          };
+        });
         
-        if (response.status === 200) {
-          // Đảm bảo dữ liệu được xử lý đúng cách trước khi hiển thị
-          const processedData = response.data.data.map((product: any) => {
-            // Đảm bảo tất cả các đối tượng phức tạp được chuyển đổi thành chuỗi khi cần hiển thị
-            return {
-              ...product,
-              // Xử lý các trường có thể gây lỗi React khi hiển thị
-              categoryName: product.category?.name || 'Không có',
-              materialName: product.material?.name || 'Không có',
-              teamName: product.team?.name || 'Không có',
-              // Đảm bảo biến thể được xử lý đúng
-              variants: Array.isArray(product.variants) ? product.variants.map((variant: any) => {
-                return {
-                  ...variant,
-                  size: variant.size || '',
-                  color: variant.color || ''
-                };
-              }) : []
-            };
-          });
-          
-          setProducts(processedData.reverse())
-          setTotalPage((response.data as any).metadata?.total_page || 1)
-        } else {
-          toast.error("Đã có lỗi xảy ra !")
-        }
-      } catch (error) {
-        console.error("Lỗi khi tải sản phẩm:", error);
-        toast.error("Đã có lỗi xảy ra khi tải dữ liệu!")
-      } finally {
-        setLoading(false);
+        setProducts(processedData.reverse())
+        setTotalPage((response.data as any).metadata?.total_page || 1)
+      } else {
+        toast.error("Đã có lỗi xảy ra !")
       }
+    } catch (error) {
+      console.error("Lỗi khi tải sản phẩm:", error);
+      toast.error("Đã có lỗi xảy ra khi tải dữ liệu!")
+    } finally {
+      setLoading(false);
     }
-    const timeout = setTimeout(() => {
-      fetchProducts()
-    }, 500)
+  }, [searchValue, page, limit]);
 
-    return () => clearTimeout(timeout)
-  }, [page, limit, isRefetch, searchTerm])
+  useEffect(() => {
+    if (searchType === 'product' || searchType === '') {
+      const timer = setTimeout(() => {
+        fetchProducts();
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [fetchProducts, searchType]);
 
   const handleDeleteProduct = async (product: any) => {
     try {
@@ -75,10 +72,10 @@ export default function ProductPage() {
       }
       const deleteRes = await deleteProduct_API(product.id, accessToken || "");
       if (deleteRes.status === 204) {
-        toast.success("Xóa sản phẩm thành công")
-        setIsRefetch(prev => !prev)
+        toast.success("Xóa sản phẩm thành công");
+        await fetchProducts();
       } else {
-        toast.error("Xóa sản phẩm thất bại")
+        toast.error("Xóa sản phẩm thất bại");
       }
       // xóa ảnh trên severs
       for (const imageUrl of product.imageUrls) {
@@ -120,12 +117,6 @@ export default function ProductPage() {
       <div className="bg-card border-b border-border">
         <div className="mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-semibold text-foreground mb-1">
-                Danh Sách Sản Phẩm
-              </h1>
-              <p className="text-muted-foreground text-sm">Quản lý sản phẩm của bạn</p>
-            </div>
             <button
               onClick={() => setIsOpen(true)}
               className="btn-primary inline-flex items-center gap-2 px-4 py-2"
@@ -144,8 +135,8 @@ export default function ProductPage() {
         handleDeleteProduct={handleDeleteProduct}
         setIsOpen={setIsOpen}
         setEdit={setEdit}
-        setSearchTerm={setSearchTerm}
-        searchTerm={searchTerm}
+        setSearchTerm={() => {}}
+        searchTerm={searchValue}
         totalPage={totalPage}
         onChangePage={setPage}
         currentPage={page}

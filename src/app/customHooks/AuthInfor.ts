@@ -20,12 +20,7 @@ const useAuthInfor = () => {
     const tokenFromStorage = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
     const userFromStorage = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
     
-    console.log('🔍 [AuthInfor] Debug info:', {
-      tokenFromCookie: !!tokenFromCookie,
-      userFromCookie: !!userFromCookie, 
-      tokenFromStorage: !!tokenFromStorage,
-      userFromStorage: !!userFromStorage
-    });
+    
     
     // Nếu không có trong cookies, thử lấy từ localStorage và sync
     if (!tokenFromCookie && typeof window !== 'undefined') {
@@ -41,7 +36,6 @@ const useAuthInfor = () => {
         setAccessToken(tokenFromStorage);
       }
     } else if (tokenFromCookie) {
-      console.log('✅ [AuthInfor] Lấy token từ cookies');
       setAccessToken(tokenFromCookie as string);
     }
 
@@ -58,7 +52,6 @@ const useAuthInfor = () => {
             path: '/'
           });
           setUser(userData);
-          console.log('✅ [AuthInfor] Set user thành công:', userData.email);
         } catch (error) {
           console.error('❌ [AuthInfor] Error parsing user data from localStorage:', error);
           localStorage.removeItem('user');
@@ -67,7 +60,7 @@ const useAuthInfor = () => {
     } else if (userFromCookie) {
       try {
         console.log('✅ [AuthInfor] Lấy user từ cookies');
-        const userData = JSON.parse(userFromCookie as string);
+        const userData = JSON.parse(decodeURIComponent(userFromCookie as string));
         setUser(userData);
         console.log('✅ [AuthInfor] Set user từ cookies thành công:', userData.email);
       } catch (error) {
@@ -125,7 +118,6 @@ const useAuthInfor = () => {
     setUser(null);
     deleteCookie('accessToken');
     deleteCookie('user');
-    deleteCookie('token'); // Clear old token format if exists
   }, []);
 
   // Function để force refresh từ cookies

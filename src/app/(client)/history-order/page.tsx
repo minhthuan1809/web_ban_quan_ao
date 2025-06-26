@@ -6,6 +6,7 @@ import { Pagination } from '@nextui-org/react';
 import OrderLoader from './OrderLoader';
 import OrderTabs from './OrderTabs';
 import OrderItem from './OrderItem';
+import { toast } from 'react-toastify';
 
 interface OrderItem {
   id: number;
@@ -57,37 +58,73 @@ const statusMap = {
 };
 
 export default function HistoryOrderPage() {
-  const { userInfo } = useAuthInfor();
+  const { user: userInfo, accessToken } = useAuthInfor();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchOrders = async (loading: boolean) => {
-      try {
-        setLoading(loading);
-        if (userInfo?.id) {
-          const res = await getOrderById_API(userInfo.id);
-          if (res?.data) {
-            setOrders(res.data);
-            setTotal(res.data.totalPages);
+      useEffect(() => {
+      const fetchOrders = async (showLoading: boolean) => {
+        try {
+          if (showLoading) setLoading(true);
+          setError(null);
+          
+          if (!userInfo?.id) {
+            setError('Không tìm thấy thông tin người dùng');
+            return;
+          }
+
+          if (!accessToken) {
+            setError('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+            return;
+          }
+
+          const res = await getOrderById_API(userInfo.id, accessToken);
+        
+        if (res.status === 200) {
+          if (res.data) {
+            let ordersData = res.data;
+            if (res.data.content && Array.isArray(res.data.content)) {
+              ordersData = res.data.content;
+              setTotal(res.data.totalPages || 1);
+            } else if (Array.isArray(res.data)) {
+              ordersData = res.data;
+              setTotal(1);
+            } else {
+              ordersData = [];
+            }
+            
+            setOrders(ordersData);
           } else {
             setOrders([]);
           }
         } else {
-          setOrders([]);
+          setError(`API trả về lỗi: ${res.status} ${res.statusText}`);
         }
-      } catch (error) {
-        console.error("Lỗi khi lấy dữ liệu đơn hàng:", error);
+      } catch (error: any) {
+        if (error.response?.status === 401) {
+          setError('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+          toast.error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+        } else if (error.response?.status === 404) {
+          setError('Không tìm thấy đơn hàng nào');
+          setOrders([]);
+        } else if (error.response?.status >= 500) {
+          setError('Lỗi máy chủ, vui lòng thử lại sau');
+          toast.error('Lỗi máy chủ, vui lòng thử lại sau');
+        } else {
+          setError(error.message || 'Có lỗi xảy ra khi tải đơn hàng');
+          toast.error('Có lỗi xảy ra khi tải đơn hàng');
+        }
         setOrders([]);
       } finally {
         setLoading(false);
       }
     };
     
-    if (userInfo?.id) {
+    if (userInfo?.id && accessToken) {
       fetchOrders(true);
       
       // Thiết lập interval để gọi API mỗi 2 giây
@@ -99,8 +136,11 @@ export default function HistoryOrderPage() {
       return () => clearInterval(intervalId);
     } else {
       setLoading(false);
+      if (!userInfo) {
+        setError('Vui lòng đăng nhập để xem lịch sử đơn hàng');
+      }
     }
-  }, [userInfo?.id]);
+  }, [userInfo?.id, accessToken]);
 
   // Lọc đơn hàng theo trạng thái
   const filteredOrders = React.useMemo(() => {
@@ -135,51 +175,60 @@ export default function HistoryOrderPage() {
     return <OrderLoader />;
   }
 
-  if (!userInfo?.id) {
-    return (
-      <div className="max-w-6xl mx-auto py-6 px-4 min-h-screen">
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">Vui lòng đăng nhập để xem lịch sử đơn hàng</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-6xl mx-auto py-6 px-4 min-h-screen">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Lịch sử đơn hàng</h1>
         <p className="text-gray-600">Theo dõi và quản lý các đơn hàng của bạn</p>
       </div>
+
+    
       
-      <OrderTabs
-       tabs={orderTabs} activeTab={activeTab} onTabChange={handleTabChange} />
-      
-      {!filteredOrders?.length ? (
+      {error ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">Không tìm thấy đơn hàng nào {activeTab !== 'all' ? 'ở trạng thái này' : ''}</p>
+          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
+            <div className="text-red-600 text-lg font-medium mb-2">Có lỗi xảy ra</div>
+            <p className="text-red-700">{error}</p>
+            <button 
+              onClick={() => window.location.reload()} 
+              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            >
+              Thử lại
+            </button>
+          </div>
         </div>
       ) : (
-        <div className="space-y-6">
-          {filteredOrders.map((order) => (
-            <OrderItem key={order.id} order={order} statusMap={statusMap} />
-          ))}
-        </div>
-      )}
-      
-      {total > 1 && (
-        <div className="flex justify-center mt-8">
-          <Pagination
-            total={total}
-            page={page + 1}
-            onChange={(newPage) => setPage(newPage - 1)}
-            classNames={{
-              wrapper: "gap-0 overflow-visible h-8 rounded-xl border border-divider",
-              item: "w-8 h-8 text-small rounded-none bg-transparent",
-              cursor: "bg-gradient-to-b shadow-lg from-default-500 to-default-800 dark:from-default-300 dark:to-default-100 text-white font-bold",
-            }}
-          />
-        </div>
+        <>
+          <OrderTabs
+           tabs={orderTabs} activeTab={activeTab} onTabChange={handleTabChange} />
+          
+          {!filteredOrders?.length ? (
+            <div className="text-center py-12">
+              <p className="text-gray-500 text-lg">Không tìm thấy đơn hàng nào {activeTab !== 'all' ? 'ở trạng thái này' : ''}</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {filteredOrders.map((order) => (
+                <OrderItem key={order.id} order={order} statusMap={statusMap} />
+              ))}
+            </div>
+          )}
+          
+          {total > 1 && (
+            <div className="flex justify-center mt-8">
+              <Pagination
+                total={total}
+                page={page + 1}
+                onChange={(newPage) => setPage(newPage - 1)}
+                classNames={{
+                  wrapper: "gap-0 overflow-visible h-8 rounded-xl border border-divider",
+                  item: "w-8 h-8 text-small rounded-none bg-transparent",
+                  cursor: "bg-gradient-to-b shadow-lg from-default-500 to-default-800 dark:from-default-300 dark:to-default-100 text-white font-bold",
+                }}
+              />
+            </div>
+          )}
+        </>
       )}
     </div>
   );
