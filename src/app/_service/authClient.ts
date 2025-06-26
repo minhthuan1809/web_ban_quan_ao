@@ -77,9 +77,9 @@ export interface ResetPasswordRequest {
 }
 
 export interface ChangePasswordRequest {
-  currentPassword: string;
+  oldPassword: string;
   newPassword: string;
-  confirmPassword: string;
+  confirmNewPassword: string;
 }
 
 export interface UpdateProfileRequest {
@@ -262,16 +262,22 @@ export class AuthService {
   /**
    * Change password
    */
-  static async changePassword(data: ChangePasswordRequest, accessToken: string): Promise<AxiosResponse<any>> {
+  static async changePassword(data: ChangePasswordRequest, accessToken: string): Promise<AxiosResponse<string>> {
     try {
       const response = await authApiClient.post('/auth/change-password', data, {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
         },
       });
       return response;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Change password failed:', error);
+      if (error.response?.status === 400) {
+        throw new Error('Mật khẩu hiện tại không đúng');
+      } else if (error.response?.status === 401) {
+        throw new Error('Phiên đăng nhập đã hết hạn');
+      }
       throw new Error('Không thể thay đổi mật khẩu');
     }
   }

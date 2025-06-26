@@ -54,7 +54,14 @@ export default function Password() {
 
     setLoading(true);
     try {
-      const response = await authChangePassword_API(formData, accessToken);
+      // Gửi theo API spec: oldPassword, newPassword, confirmNewPassword
+      const requestData = {
+        oldPassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+        confirmNewPassword: formData.confirmPassword
+      };
+      
+      const response = await authChangePassword_API(requestData, accessToken);
       
       if (response.status === 200) {
         toast.success('Đổi mật khẩu thành công!');

@@ -49,7 +49,7 @@ const ratingLabels = {
 };
 
 export default function ModalEvaluate({ isOpen, onClose, dataOrder}: ModalEvaluateProps) {
-  const { user: userInfo } = useAuthInfor();
+  const { user : userInfo, accessToken } = useAuthInfor();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [evaluations, setEvaluations] = useState<ProductEvaluation[]>(
     dataOrder.orderItems.map(() => ({
@@ -78,7 +78,7 @@ export default function ModalEvaluate({ isOpen, onClose, dataOrder}: ModalEvalua
           "isAdmin": true
         }
         
-        const res = await createEvaluate_API(data);
+        const res = await createEvaluate_API(data, accessToken || "");
         if(res.status !== 200) {
           toast.error(`Gửi đánh giá thất bại cho sản phẩm ${item.productName}`);
           return;

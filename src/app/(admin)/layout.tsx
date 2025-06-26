@@ -171,7 +171,7 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
     const [isCollapsed, setIsCollapsed] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const { user_Zustand, setUser_Zustand } = useUserStore();
+    const { user_Zustand, setUser_Zustand, clearUser } = useUserStore();
     const { accessToken, user, clearAuthData } = useAuthInfor();
     const [isLoading, setIsLoading] = useState(true);
     const [title, setTitle] = useState('Dashboard');
@@ -262,14 +262,14 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
     const handleLogout = useCallback(async () => {
       try {
         clearAuthData();
-        setUser_Zustand(null);
+        clearUser(); // Clear Zustand user data
         toast.success('Đăng xuất thành công');
         router.push('/login');
       } catch (error) {
         console.error('Logout error:', error);
         toast.error('Có lỗi xảy ra khi đăng xuất');
       }
-    }, [clearAuthData, setUser_Zustand, router]);
+    }, [clearAuthData, clearUser, router]);
 
     // Set title on mount or pathname change
     useEffect(() => {
