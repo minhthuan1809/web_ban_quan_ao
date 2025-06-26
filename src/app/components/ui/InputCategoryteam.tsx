@@ -32,13 +32,13 @@ export default function InputCategoryteam({
         if (!accessToken) return;
         try {
           setLoading(true);
-          const response = await getTeam_API(
-            searchValue,
-            currentPage,
-            limit,
-            "",
-            ""
-          );
+          const response = await getTeam_API({
+            search: searchValue,
+            page: currentPage + 1, // API expects 1-based pagination
+            pageSize: limit,
+            sort: "createdAt:desc",
+            filter: ""
+          });
           setTeams(response.data.reverse());
         } catch (err: any) {
           toast.error(err.message);

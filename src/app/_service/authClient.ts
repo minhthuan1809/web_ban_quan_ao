@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
+import { setCookie, deleteCookie } from 'cookies-next';
 
 // API Configuration
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -90,15 +91,31 @@ export class AuthService {
     try {
       const response: AxiosResponse<AuthResponse> = await authApiClient.post('/auth/login', credentials);
       
-      // Store tokens securely
+      // Store tokens securely in both localStorage and cookies
       if (typeof window !== 'undefined') {
-        localStorage.setItem('accessToken', response.data.accessToken);
+        const accessToken = response.data.accessToken;
+        const userInfo = JSON.stringify(response.data.userInfo);
+        
+        // Store in localStorage
+        localStorage.setItem('accessToken', accessToken);
+        localStorage.setItem('user', userInfo);
         if (response.data.refreshToken) {
           localStorage.setItem('refreshToken', response.data.refreshToken);
         }
         
-        // Store user info
-        localStorage.setItem('user', JSON.stringify(response.data.userInfo));
+        // Store in cookies for middleware
+        setCookie('accessToken', accessToken, {
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/'
+        });
+        setCookie('user', userInfo, {
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/'
+        });
       }
       
       return response.data;
@@ -176,21 +193,25 @@ export class AuthService {
         },
       });
       
-      // Clear stored data
+      // Clear stored data from both localStorage and cookies
       if (typeof window !== 'undefined') {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
+        deleteCookie('accessToken');
+        deleteCookie('user');
       }
       
       return response;
     } catch (error) {
       console.error('Logout failed:', error);
-      // Even if logout fails, clear local storage
+      // Even if logout fails, clear local storage and cookies
       if (typeof window !== 'undefined') {
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
+        deleteCookie('accessToken');
+        deleteCookie('user');
       }
       throw error;
     }

@@ -13,26 +13,80 @@ const useAuthInfor = () => {
 
   // Khởi tạo từ cookie khi component mount
   useEffect(() => {
+    console.log('🔍 [AuthInfor] Khởi tạo hook...');
     
     const tokenFromCookie = getCookie('accessToken');
     const userFromCookie = getCookie('user');
+    const tokenFromStorage = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+    const userFromStorage = typeof window !== 'undefined' ? localStorage.getItem('user') : null;
     
-
-    if (tokenFromCookie) {
+    console.log('🔍 [AuthInfor] Debug info:', {
+      tokenFromCookie: !!tokenFromCookie,
+      userFromCookie: !!userFromCookie, 
+      tokenFromStorage: !!tokenFromStorage,
+      userFromStorage: !!userFromStorage
+    });
+    
+    // Nếu không có trong cookies, thử lấy từ localStorage và sync
+    if (!tokenFromCookie && typeof window !== 'undefined') {
+      const tokenFromStorage = localStorage.getItem('accessToken');
+      if (tokenFromStorage) {
+        console.log('🔄 [AuthInfor] Sync token từ localStorage vào cookies');
+        setCookie('accessToken', tokenFromStorage, {
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/'
+        });
+        setAccessToken(tokenFromStorage);
+      }
+    } else if (tokenFromCookie) {
+      console.log('✅ [AuthInfor] Lấy token từ cookies');
       setAccessToken(tokenFromCookie as string);
-    } else {
     }
 
-    if (userFromCookie) {
+    if (!userFromCookie && typeof window !== 'undefined') {
+      const userFromStorage = localStorage.getItem('user');
+      if (userFromStorage) {
+        try {
+          console.log('🔄 [AuthInfor] Sync user từ localStorage vào cookies');
+          const userData = JSON.parse(userFromStorage);
+          setCookie('user', userFromStorage, {
+            maxAge: 60 * 60 * 24 * 7, // 7 days
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/'
+          });
+          setUser(userData);
+          console.log('✅ [AuthInfor] Set user thành công:', userData.email);
+        } catch (error) {
+          console.error('❌ [AuthInfor] Error parsing user data from localStorage:', error);
+          localStorage.removeItem('user');
+        }
+      }
+    } else if (userFromCookie) {
       try {
+        console.log('✅ [AuthInfor] Lấy user từ cookies');
         const userData = JSON.parse(userFromCookie as string);
         setUser(userData);
+        console.log('✅ [AuthInfor] Set user từ cookies thành công:', userData.email);
       } catch (error) {
-        console.error('Error parsing user data from cookie:', error);
+        console.error('❌ [AuthInfor] Error parsing user data from cookie:', error);
         deleteCookie('user');
       }
-    } else {
     }
+    
+    // Force sync sau khi khởi tạo
+    setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        const hasTokenInStorage = localStorage.getItem('accessToken');
+        const hasTokenInCookie = getCookie('accessToken');
+        
+        if (hasTokenInStorage && !hasTokenInCookie) {
+          window.location.reload(); // Reload để middleware pick up cookies mới
+        }
+      }
+    }, 100);
   }, []);
 
   // Function để set accessToken mới
@@ -139,13 +193,94 @@ const useAuthInfor = () => {
 
   }, []);
 
+  // Function để force sync từ localStorage vào cookies
+  const syncFromLocalStorage = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
+    const tokenFromStorage = localStorage.getItem('accessToken');
+    const userFromStorage = localStorage.getItem('user');
+    
+    if (tokenFromStorage) {
+      setCookie('accessToken', tokenFromStorage, {
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
+      });
+      setAccessToken(tokenFromStorage);
+    }
+    
+    if (userFromStorage) {
+      try {
+        const userData = JSON.parse(userFromStorage);
+        setCookie('user', userFromStorage, {
+          maxAge: 60 * 60 * 24 * 7, // 7 days
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/'
+        });
+        setUser(userData);
+      } catch (error) {
+        console.error('Error parsing user data from localStorage:', error);
+        localStorage.removeItem('user');
+      }
+    }
+  }, []);
+
+  // Hàm sync ngay lập tức (có thể gọi trong console để test)
+  const manualSync = useCallback(() => {
+    if (typeof window === 'undefined') return;
+    
+    const tokenFromStorage = localStorage.getItem('accessToken');
+    const userFromStorage = localStorage.getItem('user');
+    
+    console.log('🔧 [AuthInfor] Manual sync:', {
+      tokenFromStorage: !!tokenFromStorage,
+      userFromStorage: !!userFromStorage
+    });
+    
+    if (tokenFromStorage) {
+      setCookie('accessToken', tokenFromStorage, {
+        maxAge: 60 * 60 * 24 * 7,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/'
+      });
+      setAccessToken(tokenFromStorage);
+      console.log('✅ [AuthInfor] Synced token to cookies');
+    }
+    
+    if (userFromStorage) {
+      try {
+        const userData = JSON.parse(userFromStorage);
+        setCookie('user', userFromStorage, {
+          maxAge: 60 * 60 * 24 * 7,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'lax',
+          path: '/'
+        });
+        setUser(userData);
+        console.log('✅ [AuthInfor] Synced user to cookies:', userData.email);
+      } catch (error) {
+        console.error('❌ [AuthInfor] Error parsing user from localStorage:', error);
+      }
+    }
+    
+    // Make available globally for testing
+    if (typeof window !== 'undefined') {
+      (window as any).syncAuth = manualSync;
+    }
+  }, []);
+
   return {
     accessToken,
     user,
     setAccessToken: setAccessTokenNew,
     setUser: setUserNew,
     clearAuthData,
-    refreshFromCookies
+    refreshFromCookies,
+    syncFromLocalStorage,
+    manualSync
   };
 };
 

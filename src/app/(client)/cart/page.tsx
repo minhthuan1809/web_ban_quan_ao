@@ -14,19 +14,62 @@ import { ShoppingBag } from 'lucide-react';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
 
 export default function Page() {
-    const { userInfo } = useAuthInfor();
+    const { user : userInfo, accessToken, syncFromLocalStorage } = useAuthInfor();
     const [cartItems, setCartItems] = useState<any[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [cartData, setCartData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
+    
+    // Debug user state
+    useEffect(() => {
+        console.log('🛒 [Cart] User state:', {
+            userInfo: !!userInfo,
+            accessToken: !!accessToken,
+            userEmail: userInfo?.email,
+            userId: userInfo?.id
+        });
+    }, [userInfo, accessToken]);
+    
+    // Force sync nếu cần thiết
+    useEffect(() => {
+        if (!userInfo && !accessToken && typeof window !== 'undefined') {
+            const hasTokenInStorage = localStorage.getItem('accessToken');
+            const hasUserInStorage = localStorage.getItem('user');
+            
+            console.log('🔍 [Cart] Checking localStorage:', {
+                hasTokenInStorage: !!hasTokenInStorage,
+                hasUserInStorage: !!hasUserInStorage
+            });
+            
+            if (hasTokenInStorage && hasUserInStorage) {
+                console.log('🔄 [Cart] Force sync từ localStorage');
+                syncFromLocalStorage();
+                return;
+            }
+        }
+        
+        // Sau 2 giây nếu vẫn không có user thì redirect
+        const timer = setTimeout(() => {
+            if (!userInfo && !accessToken) {
+                console.log('🚫 [Cart] No user found, redirecting to login');
+                router.push('/login');
+            }
+        }, 2000);
+        
+        return () => clearTimeout(timer);
+    }, [userInfo, accessToken, syncFromLocalStorage, router]);
     
     useEffect(() => {
         const fetchCard = async () => {
             try {
-                if (!userInfo) {
-                    router.push('/login');
+                console.log("🛒 [Cart] Fetching cart for user:", userInfo?.email);
+                if (!userInfo?.id) {
+                    console.log("🚫 [Cart] No user ID available");
+                    setLoading(false);
                     return;
                 }
+                
                 const res = await GetCard_API(userInfo.id);
                 if (res.data) {
                     setCartData(res.data);
@@ -36,10 +79,18 @@ export default function Page() {
                 }
             } catch (error) {
                 console.error('Lỗi khi tải giỏ hàng:', error);
+            } finally {
+                setLoading(false);
             }
         }   
-        fetchCard();
-    }, [])
+        
+        // Chỉ fetch khi có userInfo
+        if (userInfo?.id) {
+            fetchCard();
+        } else {
+            setLoading(false);
+        }
+    }, [userInfo])
 
     const handleQuantityChange = async (itemId: number, newQuantity: number, variantId: number, cartId: number) => {
         if (newQuantity < 1) return;
@@ -99,8 +150,30 @@ export default function Page() {
         }, 0);
     }
 
+    // Show loading khi đang check auth hoặc sync data
+    if (loading || (!userInfo && typeof window !== 'undefined' && (localStorage.getItem('accessToken') || localStorage.getItem('user')))) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                    <p className="text-gray-600">Đang tải thông tin người dùng...</p>
+                </div>
+            </div>
+        );
+    }
+    
+    // Redirect nếu không có user sau khi đã load xong
     if (!userInfo) {
-        return null; // hoặc có thể return một component loading
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-gray-600 mb-4">Bạn cần đăng nhập để xem giỏ hàng</p>
+                    <Button color="primary" onClick={() => router.push('/login')}>
+                        Đăng nhập
+                    </Button>
+                </div>
+            </div>
+        );
     }
 
     return (
