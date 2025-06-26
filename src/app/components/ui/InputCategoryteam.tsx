@@ -17,7 +17,7 @@ export default function InputCategoryteam({
     const { accessToken } = useAuthInfor();
     const [loading, setLoading] = useState(false);
     const [searchValue, setSearchValue] = useState("");
-    const [currentPage, setCurrentPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(0);
     const [limit, setLimit] = useState(10);
     const [teams, setTeams] = useState<any[]>([]);
     const [showDropdown, setShowDropdown] = useState(false);

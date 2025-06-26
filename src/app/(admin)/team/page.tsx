@@ -14,7 +14,7 @@ import { TeamSkeleton } from "../_skeleton";
 export default function Team() {
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [searchValue, setSearchValue] = useState("");
   const limit = 10;
   const [isOpen, setIsOpen] = useState(false);

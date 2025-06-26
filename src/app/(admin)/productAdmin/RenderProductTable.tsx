@@ -538,8 +538,8 @@ export default function RenderProductTable({
           <Pagination
             isCompact
             total={totalPage}
-            initialPage={currentPage}
-            onChange={(page) => onChangePage(page)}
+            initialPage={currentPage + 1}
+            onChange={(page) => onChangePage(page - 1)}
             classNames={{
               wrapper: "gap-0 sm:gap-2",
               item: "w-8 h-8 sm:w-10 sm:h-10",

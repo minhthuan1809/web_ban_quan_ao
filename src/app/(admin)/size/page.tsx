@@ -46,7 +46,7 @@ export default function page() {
       to: 0
     }
   })
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(0)
   const [loading, setLoading] = useState(false)
   const { accessToken } = useAuthInfor()
 

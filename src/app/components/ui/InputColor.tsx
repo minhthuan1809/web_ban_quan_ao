@@ -18,7 +18,7 @@ export default function InputColor({ setColor, color }: { setColor: (color: stri
   const [loading, setLoading] = useState(false);
   const [colorList, setColorList] = useState<Color[]>([]); 
   const [searchQuery, setSearchQuery] = useState('');   
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const { accessToken } = useAuthInfor();
   const [mounted, setMounted] = useState(false);
   const [validSelectedKey, setValidSelectedKey] = useState<string>("");

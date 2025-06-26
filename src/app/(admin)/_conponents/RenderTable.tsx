@@ -101,8 +101,8 @@ export default function RenderTable({
         <div className="flex justify-center">
           <Pagination
             total={totalPage}
-            page={currentPage}
-            onChange={setCurrentPage}
+            page={currentPage + 1}
+            onChange={(newPage) => setCurrentPage(newPage - 1)}
             showControls
             variant="bordered"
             classNames={{

@@ -14,7 +14,7 @@ import { ContactSkeleton } from '../../_skeleton';
 export default function ContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [searchValue, setSearchValue] = useState("");
   const [isMailModalOpen, setIsMailModalOpen] = useState(false);
@@ -115,9 +115,9 @@ export default function ContactsPage() {
          (<div className='flex justify-center mt-4'>
           <Pagination
                color="primary"
-               page={page}
+               page={page + 1}
                total={totalPages}
-               onChange={(page) => setPage(page)}
+               onChange={(newPage) => setPage(newPage - 1)}
              />
           </div>)
         }

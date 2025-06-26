@@ -42,7 +42,7 @@ export default function Code() {
   const { accessToken } = useAuthInfor();
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState<number>(0);
   const [total, setTotal] = useState<number>(1);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -232,8 +232,8 @@ export default function Code() {
             <div className="flex justify-center">
               <Pagination
                 total={total}
-                page={page}
-                onChange={setPage}
+                page={page + 1}
+                onChange={(newPage) => setPage(newPage - 1)}
                 classNames={{
                   wrapper: "gap-0 overflow-visible h-8 rounded border border-divider",
                 }}

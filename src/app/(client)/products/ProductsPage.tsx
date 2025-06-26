@@ -11,7 +11,7 @@ export default function ProductsPage({filter} : {filter: any}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(16);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);

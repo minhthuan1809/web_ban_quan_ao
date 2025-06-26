@@ -60,7 +60,7 @@ export default function HistoryOrderPage() {
   const { userInfo } = useAuthInfor();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [page, setPage] = useState<number>(1);
+  const [page, setPage] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>('all');
 
@@ -171,8 +171,8 @@ export default function HistoryOrderPage() {
         <div className="flex justify-center mt-8">
           <Pagination
             total={total}
-            page={page}
-            onChange={setPage}
+            page={page + 1}
+            onChange={(newPage) => setPage(newPage - 1)}
             classNames={{
               wrapper: "gap-0 overflow-visible h-8 rounded-xl border border-divider",
               item: "w-8 h-8 text-small rounded-none bg-transparent",

@@ -57,7 +57,7 @@ export default function SimpleEvaluateComment() {
   const params = useParams();
   const _params = params.slug;
   const productId = _params && Array.isArray(_params) ? _params[1] : null;
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const totalPage = metadata?.total_page || 1;
 
   // Tránh setState trong render
@@ -241,8 +241,8 @@ export default function SimpleEvaluateComment() {
         {totalPage > 1 && (
           <Pagination
             total={totalPage}
-            page={page}
-            onChange={handlePageChange}
+            page={page + 1}
+            onChange={(newPage) => handlePageChange(newPage - 1)}
           />
         )}
       </div>

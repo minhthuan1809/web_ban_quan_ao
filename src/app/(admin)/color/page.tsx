@@ -50,7 +50,7 @@ export default function page() {
       to: 0
     }
   })
-  const [currentPage, setCurrentPage] = useState(1)
+  const [currentPage, setCurrentPage] = useState(0)
   const [loading, setLoading] = useState(false)
   const { accessToken } = useAuthInfor()
 
@@ -228,9 +228,9 @@ export default function page() {
                   <Pagination
                     showControls
                     total={metadata.total_page}
-                    initialPage={currentPage}
-                    page={currentPage}
-                    onChange={setCurrentPage}
+                    initialPage={currentPage + 1}
+                    page={currentPage + 1}
+                    onChange={(newPage) => setCurrentPage(newPage - 1)}
                     size="sm"
                   />
                 </div>

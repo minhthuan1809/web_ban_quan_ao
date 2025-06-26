@@ -17,7 +17,7 @@ export default function EvaluatePage() {
     const [searchValue, setSearchValue] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(false);
     const [totalPage, setTotalPage] = useState<number>(0);
-    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [currentPage, setCurrentPage] = useState<number>(0);
     const [selectedImage, setSelectedImage] = useState<string>('');
     const [isImageModalOpen, setIsImageModalOpen] = useState<boolean>(false);
     const [isReplyModalOpen, setIsReplyModalOpen] = useState<boolean>(false);
@@ -255,8 +255,8 @@ export default function EvaluatePage() {
             <div className='flex justify-center mt-4'>
                 <Pagination
                     total={totalPage}
-                    page={currentPage}
-                    onChange={(page) => setCurrentPage(page as number)}
+                    page={currentPage + 1}
+                    onChange={(page) => setCurrentPage((page as number) - 1)}
                 /> 
             </div>
           )}

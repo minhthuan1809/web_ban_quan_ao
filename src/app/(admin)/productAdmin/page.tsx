@@ -14,7 +14,7 @@ export default function ProductPage() {
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [page, setPage] = useState(1)
+  const [page, setPage] = useState(0)
   const [limit, setLimit] = useState(30)
   const [isRefetch, setIsRefetch] = useState(false)
   const [edit, setEdit] = useState(false)
