@@ -103,11 +103,29 @@ export default function PageRegister() {
       "phone", "gender", "address", "agreeToTerms"
     ];
     
-    return requiredFields.every(field => {
+    const validation = requiredFields.every(field => {
       if (field === "address") return formData.address !== null;
       if (field === "agreeToTerms") return formData.agreeToTerms;
       return formData[field as keyof FormData] && validateField(field, formData[field]) === "";
     }) && passwordError === "";
+
+    // Debug in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Form validation debug:', {
+        fullName: !!formData.fullName,
+        email: !!formData.email,
+        password: !!formData.password,
+        confirmPassword: !!formData.confirmPassword,
+        phone: !!formData.phone,
+        gender: !!formData.gender,
+        address: !!formData.address,
+        agreeToTerms: formData.agreeToTerms,
+        passwordError,
+        isValid: validation
+      });
+    }
+
+    return validation;
   }, [formData, validateField, passwordError]);
 
   // Form field update handler
@@ -202,6 +220,40 @@ export default function PageRegister() {
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
+            {/* Progress indicator */}
+            <div className="mb-6">
+              <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Tiến độ hoàn thành</span>
+                <span>{Math.round((
+                  (formData.fullName ? 1 : 0) +
+                  (formData.email ? 1 : 0) +
+                  (formData.password ? 1 : 0) +
+                  (formData.confirmPassword ? 1 : 0) +
+                  (formData.phone ? 1 : 0) +
+                  (formData.gender ? 1 : 0) +
+                  (formData.address ? 1 : 0) +
+                  (formData.agreeToTerms ? 1 : 0)
+                ) / 8 * 100)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${Math.round((
+                      (formData.fullName ? 1 : 0) +
+                      (formData.email ? 1 : 0) +
+                      (formData.password ? 1 : 0) +
+                      (formData.confirmPassword ? 1 : 0) +
+                      (formData.phone ? 1 : 0) +
+                      (formData.gender ? 1 : 0) +
+                      (formData.address ? 1 : 0) +
+                      (formData.agreeToTerms ? 1 : 0)
+                    ) / 8 * 100)}%`
+                  }}
+                />
+              </div>
+            </div>
+
             {/* Name and Email */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <InputInformation
@@ -294,13 +346,35 @@ export default function PageRegister() {
               </Checkbox>
             </div>
 
+            {/* Form validation status */}
+            {!isFormValid && (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                <p className="text-orange-800 text-sm font-medium mb-2">Vui lòng hoàn thành:</p>
+                <ul className="text-orange-700 text-sm space-y-1">
+                  {!formData.fullName && <li>• Tên người dùng</li>}
+                  {!formData.email && <li>• Email</li>}
+                  {!formData.password && <li>• Mật khẩu</li>}
+                  {!formData.confirmPassword && <li>• Xác nhận mật khẩu</li>}
+                  {!formData.phone && <li>• Số điện thoại</li>}
+                  {!formData.gender && <li>• Giới tính</li>}
+                  {!formData.address && <li>• Địa chỉ</li>}
+                  {!formData.agreeToTerms && <li>• Đồng ý điều khoản</li>}
+                  {passwordError && <li>• {passwordError}</li>}
+                </ul>
+              </div>
+            )}
+
             {/* Submit button */}
             <Button
               type="submit"
               disabled={!isFormValid || loading}
               isLoading={loading}
               color="primary"
-              className="w-full font-semibold text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl transition-all duration-300"
+              className={`w-full font-semibold text-white transition-all duration-300 ${
+                isFormValid 
+                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl' 
+                  : 'bg-gray-400 cursor-not-allowed'
+              }`}
               size="lg"
             >
               {loading ? "Đang xử lý..." : "Đăng Ký"}

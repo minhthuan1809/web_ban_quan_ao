@@ -21,6 +21,7 @@ import InputGender from "@/app/components/ui/InputGender";
 import { uploadToCloudinary } from "@/app/_util/upload_img_cloudinary";
 import InputGmail from "@/app/components/ui/InputGmail";
 import InputPhone from "@/app/components/ui/InputPhone";
+import InputPassword from "@/app/components/ui/InputPassword";
 
 interface User {
   id: number;
@@ -30,9 +31,19 @@ interface User {
   address: string;
   district: string;
   ward: string;
-  roleId: number;
+  role: {
+    id: number;
+    name: string;
+    createdAt: number;
+    updatedAt: number;
+    isDeleted: boolean;
+  };
   avatarUrl: string;
   gender: string;
+  cartId: number | null;
+  isVerify: boolean;
+  createdAt: number;
+  updatedAt: number;
 }
 
 interface ModalAddUseProps {
@@ -358,7 +369,22 @@ export default function ModalAddUse({
                   />  
                 </div>
 
-            
+                {/* Add Password field for new users */}
+                {modalMode === 'add' && (
+                  <div className="mt-5">
+                    <InputPassword
+                      label="Mật khẩu"
+                      placeholder="Nhập mật khẩu"
+                      value={formData.password}
+                      onChange={(value) => updateField('password', value)}
+                      minLength={6}
+                      showStrengthIndicator={true}
+                    />
+                    {errors.password && (
+                      <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -416,16 +442,11 @@ export default function ModalAddUse({
                     </SelectItem>
                   </Select>
 
-                  <Input
-                      label="Giới tính"
-                    placeholder="Nam/Nữ/Khác"
-                      value={formData.gender}
-                    onChange={(e) => updateField('gender', e.target.value)}
-                    variant="bordered"
-                    isRequired
-                    isInvalid={!!errors.gender}
-                    errorMessage={errors.gender}
-                    startContent={<User className="w-4 h-4 text-gray-400" />}
+                  <InputGender
+                    label="Giới tính"
+                    placeholder="Chọn giới tính"
+                    value={formData.gender}
+                    onChange={(value) => updateField('gender', value)}
                   />
                 </div>
               </div>

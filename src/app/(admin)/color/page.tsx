@@ -35,7 +35,7 @@ interface Metadata {
 
 export default function page() {
   const [color, setColor] = useState<ColorData[]>([])
-  const { search: searchValue, type: searchType } = useAdminSearchStore()
+  const { search: searchValue, type: searchType, setType } = useAdminSearchStore()
   const [isOpen, setIsOpen] = useState(false)
   const [name, setName] = useState("")
   const [code, setCode] = useState("")
@@ -68,6 +68,10 @@ export default function page() {
       setLoading(false);
     }
   }, [searchValue, currentPage, accessToken]);
+
+  useEffect(() => {
+    setType('color');
+  }, [setType]);
 
   useEffect(() => {
     if (searchType === 'color' || searchType === '') {

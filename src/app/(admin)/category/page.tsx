@@ -23,13 +23,7 @@ interface Category {
 export default function Category() {
     const [category, setCategory] = useState<Category[]>([]);
     const [loading, setLoading] = useState(false);
-<<<<<<< HEAD
-    const [currentPage, setCurrentPage] = useState(0);
-    const [searchValue, setSearchValue] = useState("");
-    const rowsPerPage = 10;
-=======
     const [currentPage, setCurrentPage] = useState(1);
->>>>>>> 2c6b65deb3c2dc4f46adc89cb3adf563d96de6f2
     const [refresh, setRefresh] = useState(false);
     const [editCategory, setEditCategory] = useState<any>(null);
     const [isOpen, setIsOpen] = useState(false);

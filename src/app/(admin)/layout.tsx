@@ -175,7 +175,6 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
     const { accessToken, user, clearAuthData } = useAuthInfor();
     const [isLoading, setIsLoading] = useState(true);
     const [title, setTitle] = useState('Dashboard');
-    const { resetSearch } = useAdminSearchStore();
 
    
 
@@ -239,24 +238,19 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
 
     // Auth check
     useEffect(() => {
-      if (!accessToken || !user) {
-        if (!accessToken) {
-          router.push('/login');
+    
+
+      if (accessToken && user) {
+        if (user.role?.name?.trim().toLowerCase() !== 'admin') {
+          setIsLoading(false);
           return;
         }
-        return;
-      }
 
-      // Check admin role
-      if (user.role?.name?.trim().toLowerCase() !== 'admin') {
-        toast.error('Bạn không có quyền truy cập trang admin');
-        router.push('/');
-        return;
+        setUser_Zustand(user);
       }
-
-      setUser_Zustand(user);
+      
       setIsLoading(false);
-    }, [accessToken, user, router, setUser_Zustand]);
+    }, [accessToken, user, setUser_Zustand]);
 
     // Handle logout
     const handleLogout = useCallback(async () => {

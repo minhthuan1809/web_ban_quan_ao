@@ -69,17 +69,18 @@ const useAuthInfor = () => {
       }
     }
     
+    // Remove automatic reload logic to prevent unwanted redirects
     // Force sync sau khi khởi tạo
-    setTimeout(() => {
-      if (typeof window !== 'undefined') {
-        const hasTokenInStorage = localStorage.getItem('accessToken');
-        const hasTokenInCookie = getCookie('accessToken');
+    // setTimeout(() => {
+    //   if (typeof window !== 'undefined') {
+    //     const hasTokenInStorage = localStorage.getItem('accessToken');
+    //     const hasTokenInCookie = getCookie('accessToken');
         
-        if (hasTokenInStorage && !hasTokenInCookie) {
-          window.location.reload(); // Reload để middleware pick up cookies mới
-        }
-      }
-    }, 100);
+    //     if (hasTokenInStorage && !hasTokenInCookie) {
+    //       window.location.reload(); // Reload để middleware pick up cookies mới
+    //     }
+    //   }
+    // }, 100);
   }, []);
 
   // Function để set accessToken mới

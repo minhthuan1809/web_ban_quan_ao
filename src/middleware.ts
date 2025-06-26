@@ -17,7 +17,9 @@ const ADMIN_PATHS = [
   '/orders/confirm',
   '/orders/payments',
   '/discount',
-  '/evaluate'
+  '/evaluate',
+  '/color',
+  '/size'
 ] as const;
 
 const PROTECTED_PATHS = [
@@ -35,8 +37,8 @@ const PUBLIC_AUTH_PATHS = [
 ] as const;
 
 const REDIRECT_PATHS = {
-  unauthorized: '/components/error/401',
-  notFound: '/404',
+  unauthorized: '/not-found',
+  notFound: '/not-found',
   home: '/',
   dashboard: '/dashboard'
 } as const;
@@ -127,9 +129,10 @@ function createResponse(
       return NextResponse.redirect(new URL('/login', request.url));
     }
     if (!auth.isAdmin) {
-      return NextResponse.rewrite(new URL(REDIRECT_PATHS.unauthorized, request.url));
+      // Return 404 instead of redirect for non-admin users
+      return NextResponse.rewrite(new URL('/not-found', request.url));
     }
-    // Redirect /admin to dashboard
+    // Only redirect /admin to dashboard, not other admin routes
     if (pathname === '/admin') {
       return NextResponse.redirect(new URL(REDIRECT_PATHS.dashboard, request.url));
     }
@@ -169,7 +172,7 @@ function createResponse(
 
   // Special handling for specific routes
   if (pathname === '/profile' && !auth.isAuthenticated) {
-    return NextResponse.rewrite(new URL(REDIRECT_PATHS.notFound, request.url));
+    return NextResponse.rewrite(new URL('/not-found', request.url));
   }
 
   // Add user info to headers for SSR components (optional)
@@ -221,14 +224,7 @@ export function middleware(request: NextRequest): NextResponse {
 // Optimized matcher configuration
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder files
-     */
+  
     '/((?!api|_next/static|_next/image|favicon.ico|public).*)',
   ],
 };

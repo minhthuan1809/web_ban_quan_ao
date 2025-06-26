@@ -27,10 +27,17 @@ interface UserData {
   address: string;
   district: string;
   ward: string;
-  roleId: number;
+  role: {
+    id: number;
+    name: string;
+    createdAt: number;
+    updatedAt: number;
+    isDeleted: boolean;
+  };
   avatarUrl: string | null;
   gender: string;
   isVerify: boolean;
+  cartId: number | null;
   createdAt: number;
   updatedAt: number;
 }
@@ -56,7 +63,7 @@ const FILTER_OPTIONS = [
 
 export default function PageUser() {        
   const [users, setUsers] = useState<any | null>(null);
-  const { accessToken } = useAuthInfor();
+  const { accessToken, user: currentUser } = useAuthInfor();
   const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
   const [editUser, setEditUser] = useState<UserData | null>(null);
   const [filterRole, setFilterRole] = useState<'all' | '1' | '2'>('all');
@@ -68,6 +75,11 @@ export default function PageUser() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
   const [totalPage, setTotalPage] = useState(1);
+
+  // Check if user is viewing their own account
+  const isCurrentUser = useCallback((userId: number) => {
+    return currentUser?.id === userId;
+  }, [currentUser?.id]);
 
   // Fetch users
   const fetchUsers = useCallback(async () => {
@@ -118,7 +130,7 @@ export default function PageUser() {
         user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
         user.phone.includes(searchQuery);
       
-      const matchesRole = filterRole === 'all' || user.roleId.toString() === filterRole;
+      const matchesRole = filterRole === 'all' || user.role.id.toString() === filterRole;
       
       return matchesSearch && matchesRole;
     });
@@ -144,7 +156,7 @@ export default function PageUser() {
       district: user.district,
       ward: user.ward,
       gender: user.gender,
-      roleId: user.roleId ?? 1
+      roleId: user.role?.id ?? 1
     });
     setShowModal(true);
   }, []);
@@ -206,7 +218,7 @@ export default function PageUser() {
       </div>
       <div className="block lg:hidden space-y-4">
         {filteredUsers.map((user: UserData) => {
-          const roleConfig = getRoleConfig(user.roleId);
+          const roleConfig = getRoleConfig(user.role.id);
           const genderConfig = getGenderConfig(user.gender);
           const RoleIcon = roleConfig.icon;
 
@@ -272,28 +284,36 @@ export default function PageUser() {
                 </div>
               </div>
 
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  color="primary"
-                  variant="flat"
-                  onPress={() => handleEdit(user)}
-                  startContent={<Edit3 className="w-4 h-4" />}
-                  className="flex-1"
-                >
-                  Chỉnh sửa
-                </Button>
-                <Button
-                  size="sm"
-                  color="danger"
-                  variant="flat"
-                  onPress={() => handleDelete(user.id)}
-                  startContent={<Trash2 className="w-4 h-4" />}
-                  className="flex-1"
-                >
-                  Xóa
-                </Button>
-              </div>
+              {!isCurrentUser(user.id) && (
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    color="primary"
+                    variant="flat"
+                    onPress={() => handleEdit(user)}
+                    startContent={<Edit3 className="w-4 h-4" />}
+                    className="flex-1"
+                  >
+                    Chỉnh sửa
+                  </Button>
+                  <Button
+                    size="sm"
+                    color="danger"
+                    variant="flat"
+                    onPress={() => handleDelete(user.id)}
+                    startContent={<Trash2 className="w-4 h-4" />}
+                    className="flex-1"
+                  >
+                    Xóa
+                  </Button>
+                </div>
+              )}
+              {isCurrentUser(user.id) && (
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-center">
+                  <p className="text-blue-700 text-sm font-medium">Tài khoản hiện tại</p>
+                  <p className="text-blue-600 text-xs">Không thể chỉnh sửa tài khoản của chính mình</p>
+                </div>
+              )}
             </Card>
           );
         })}
@@ -327,7 +347,7 @@ export default function PageUser() {
             </div>
           }>
             {filteredUsers.map((user: UserData, index: number) => {
-              const roleConfig = getRoleConfig(user.roleId);
+              const roleConfig = getRoleConfig(user.role.id);
               const genderConfig = getGenderConfig(user.gender);
               const RoleIcon = roleConfig.icon;
 
@@ -393,24 +413,32 @@ export default function PageUser() {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-center gap-2">
-                      <Button
-                        size="sm"
-                        color="primary"
-                        variant="flat"
-                        onPress={() => handleEdit(user)}
-                        startContent={<Edit3 className="w-4 h-4" />}
-                      >
-                        Sửa
-                      </Button>
-                      <Button
-                        size="sm"
-                        color="danger"
-                        variant="flat"
-                        onPress={() => handleDelete(user.id)}
-                        startContent={<Trash2 className="w-4 h-4" />}
-                      >
-                        Xóa
-                      </Button>
+                      {!isCurrentUser(user.id) ? (
+                        <>
+                          <Button
+                            size="sm"
+                            color="primary"
+                            variant="flat"
+                            onPress={() => handleEdit(user)}
+                            startContent={<Edit3 className="w-4 h-4" />}
+                          >
+                            Sửa
+                          </Button>
+                          <Button
+                            size="sm"
+                            color="danger"
+                            variant="flat"
+                            onPress={() => handleDelete(user.id)}
+                            startContent={<Trash2 className="w-4 h-4" />}
+                          >
+                            Xóa
+                          </Button>
+                        </>
+                      ) : (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                          <p className="text-blue-700 text-xs font-medium">Tài khoản hiện tại</p>
+                        </div>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

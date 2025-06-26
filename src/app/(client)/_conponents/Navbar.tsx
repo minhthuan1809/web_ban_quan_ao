@@ -58,10 +58,10 @@ export default function Navbar() {
       setUser(hookUser);
       setUser_Zustand(hookUser);
       
-      // Redirect admin
-      if (hookUser.role?.name?.trim().toLowerCase() === 'admin') {
-        router.push("/admin");
-      }
+      // Remove admin redirect logic - let middleware handle this
+      // if (hookUser.role?.name?.trim().toLowerCase() === 'admin') {
+      //   router.push("/admin");
+      // }
       return;
     }
 
@@ -72,10 +72,10 @@ export default function Navbar() {
         if (res) {
           setUser(res);
           setCookie("user", JSON.stringify(res));
-          //đẩy về admin nếu là admin
-          if (res.role.name.trim().toLowerCase() === 'admin') {
-            router.push("/admin");
-          }
+          // Remove admin redirect logic - let middleware handle this
+          // if (res.role.name.trim().toLowerCase() === 'admin') {
+          //   router.push("/admin");
+          // }
         
           setUser_Zustand(res);
         }

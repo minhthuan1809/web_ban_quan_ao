@@ -15,13 +15,8 @@ import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore';
 export default function Material() {
   const [material, setMaterial] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
-<<<<<<< HEAD
-  const [currentPage, setCurrentPage] = useState(0);
-  const [searchValue, setSearchValue] = useState("");
-=======
   const [currentPage, setCurrentPage] = useState(1);
   const { search: searchValue, type: searchType, setType, setSearch } = useAdminSearchStore();
->>>>>>> 2c6b65deb3c2dc4f46adc89cb3adf563d96de6f2
   const limit = 10;
   const [isOpen, setIsOpen] = useState(false);
   const [loadingBtn, setLoadingBtn] = useState(false);

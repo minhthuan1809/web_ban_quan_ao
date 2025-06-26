@@ -41,11 +41,7 @@ export default function Code() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [page, setPage] = useState<number>(0);
-<<<<<<< HEAD
-  const [total, setTotal] = useState<number>(1);
-=======
   const [total, setTotal] = useState<number>(0);
->>>>>>> 2c6b65deb3c2dc4f46adc89cb3adf563d96de6f2
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null);  
