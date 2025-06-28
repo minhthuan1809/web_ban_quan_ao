@@ -80,6 +80,7 @@ export interface ChangePasswordRequest {
   oldPassword: string;
   newPassword: string;
   confirmNewPassword: string;
+  token: string;
 }
 
 export interface UpdateProfileRequest {
@@ -87,6 +88,7 @@ export interface UpdateProfileRequest {
   email?: string;
   phone?: string;
   address?: string;
+  token: string;
   district?: string;
   ward?: string;
   avatarUrl?: string;
@@ -262,12 +264,12 @@ export class AuthService {
   /**
    * Change password
    */
-  static async changePassword(data: ChangePasswordRequest, accessToken: string): Promise<AxiosResponse<string>> {
+  static async changePassword(data: ChangePasswordRequest): Promise<AxiosResponse<string>> {
     try {
       const response = await authApiClient.post('/auth/change-password', data, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${data.token}`
         },
       });
       return response;
@@ -285,11 +287,11 @@ export class AuthService {
   /**
    * Update user profile
    */
-  static async updateProfile(data: UpdateProfileRequest, accessToken: string): Promise<AxiosResponse<AuthUser>> {
+  static async updateProfile(data: UpdateProfileRequest): Promise<AxiosResponse<AuthUser>> {
     try {
       const response = await authApiClient.put('/auth/update-profile', data, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          'Authorization': `Bearer ${data.token}`,
         },
       });
       
@@ -390,10 +392,10 @@ export const authLogout_API = (accessToken: string) => AuthService.logout(access
 export const authForgotPassword_API = (email: string) => AuthService.forgotPassword(email);
 export const authResetPassword_API = (token: string, password: string) => 
   AuthService.resetPassword(token, password);
-export const authUpdateProfile_API = (data: UpdateProfileRequest, accessToken: string) => 
-  AuthService.updateProfile(data, accessToken);
-export const authChangePassword_API = (data: ChangePasswordRequest, accessToken: string) => 
-  AuthService.changePassword(data, accessToken);
+export const authUpdateProfile_API = (data: UpdateProfileRequest) => 
+  AuthService.updateProfile(data);
+export const authChangePassword_API = (data: ChangePasswordRequest) => 
+  AuthService.changePassword(data);
 
 // Export the API client
 export { authApiClient };

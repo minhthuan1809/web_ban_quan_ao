@@ -16,6 +16,7 @@ export interface AuthUser {
   gender: string;
   address: string;
   district: string;
+  token: string;
   ward: string;
   avatarUrl?: string | null;
   isVerify: boolean;

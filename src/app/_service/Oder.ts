@@ -170,6 +170,48 @@ export const createOrderWithPaymentMethod6_API = async (amount: number, orderId:
     }
 }
 
+// Export order as PDF
+export const exportOrderPDF_API = async (orderId: number, accessToken: string | null): Promise<Blob> => {
+    try {
+        if (!accessToken) {
+            throw new Error('Token xác thực không hợp lệ');
+        }
+        
+        if (!orderId) {
+            throw new Error('ID đơn hàng không hợp lệ');
+        }
+        
+        const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders/export-pdf/${orderId}`, 
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                responseType: 'blob', // Important for PDF download
+                timeout: 30000
+            }
+        );
+        
+        return res.data;
+    } catch (error: any) {
+        console.error('Export PDF API error:', error);
+        if (error.response?.status === 401) {
+            throw new Error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
+        } else if (error.response?.status === 403) {
+            throw new Error('Bạn không có quyền xuất hóa đơn này');
+        } else if (error.response?.status === 404) {
+            throw new Error('Không tìm thấy đơn hàng');
+        } else if (error.response?.status >= 500) {
+            throw new Error('Lỗi máy chủ, vui lòng thử lại sau');
+        } else if (error.code === 'ECONNABORTED') {
+            throw new Error('Kết nối quá chậm, vui lòng thử lại');
+        } else if (error.code === 'NETWORK_ERROR') {
+            throw new Error('Lỗi kết nối mạng');
+        }
+        throw error;
+    }
+}
+
 
 
 

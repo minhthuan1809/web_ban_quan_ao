@@ -91,38 +91,39 @@ export default function ProductsPage({filter} : {filter: any}) {
   return (
     <div className="min-h-screen">
       {/* Modern Header */}
-      <div className="bg-background/60 backdrop-blur-md border-b border-border sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
+      <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-white/20 dark:border-gray-700/30 rounded-2xl shadow-lg sticky top-4 z-10 mb-6">
+        <div className="px-6 py-4">
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 max-w-md">
               <Input
-                placeholder="Tìm kiếm sản phẩm"
-                size="sm"
+                placeholder="Tìm kiếm sản phẩm..."
+                size="lg"
                 variant="bordered"
-                radius="sm"
+                radius="md"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                startContent={<Search size={16} className="text-default-400" />}
+                startContent={<Search size={18} className="text-blue-600 dark:text-blue-400" />}
                 classNames={{
-                  input: "text-default-700",
-                  inputWrapper: "border-border"
+                  input: "text-gray-900 dark:text-gray-100",
+                  inputWrapper: "border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500 focus-within:border-blue-600 dark:focus-within:border-blue-400 bg-white dark:bg-gray-800"
                 }}
               />
             </div>
+            
             {/* Right side - Sort options */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-default-600 hidden sm:inline">Sắp xếp</span>
+            <div className="flex items-center gap-3">
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-300 hidden sm:inline">Sắp xếp theo:</span>
               <Select
-                size="sm"
+                size="lg"
                 variant="bordered"
                 defaultSelectedKeys={["all"]}
                 value={sort}
                 onChange={(e) => setSort(e.target.value)}
-                className="w-[140px] sm:w-[180px]"
+                className="w-[150px] sm:w-[200px]"
                 aria-label="Sắp xếp sản phẩm"
                 classNames={{
-                  trigger: "border-border",
-                  value: "text-default-700"
+                  trigger: "border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500 bg-white dark:bg-gray-800",
+                  value: "text-gray-900 dark:text-gray-100"
                 }}
               >
                 {sortOptions.map((option) => (
@@ -137,20 +138,40 @@ export default function ProductsPage({filter} : {filter: any}) {
       </div>
 
       {/* Products Grid */}
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 py-4 sm:py-6">
+      <div className="px-2 sm:px-0">
         {/* Results info */}
-        <div className="mb-4 sm:mb-6">
-          <p className="text-sm text-default-600">
-            Hiển thị <span className="font-semibold text-foreground">{products.length}</span> sản phẩm
-          </p>
+        <div className="mb-6">
+          <div className="bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-xl p-4 border border-white/20 dark:border-gray-700/30">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Hiển thị <span className="font-bold text-blue-600 dark:text-blue-400">{products.length}</span> sản phẩm
+              {searchTerm && (
+                <span className="ml-2">
+                  cho từ khóa "<span className="font-semibold text-gray-900 dark:text-gray-100">{searchTerm}</span>"
+                </span>
+              )}
+            </p>
+          </div>
         </div>
 
-        {/* Compact Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4">
-          {products.map((product: any) => (
-            <CardProduct key={product.id} product={product} />
-          ))}
-        </div>
+        {/* Empty State */}
+        {products.length === 0 && !loading && (
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/30 p-12 text-center">
+            <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center">
+              <Search className="w-12 h-12 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-3">Không tìm thấy sản phẩm</h3>
+            <p className="text-gray-600 dark:text-gray-400">Hãy thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+          </div>
+        )}
+
+        {/* Products Grid */}
+        {products.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
+            {products.map((product: any) => (
+              <CardProduct key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

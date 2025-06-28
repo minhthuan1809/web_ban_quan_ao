@@ -13,12 +13,12 @@ export default function PageFooter() {
               <Image 
                 src="https://plus.unsplash.com/premium_photo-1687686676757-9d849a16e4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGVyc2lvbnxlbnwwfHwwfHx8MA%3D%3D" 
                 className="w-20 h-20 rounded-full border-4 border-card shadow-lg" 
-                alt="MINHTHUAN Logo" 
+                alt="KICKSTYLE Logo" 
                 height={80}
                 width={80}
               />
               <div>
-                <p className="text-3xl font-extrabold text-card-foreground tracking-wider">MINHTHUAN</p>
+                <p className="text-3xl font-extrabold text-card-foreground tracking-wider">KICKSTYLE</p>
                 <p className="text-sm text-muted-foreground italic">Fashion & Style</p>
               </div>
             </div>
@@ -39,7 +39,7 @@ export default function PageFooter() {
           <div className="text-center md:text-left">
             <h3 className="text-lg font-semibold text-card-foreground mb-4">Về Chúng Tôi</h3>
             <p className="text-muted-foreground leading-relaxed">
-              MINHTHUAN là thương hiệu thời trang hàng đầu, mang đến những sản phẩm chất lượng và phong cách độc đáo cho khách hàng.
+              KICKSTYLE là thương hiệu thời trang hàng đầu, mang đến những sản phẩm chất lượng và phong cách độc đáo cho khách hàng.
             </p>
           </div>
 
@@ -57,7 +57,7 @@ export default function PageFooter() {
               </li>
               <li className="flex items-center justify-center md:justify-start text-muted-foreground">
                 <Mail size={20} className="mr-2" />
-                contact@minhthuan.com
+                contact@KICKSTYLE.com
               </li>
             </ul>
           </div>
@@ -65,7 +65,7 @@ export default function PageFooter() {
 
         {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-border text-center text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} MINHTHUAN. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} KICKSTYLE. All rights reserved.</p>
         </div>
       </div>
     </footer>

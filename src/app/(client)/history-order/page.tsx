@@ -176,60 +176,72 @@ export default function HistoryOrderPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-6 px-4 min-h-screen">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Lịch sử đơn hàng</h1>
-        <p className="text-gray-600">Theo dõi và quản lý các đơn hàng của bạn</p>
-      </div>
-
-    
-      
-      {error ? (
-        <div className="text-center py-12">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
-            <div className="text-red-600 text-lg font-medium mb-2">Có lỗi xảy ra</div>
-            <p className="text-red-700">{error}</p>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Thử lại
-            </button>
-          </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      <div className="max-w-6xl mx-auto py-6 px-4">
+        <div className="mb-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl p-6 border-2 border-gray-200/60 dark:border-gray-600/60 shadow-lg">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">Lịch sử đơn hàng</h1>
+          <p className="text-gray-600 dark:text-gray-400">Theo dõi và quản lý các đơn hàng của bạn</p>
         </div>
-      ) : (
-        <>
-          <OrderTabs
-           tabs={orderTabs} activeTab={activeTab} onTabChange={handleTabChange} />
-          
-          {!filteredOrders?.length ? (
-            <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">Không tìm thấy đơn hàng nào {activeTab !== 'all' ? 'ở trạng thái này' : ''}</p>
+
+      
+        
+        {error ? (
+          <div className="text-center py-12">
+            <div className="bg-red-50 dark:bg-red-900/30 border-2 border-red-200 dark:border-red-700 rounded-xl p-6 max-w-md mx-auto backdrop-blur-sm">
+              <div className="text-red-600 dark:text-red-400 text-lg font-bold mb-2">Có lỗi xảy ra</div>
+              <p className="text-red-700 dark:text-red-300">{error}</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-4 px-6 py-3 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                Thử lại
+              </button>
             </div>
-          ) : (
-            <div className="space-y-6">
-              {filteredOrders.map((order) => (
-                <OrderItem key={order.id} order={order} statusMap={statusMap} />
-              ))}
-            </div>
-          )}
-          
-          {total > 1 && (
-            <div className="flex justify-center mt-8">
-              <Pagination
-                total={total}
-                page={page + 1}
-                onChange={(newPage) => setPage(newPage - 1)}
-                classNames={{
-                  wrapper: "gap-0 overflow-visible h-8 rounded-xl border border-divider",
-                  item: "w-8 h-8 text-small rounded-none bg-transparent",
-                  cursor: "bg-gradient-to-b shadow-lg from-default-500 to-default-800 dark:from-default-300 dark:to-default-100 text-white font-bold",
-                }}
-              />
-            </div>
-          )}
-        </>
-      )}
+          </div>
+        ) : (
+          <>
+            <OrderTabs
+             tabs={orderTabs} activeTab={activeTab} onTabChange={handleTabChange} />
+            
+            {!filteredOrders?.length ? (
+              <div className="text-center py-12">
+                <div className="bg-white/80 dark:bg-gray-800/80   dark:border-gray-600/60 max-w-md mx-auto">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/30 dark:to-purple-900/30 rounded-full flex items-center justify-center">
+                    <svg className="w-12 h-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-2">Chưa có đơn hàng</h3>
+                  <p className="text-gray-500 dark:text-gray-400">Không tìm thấy đơn hàng nào {activeTab !== 'all' ? 'ở trạng thái này' : ''}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {filteredOrders.map((order) => (
+                  <OrderItem key={order.id} order={order} statusMap={statusMap} />
+                ))}
+              </div>
+            )}
+            
+            {total > 1 && (
+              <div className="flex justify-center mt-8">
+                <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl p-4 border-2 border-gray-200/60 dark:border-gray-600/60 shadow-lg">
+                  <Pagination
+                    total={total}
+                    page={page + 1}
+                    onChange={(newPage) => setPage(newPage - 1)}
+                    classNames={{
+                      wrapper: "gap-0 overflow-visible h-10 rounded-xl border-2 border-gray-200 dark:border-gray-600",
+                      item: "w-10 h-10 text-sm rounded-none bg-transparent text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700",
+                      cursor: "bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg text-white font-bold",
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
