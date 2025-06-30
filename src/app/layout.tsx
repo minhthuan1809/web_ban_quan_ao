@@ -4,6 +4,7 @@ import "./globals.css";
 import 'suneditor/dist/css/suneditor.min.css';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import { Providers } from "./Providers";
+import StagewiseWrapper from './components/StagewiseWrapper';
 
 // Optimized font loading
 const inter = Inter({ 
@@ -215,6 +216,15 @@ export default function RootLayout({
           {/* Main content */}
           <div className="relative z-10">
             <Providers>
+              {/* Stagewise AI Toolbar - chỉ hiển thị ở development */}
+              {process.env.NODE_ENV === 'development' && (
+                <StagewiseWrapper
+                  config={{
+                    plugins: [], // Có thể thêm plugins tùy chỉnh sau
+                  }}
+                />
+              )}
+              
               <main id="main-content">
                 {children}
               </main>

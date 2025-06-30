@@ -28,8 +28,8 @@ export default function ProductCarousel({
   if (!data || !data.length) {
     return (
       <div className={`${className}`}>
-        <h2 className="text-lg font-semibold mb-4 text-gray-900">{title}</h2>
-        <p className="text-gray-500 text-center py-8">Không có sản phẩm nào để hiển thị</p>
+        <h2 className="text-lg font-semibold mb-4 text-foreground">{title}</h2>
+        <p className="text-foreground/60 text-center py-8">Không có sản phẩm nào để hiển thị</p>
       </div>
     )
   }
@@ -38,7 +38,7 @@ export default function ProductCarousel({
     <section className={`product-carousel ${className} relative`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 leading-tight">
+        <h2 className="text-xl font-semibold text-foreground leading-tight">
           {title}
         </h2>
       </div>
@@ -102,8 +102,8 @@ export default function ProductCarousel({
         }
         :global(.swiper-button-next),
         :global(.swiper-button-prev) {
-          color: #1a1a1a;
-          background: rgba(255, 255, 255, 0.8);
+          color: hsl(var(--nextui-foreground));
+          background: hsl(var(--nextui-content1) / 0.8);
           backdrop-filter: blur(4px);
           padding: 2rem;
           border-radius: 50%;
@@ -112,7 +112,7 @@ export default function ProductCarousel({
         }
         :global(.swiper-button-next:hover),
         :global(.swiper-button-prev:hover) {
-          background: rgba(255, 255, 255, 0.9);
+          background: hsl(var(--nextui-content1) / 0.9);
           transform: scale(0.55);
         }
         :global(.swiper-button-disabled) {
@@ -120,7 +120,7 @@ export default function ProductCarousel({
           cursor: not-allowed;
         }
         :global(.swiper-pagination-bullet) {
-          background: #1a1a1a;
+          background: hsl(var(--nextui-foreground));
           display: none;
         }
       `}</style>

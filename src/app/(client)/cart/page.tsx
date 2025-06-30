@@ -13,7 +13,7 @@ import { Button } from '@nextui-org/react';
 import { ShoppingBag } from 'lucide-react';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
 import { useCartStore } from '@/app/_zustand/client/CartStore';
-import { formatProductImageUrl } from '@/app/_util/formatImageUrl';
+
 
 export default function Page() {
     const { user : userInfo, accessToken, syncFromLocalStorage } = useAuthInfor();
@@ -22,6 +22,7 @@ export default function Page() {
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [cartData, setCartData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [expandedItems, setExpandedItems] = useState<number[]>([]);
     const router = useRouter();
     // Force sync nếu cần thiết
     useEffect(() => {
@@ -58,6 +59,7 @@ export default function Page() {
                     setCartData(res.data);
                     if (res.data.cartItems) {
                         setCartItems(res.data.cartItems);
+                        console.log(res.data.cartItems);
                         // Đồng bộ với Zustand store
                         setStoreCartItems(res.data.cartItems);
                     }
@@ -141,6 +143,14 @@ export default function Page() {
         }, 0);
     }
 
+    const toggleItemDetails = (itemId: number) => {
+        setExpandedItems(prev => 
+            prev.includes(itemId) 
+                ? prev.filter(id => id !== itemId)
+                : [...prev, itemId]
+        );
+    }
+
     // Show loading khi đang check auth hoặc sync data
     if (loading || (!userInfo && typeof window !== 'undefined' && (localStorage.getItem('accessToken') || localStorage.getItem('user')))) {
         return (
@@ -168,18 +178,17 @@ export default function Page() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+        <div className="min-h-screen bg-background">
             <div className="container mx-auto px-4 py-8">
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-6">
-                    <div className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl shadow-lg">
-                        <ShoppingBag className="w-6 h-6 text-white" />
+                    <div className="p-3 bg-primary rounded-xl shadow-lg">
+                        <ShoppingBag className="w-6 h-6 text-primary-foreground" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                            Giỏ hàng của bạn
+                            <h1 className="text-3xl font-bold text-foreground">
+                                Giỏ hàng của bạn
                         </h1>
-                        <p className="text-gray-600 dark:text-gray-300">Quản lý và thanh toán các sản phẩm yêu thích</p>
                     </div>
                 </div>
 
@@ -220,7 +229,7 @@ export default function Page() {
                                             {/* Product Image */}
                                             <div className="w-28 h-28 relative flex-shrink-0">
                                                 <Image
-                                                    src={formatProductImageUrl(item.variant.product.imageUrls, 0)}
+                                                    src={item.variant.product.imageUrls?.[0] || '/next.svg'}
                                                     alt={item.variant.product.name}
                                                     fill
                                                     className="object-cover rounded-xl shadow-md"
@@ -233,14 +242,17 @@ export default function Page() {
                                                     <h3 className="font-bold text-gray-900 dark:text-gray-100 text-xl">
                                                         {item.variant.product.name}
                                                     </h3>
-                                                    <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
-                                                        ID: {item.id}
-                                                    </span>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => toggleItemDetails(item.id)}
+                                                            className="text-xs bg-primary/10 text-primary px-2 py-1 rounded-full hover:bg-primary/20 transition-colors"
+                                                        >
+                                                            {expandedItems.includes(item.id) ? 'Ẩn chi tiết' : 'Chi tiết'}
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-                                                    Thêm vào: {new Date(item.createdAt).toLocaleDateString('vi-VN')}
-                                                </p>
                                                 
+                                                {/* Always show basic info */}
                                                 <div className="flex flex-wrap gap-2 mb-4">
                                                     <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
                                                         Size: {item.variant.size.name}
@@ -250,25 +262,36 @@ export default function Page() {
                                                         <span>{item.variant.color.name}</span>
                                                         <div className="w-3 h-3 rounded-full border border-white dark:border-gray-600 shadow-sm" style={{backgroundColor: item.variant.color.hexColor}}></div>
                                                     </span>
-                                                    <span className="px-3 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full text-sm font-medium">
-                                                        Mùa: {item.variant.product.season}
-                                                    </span>
-                                                    <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded-full text-sm font-medium">
-                                                        {item.variant.product.category.name}
-                                                    </span>
-                                                    <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-medium">
-                                                        {item.variant.product.team.name}
-                                                    </span>
-                                                    <span className="px-3 py-1 bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-300 rounded-full text-sm font-medium">
-                                                        {item.variant.product.team.league}
-                                                    </span>
-                                                    <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 rounded-full text-sm font-medium">
-                                                        {item.variant.product.material.name}
-                                                    </span>
-                                                    <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">
-                                                        Mã: {item.variant.product.code}
-                                                    </span>
                                                 </div>
+
+                                                {/* Detailed info - only show when expanded */}
+                                                {expandedItems.includes(item.id) && (
+                                                    <div className="space-y-3 mb-4">
+                                                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                                                            Thêm vào: {new Date(item.createdAt).toLocaleDateString('vi-VN')}
+                                                        </p>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <span className="px-3 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full text-sm font-medium">
+                                                                Mùa: {item.variant.product.season}
+                                                            </span>
+                                                            <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded-full text-sm font-medium">
+                                                                {item.variant.product.category.name}
+                                                            </span>
+                                                            <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-medium">
+                                                                {item.variant.product.team.name}
+                                                            </span>
+                                                            <span className="px-3 py-1 bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-300 rounded-full text-sm font-medium">
+                                                                {item.variant.product.team.league}
+                                                            </span>
+                                                            <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 rounded-full text-sm font-medium">
+                                                                {item.variant.product.material.name}
+                                                            </span>
+                                                            <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">
+                                                                Mã: {item.variant.product.code}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                )}
                                                 
                                                 {/* Price */}
                                                 <div className="flex items-center gap-3 mb-6">

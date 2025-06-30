@@ -215,7 +215,7 @@ const handlePayment = async () => {
     <div className="lg:col-span-1">
       <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 dark:border-gray-700/30 overflow-hidden sticky top-4">
         {/* Header */}
-        <div className="px-6 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+        <div className="px-6 py-5 bg-gradient-to-r from-blue-600 to-purple-600 text-gray-900 dark:text-gray-100">
           <h2 className="text-xl font-bold">
             Chi tiết đơn hàng
           </h2>
@@ -326,7 +326,7 @@ const handlePayment = async () => {
             />
             {discount > 0 && (
               <div className="flex justify-between items-center text-sm bg-green-50 dark:bg-green-900/30 p-3 rounded-lg border border-green-200 dark:border-green-700">
-                <span className="text-gray-700 dark:text-gray-300 font-medium">Giảm giá:</span>
+                <span className="text-foreground/70 font-medium">Giảm giá:</span>
                 <span className="text-green-600 dark:text-green-400 font-bold">-<FormatPrice price={discount} currency="₫" /></span>
               </div>
             )}
@@ -336,34 +336,34 @@ const handlePayment = async () => {
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700/50 dark:to-gray-800/50 rounded-xl p-4 border border-blue-100 dark:border-gray-600">
             <div className="space-y-3">
               <div className="flex justify-between items-center">
-                <span className="text-gray-700 dark:text-gray-300 font-medium">Số lượng sản phẩm:</span>
-                <span className="font-bold text-gray-900 dark:text-gray-100">{selectedItems.length}</span>
+                <span className="text-foreground/70 font-medium">Số lượng sản phẩm:</span>
+                <span className="font-bold text-foreground">{selectedItems.length}</span>
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-gray-700 dark:text-gray-300 font-medium">Tạm tính:</span>
+                <span className="text-foreground/70 font-medium">Tạm tính:</span>
                 <FormatPrice
                   price={calculateTotal()}
-                  className="font-bold text-gray-900 dark:text-gray-100"
+                  className="font-bold text-foreground"
                   currency="₫"
                 />
               </div>
 
               <div className="flex justify-between items-center">
-                <span className="text-gray-700 dark:text-gray-300 font-medium">Phí vận chuyển:</span>
+                <span className="text-foreground/70 font-medium">Phí vận chuyển:</span>
                 <FormatPrice 
                   price={feeShip} 
-                  className="font-bold text-gray-900 dark:text-gray-100" 
+                  className="font-bold text-foreground" 
                   currency="₫" 
                 />
               </div>
 
               <div className="border-t border-blue-200 dark:border-gray-600 pt-3">
                 <div className="flex justify-between items-center">
-                  <span className="text-lg font-bold text-gray-900 dark:text-gray-100">Tổng thanh toán:</span>
+                  <span className="text-lg font-bold text-foreground">Tổng thanh toán:</span>
                   <FormatPrice
                     price={calculateTotalAfterDiscount()}
-                    className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent"
+                    className="text-xl font-bold text-foreground"
                     currency="₫"
                   />
                 </div>
@@ -423,8 +423,8 @@ const handlePayment = async () => {
               disabled={selectedItems.length === 0 || isProcessing}
               className={`w-full py-4 px-6 rounded-xl font-bold transition-all duration-200 text-sm shadow-lg flex items-center justify-center gap-2 ${
                 selectedItems.length === 0 || isProcessing
-                  ? "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:shadow-xl transform hover:scale-105"
+                  ? "bg-default-200 text-default-500 cursor-not-allowed"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-xl transform hover:scale-105"
               }`}
               onClick={handlePayment}
             >

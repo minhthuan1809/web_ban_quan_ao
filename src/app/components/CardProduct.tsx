@@ -25,12 +25,12 @@ const CardProduct = ({ product } : { product : any }  ) => {
           {/* Badges */}
           <div className="absolute top-1 left-1 flex justify-between w-[95%] gap-1">
             {product.isFeatured && (
-              <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-1.5 py-0.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm border border-white/20">
+              <div className="bg-red-500 text-white px-1.5 py-0.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm border border-white/20">
                 HOT
               </div>
             )}
             {product.salePrice && product.salePrice > 0 && (
-              <div className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-1.5 py-0.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm border border-white/20">
+              <div className="bg-green-500 text-white px-1.5 py-0.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm border border-white/20">
                 -{product.salePrice}%
               </div>
             )}

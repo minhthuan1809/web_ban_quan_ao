@@ -335,7 +335,7 @@
                           <span>Giảm giá:</span>
                           <span>{formatCurrency(order.discountAmount)}</span>
                         </div>
-                        <div className="flex justify-between font-bold border-t border-gray-100 pt-1 mt-1">
+                        <div className="flex justify-between font-bold border-t border-gray-100 text-foreground pt-1 mt-1">
                           <span>Tổng thanh toán:</span>
                           <span>{formatCurrency(order.totalAmount)}</span>
                         </div>

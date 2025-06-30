@@ -7,7 +7,7 @@ import { authUpdateProfile_API } from '@/app/_service/authClient';
 import { uploadToCloudinary } from '@/app/_util/upload_img_cloudinary';
 import { Button, Input, Card, CardBody, CardHeader, Divider, Select, SelectItem } from '@nextui-org/react';
 import { User, Mail, Camera, Phone, MapPin, Calendar, Edit3, Save, X } from 'lucide-react';
-import { formatAvatarUrl } from '@/app/_util/formatImageUrl';
+
 
 export default function PageProfile() {
   const { user: userInfo, accessToken, setUser } = useAuthInfor();
@@ -143,7 +143,7 @@ export default function PageProfile() {
             <div className="relative group">
               <div className="relative w-32 h-32 md:w-40 md:h-40">
                 <Image 
-                  src={formatAvatarUrl(avatar)} 
+                  src={avatar || '/app/_img/default-avatar.png'} 
                   alt="avatar" 
                   fill 
                   className="rounded-full object-cover border-4 border-white shadow-xl" 

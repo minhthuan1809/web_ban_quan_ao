@@ -107,7 +107,7 @@ export default function SimpleEvaluateComment() {
   }
 
   if (loading) {
-    return <div className="bg-white p-4 text-center">Đang tải đánh giá...</div>;
+    return <div className="bg-content1 p-4 text-center text-foreground">Đang tải đánh giá...</div>;
   }
 
   const renderStars = (rating: number) => {
@@ -132,21 +132,21 @@ export default function SimpleEvaluateComment() {
   };
 
   return (
-    <div className="bg-white p-4 ">
-      <h2 className="text-lg font-medium mb-4 text-gray-900">
+    <div className="bg-content1 p-4">
+      <h2 className="text-lg font-medium mb-4 text-foreground">
         ĐÁNH GIÁ SẢN PHẨM {metadata && `(${metadata.total})`}
       </h2>
       
-      <div className="flex items-center gap-6 mb-6 pb-4 border-b">
+      <div className="flex items-center gap-6 mb-6 pb-4 border-b border-divider">
         <div className="text-center">
-          <div className="text-3xl font-bold text-gray-900 mb-1">{averageRating}</div>
-          <div className="text-sm text-gray-600">trên 5</div>
+          <div className="text-3xl font-bold text-foreground mb-1">{averageRating}</div>
+          <div className="text-sm text-foreground/60">trên 5</div>
           <div className="flex justify-center gap-1 mt-1">
             {renderStars(Math.round(averageRating))}
           </div>
         </div>
         
-        <div className="text-sm text-gray-600">
+        <div className="text-sm text-foreground/60">
           <div>
             {[5, 4, 3, 2, 1].map(rating => 
               ratingCounts[rating] ? (
@@ -162,9 +162,9 @@ export default function SimpleEvaluateComment() {
 
       <div className="space-y-5">
         {reviews.map((review) => (
-          <div key={review.id} className="pb-5 border-b border-gray-100 last:border-b-0">
+          <div key={review.id} className="pb-5 border-b border-divider last:border-b-0">
             <div className="flex gap-3">
-              <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 text-sm overflow-hidden">
+              <div className="w-8 h-8 bg-default-200 rounded-full flex items-center justify-center text-foreground/60 text-sm overflow-hidden">
                 {review.user?.avatarUrl ? (
                   <img 
                     src={review.user.avatarUrl}
@@ -187,24 +187,24 @@ export default function SimpleEvaluateComment() {
               
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <span className="text-sm font-medium text-gray-900">{review.user?.fullName || 'Người dùng'}</span>
+                  <span className="text-sm font-medium text-foreground">{review.user?.fullName || 'Người dùng'}</span>
                   <div className="flex gap-1">
                     {renderStars(review.rating)}
                   </div>
                 </div>
                 
-                <div className="text-xs text-gray-500 mb-3">
+                <div className="text-xs text-foreground/50 mb-3">
                   {formatDate(review.createdAt)}
                 </div>
                 
-                <p className="text-gray-800 text-sm mb-3 leading-relaxed">
+                <p className="text-foreground/80 text-sm mb-3 leading-relaxed">
                   {review.comment}
                 </p>
                 
                 {review.images && review.images.length > 0 && (
                   <div className="flex gap-2 mb-3 flex-wrap">
                     {review.images.map((image, index) => (
-                      <div key={index} className="w-16 h-16 bg-gray-100 rounded">
+                      <div key={index} className="w-16 h-16 bg-default-200 rounded">
                         <img 
                           src={image} 
                           alt={`Ảnh ${index + 1}`}
@@ -220,14 +220,14 @@ export default function SimpleEvaluateComment() {
                 )}
 
                 {review.answers && review.answers.length > 0 && (
-                  <div className="mt-4 pl-4 border-l-2 border-gray-200">
+                  <div className="mt-4 pl-4 border-l-2 border-divider">
                     {review.answers.map((answer) => (
                       <div key={answer.id} className="mb-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="text-sm font-medium text-blue-600">KICKSTYLE</span>
-                          <span className="text-xs text-gray-500">{formatDate(answer.createdAt)}</span>
+                          <span className="text-sm font-medium text-primary">KICKSTYLE</span>
+                          <span className="text-xs text-foreground/50">{formatDate(answer.createdAt)}</span>
                         </div>
-                        <p className="text-sm text-gray-700">{answer.answer}</p>
+                        <p className="text-sm text-foreground/80">{answer.answer}</p>
                       </div>
                     ))}
                   </div>
