@@ -11,8 +11,7 @@ import { authRegister_API } from "@/app/_service/authClient";
 import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
 import { useRouter } from "next/navigation";
-import { Button, Checkbox } from "@nextui-org/react";
-import { UserPlus } from "lucide-react";
+import { Checkbox } from "@nextui-org/react";
 
 interface FormData {
   fullName: string;
@@ -109,22 +108,6 @@ export default function PageRegister() {
       return formData[field as keyof FormData] && validateField(field, formData[field]) === "";
     }) && passwordError === "";
 
-    // Debug in development
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Form validation debug:', {
-        fullName: !!formData.fullName,
-        email: !!formData.email,
-        password: !!formData.password,
-        confirmPassword: !!formData.confirmPassword,
-        phone: !!formData.phone,
-        gender: !!formData.gender,
-        address: !!formData.address,
-        agreeToTerms: formData.agreeToTerms,
-        passwordError,
-        isValid: validation
-      });
-    }
-
     return validation;
   }, [formData, validateField, passwordError]);
 
@@ -188,74 +171,34 @@ export default function PageRegister() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-white rounded-2xl shadow-2xl overflow-hidden">
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 bg-card rounded-2xl shadow-2xl overflow-hidden">
         {/* Left side - Illustration */}
-        <div className="hidden md:flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-8">
-          <div className="text-center text-white">
-            <div className="w-64 h-64 mx-auto mb-6 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <UserPlus className="w-24 h-24 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold mb-4">Chào mừng đến với KICKSTYLE</h3>
-            <p className="text-blue-100">
-              Tạo tài khoản để khám phá những sản phẩm thời trang tuyệt vời
-            </p>
-          </div>
+        <div className="hidden md:flex items-center justify-center bg-muted p-8">
+          <div
+            className="w-full h-full bg-cover bg-center rounded-2xl"
+            style={{
+              backgroundImage:
+                "url('https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80')",
+              backgroundPosition: "center",
+            }}
+          />
         </div>
 
         {/* Right side - Register form */}
         <div className="flex flex-col justify-center px-8 py-12">
           <div className="sm:mx-auto sm:w-full sm:max-w-md">
-            <div className="flex items-center justify-center gap-3 mb-6">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg">
-                <UserPlus className="w-6 h-6 text-white" />
-              </div>
-              <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Đăng Ký
-              </h2>
-            </div>
-            <p className="text-center text-gray-600 mb-8">
+            <h2 className="text-center text-4xl font-bold text-card-foreground mb-6 tracking-tight">
+              Đăng Ký
+            </h2>
+            <p className="text-center text-muted-foreground mb-8">
               Tạo tài khoản mới của bạn
             </p>
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
-            {/* Progress indicator */}
-            <div className="mb-6">
-              <div className="flex justify-between text-sm text-gray-600 mb-2">
-                <span>Tiến độ hoàn thành</span>
-                <span>{Math.round((
-                  (formData.fullName ? 1 : 0) +
-                  (formData.email ? 1 : 0) +
-                  (formData.password ? 1 : 0) +
-                  (formData.confirmPassword ? 1 : 0) +
-                  (formData.phone ? 1 : 0) +
-                  (formData.gender ? 1 : 0) +
-                  (formData.address ? 1 : 0) +
-                  (formData.agreeToTerms ? 1 : 0)
-                ) / 8 * 100)}%</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${Math.round((
-                      (formData.fullName ? 1 : 0) +
-                      (formData.email ? 1 : 0) +
-                      (formData.password ? 1 : 0) +
-                      (formData.confirmPassword ? 1 : 0) +
-                      (formData.phone ? 1 : 0) +
-                      (formData.gender ? 1 : 0) +
-                      (formData.address ? 1 : 0) +
-                      (formData.agreeToTerms ? 1 : 0)
-                    ) / 8 * 100)}%`
-                  }}
-                />
-              </div>
-            </div>
-
             {/* Name and Email */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <InputInformation
                 placeholder="Nguyễn Văn A"
                 label="Tên người dùng"
@@ -281,7 +224,7 @@ export default function PageRegister() {
 
             {/* Address */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-card-foreground mb-2">
                 Địa chỉ <span className="text-red-500">*</span>
               </label>
               <InputAddress
@@ -292,20 +235,18 @@ export default function PageRegister() {
 
             {/* Passwords */}
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputPassword
-                  placeholder="Nhập mật khẩu"
-                  label="Mật khẩu"
-                  value={formData.password}
-                  onChange={(value) => updateField("password", value)}
-                />
-                <InputPassword
-                  placeholder="Nhập lại mật khẩu"
-                  label="Xác nhận mật khẩu"
-                  value={formData.confirmPassword}
-                  onChange={(value) => updateField("confirmPassword", value)}
-                />
-              </div>
+              <InputPassword
+                placeholder="Nhập mật khẩu"
+                label="Mật khẩu"
+                value={formData.password}
+                onChange={(value) => updateField("password", value)}
+              />
+              <InputPassword
+                placeholder="Nhập lại mật khẩu"
+                label="Xác nhận mật khẩu"
+                value={formData.confirmPassword}
+                onChange={(value) => updateField("confirmPassword", value)}
+              />
               {passwordError && (
                 <p className="text-red-500 text-sm">{passwordError}</p>
               )}
@@ -325,20 +266,20 @@ export default function PageRegister() {
                 size="sm"
                 isSelected={formData.agreeToTerms}
                 onValueChange={(checked) => updateField("agreeToTerms", checked)}
-                className="mt-1"
+                color="primary"
               >
-                <span className="text-sm text-gray-700">
+                <span className="text-sm text-muted-foreground">
                   Tôi đồng ý với{" "}
                   <Link
                     href="/terms"
-                    className="text-blue-600 hover:text-blue-500 font-medium underline"
+                    className="font-semibold text-primary hover:text-primary/80"
                   >
                     Điều khoản dịch vụ
                   </Link>
                   {" "}và{" "}
                   <Link
                     href="/privacy"
-                    className="text-blue-600 hover:text-blue-500 font-medium underline"
+                    className="font-semibold text-primary hover:text-primary/80"
                   >
                     Chính sách bảo mật
                   </Link>
@@ -346,47 +287,47 @@ export default function PageRegister() {
               </Checkbox>
             </div>
 
-            {/* Form validation status */}
-            {!isFormValid && (
-              <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                <p className="text-orange-800 text-sm font-medium mb-2">Vui lòng hoàn thành:</p>
-                <ul className="text-orange-700 text-sm space-y-1">
-                  {!formData.fullName && <li>• Tên người dùng</li>}
-                  {!formData.email && <li>• Email</li>}
-                  {!formData.password && <li>• Mật khẩu</li>}
-                  {!formData.confirmPassword && <li>• Xác nhận mật khẩu</li>}
-                  {!formData.phone && <li>• Số điện thoại</li>}
-                  {!formData.gender && <li>• Giới tính</li>}
-                  {!formData.address && <li>• Địa chỉ</li>}
-                  {!formData.agreeToTerms && <li>• Đồng ý điều khoản</li>}
-                  {passwordError && <li>• {passwordError}</li>}
-                </ul>
-              </div>
-            )}
-
             {/* Submit button */}
-            <Button
-              type="submit"
-              disabled={!isFormValid || loading}
-              isLoading={loading}
-              color="primary"
-              className={`w-full font-semibold text-white transition-all duration-300 ${
-                isFormValid 
-                  ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-lg hover:shadow-xl' 
-                  : 'bg-gray-400 cursor-not-allowed'
-              }`}
-              size="lg"
-            >
-              {loading ? "Đang xử lý..." : "Đăng Ký"}
-            </Button>
+            <div>
+              <button
+                type="submit"
+                disabled={!isFormValid || loading}
+                className="btn-primary w-full py-3"
+              >
+                {loading ? (
+                  <div className="flex items-center justify-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24">
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Đang xử lý...
+                  </div>
+                ) : (
+                  "Đăng Ký"
+                )}
+              </button>
+            </div>
 
             {/* Login link */}
-            <div className="text-center">
-              <p className="text-gray-600">
+            <div className="text-sm text-center">
+              <p className="text-muted-foreground">
                 Bạn đã có tài khoản?{" "}
                 <Link
                   href="/login"
-                  className="font-semibold text-blue-600 hover:text-blue-500 transition-colors"
+                  className="font-semibold text-primary hover:text-primary/80"
                 >
                   Đăng Nhập Ngay
                 </Link>

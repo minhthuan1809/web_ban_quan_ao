@@ -77,9 +77,15 @@ export const CreateUser_API = async (data: UserCreateData, token: string): Promi
 export const UpdateUser_API = async (id: number, data: UserUpdateData, token: string): Promise<AxiosResponse<ApiResponse>> => {
   try {
     const payload = {
-      ...data,
-      isAdmin: true,
-      token: token,
+      "fullName": data.fullName,
+      "phone": data.phone,
+      "token": token,
+      "address": data.address,
+      "district": data.district,
+      "ward": data.ward,
+      "gender": data.gender,
+      "avatarUrl": data.avatarUrl,
+      "roleId": data.roleId
     };
     
     const response = await apiClient.put(`/auth/update-profile`, payload, {

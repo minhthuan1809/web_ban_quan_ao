@@ -7,6 +7,7 @@ import OrderLoader from './OrderLoader';
 import OrderTabs from './OrderTabs';
 import OrderItem from './OrderItem';
 import { toast } from 'react-toastify';
+import { useSearchParams } from 'next/navigation';
 
 interface OrderItem {
   id: number;
@@ -65,8 +66,18 @@ export default function HistoryOrderPage() {
   const [total, setTotal] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>('all');
   const [error, setError] = useState<string | null>(null);
+const params = useSearchParams();
+console.log(params);
 
-      useEffect(() => {
+
+useEffect(() => {
+  const limit = params.get('vnp_TransactionStatus') === '00' ? 'all' : params.get('vnp_TransactionStatus') ;
+  if(limit){
+ 
+  }
+}, [params]);
+
+useEffect(() => {
       const fetchOrders = async (showLoading: boolean) => {
         try {
           if (showLoading) setLoading(true);

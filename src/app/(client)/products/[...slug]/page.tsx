@@ -21,6 +21,7 @@ import { CreateCard_API } from "@/app/_service/Card";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { Button, Card, CardBody, Chip } from "@nextui-org/react";
 import { calculateDiscountedPrice } from "@/app/_util/CalculateCartPrice";
+import { useCartStore } from "@/app/_zustand/client/CartStore";
 
 // Lazy load heavy components
 const EvaluateComment = lazy(() => import("@/app/components/EvaluateCommet"));
@@ -33,6 +34,7 @@ export default function ProductDetailPage({
   params: { slug: string[] };
 }) {
   const { user } = useAuthInfor();
+  const { addToCart } = useCartStore();
   const id = params.slug[1];
   const [product, setProduct] = useState<any>({
     name: '',
@@ -150,6 +152,13 @@ if(user){
       const res = await CreateCard_API(data);
       if (res.status === 200) {
         toast.success("Thêm vào giỏ hàng thành công");
+        // Cập nhật Zustand store
+        const cartItem = {
+          id: res.data?.id || Date.now(), // Sử dụng ID từ response hoặc timestamp
+          quantity: quantity,
+          variant: selectedVariant
+        };
+        addToCart(cartItem);
       }
     } catch (error) {
       toast.error("Thêm vào giỏ hàng thất bại");

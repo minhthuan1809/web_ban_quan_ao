@@ -171,25 +171,12 @@ export const createOrderWithPaymentMethod6_API = async (amount: number, orderId:
 }
 
 // Export order as PDF
-export const exportOrderPDF_API = async (orderId: number, accessToken: string | null): Promise<Blob> => {
+export const exportOrderPDF_API = async (orderId: number): Promise<Blob> => {
     try {
-        if (!accessToken) {
-            throw new Error('Token xác thực không hợp lệ');
-        }
-        
-        if (!orderId) {
-            throw new Error('ID đơn hàng không hợp lệ');
-        }
+     
         
         const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/v1/orders/export-pdf/${orderId}`, 
-            {
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                },
-                responseType: 'blob', // Important for PDF download
-                timeout: 30000
-            }
+            `${process.env.NEXT_PUBLIC_API_URL}/orders/export-pdf/${orderId}`, 
         );
         
         return res.data;

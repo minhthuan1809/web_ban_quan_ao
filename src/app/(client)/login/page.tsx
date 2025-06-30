@@ -9,6 +9,8 @@ import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
 import { Checkbox } from "@nextui-org/react";
+import useAuthInfor from "@/app/customHooks/AuthInfor";
+import { useCartStore } from "@/app/_zustand/client/CartStore";
 
 export default function PageLogin() {
   const [password, setPassword] = useState("");
@@ -16,6 +18,12 @@ export default function PageLogin() {
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
+  
+  // Auth hook để cập nhật state sau khi login
+  const { setAccessToken, setUser, manualSync } = useAuthInfor();
+  
+  // Cart store để clear cart cũ và sync mới
+  const { clearCart } = useCartStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,8 +62,22 @@ export default function PageLogin() {
         localStorage.setItem('user', JSON.stringify(response.userInfo));
       }
       
+      // Cập nhật hook state ngay lập tức
+      setAccessToken(response.accessToken);
+      setUser(response.userInfo);
+      
+      // Clear cart cũ để sync mới từ server
+      clearCart();
+      
+      // Force sync để đảm bảo tất cả component nhận được update
+      manualSync();
+      
       toast.success("Đăng nhập thành công");
-      router.push("/");
+      
+      // Delay nhỏ để đảm bảo state đã sync hoàn toàn
+      setTimeout(() => {
+        router.push("/");
+      }, 100);
     } catch (error) {
       console.error('Login error details:', error);
       toast.error("Đăng nhập thất bại");

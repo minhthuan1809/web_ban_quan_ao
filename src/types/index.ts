@@ -6,6 +6,7 @@ export * from './contact';
 export * from './discount';
 export * from './evaluate';
 export * from './api';
+export * from './cart';
 
 // UI types (excluding conflicting FormErrors)
 export type {

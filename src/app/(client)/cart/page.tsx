@@ -12,9 +12,12 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@nextui-org/react';
 import { ShoppingBag } from 'lucide-react';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
+import { useCartStore } from '@/app/_zustand/client/CartStore';
+import { createOrder_API } from '@/app/_service/Oder';
 
 export default function Page() {
     const { user : userInfo, accessToken, syncFromLocalStorage } = useAuthInfor();
+    const { setCartItems: setStoreCartItems, removeFromCart, updateQuantity } = useCartStore();
     const [cartItems, setCartItems] = useState<any[]>([]);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [cartData, setCartData] = useState<any>(null);
@@ -23,12 +26,15 @@ export default function Page() {
     
     // Debug user state
     useEffect(() => {
-        console.log('🛒 [Cart] User state:', {
-            userInfo: !!userInfo,
-            accessToken: !!accessToken,
-            userEmail: userInfo?.email,
-            userId: userInfo?.id
-        });
+        const createOrder = async () => {
+        // User state tracking removed
+        const data = sessionStorage.getItem('tempOrderData');
+        if(data){
+                const res = await createOrder_API(JSON.parse(data), Number(userInfo?.id), accessToken);     
+                sessionStorage.removeItem('tempOrderData'); 
+            }   
+        }
+        createOrder();
     }, [userInfo, accessToken]);
     
     // Force sync nếu cần thiết
@@ -37,13 +43,7 @@ export default function Page() {
             const hasTokenInStorage = localStorage.getItem('accessToken');
             const hasUserInStorage = localStorage.getItem('user');
             
-            console.log('🔍 [Cart] Checking localStorage:', {
-                hasTokenInStorage: !!hasTokenInStorage,
-                hasUserInStorage: !!hasUserInStorage
-            });
-            
             if (hasTokenInStorage && hasUserInStorage) {
-                console.log('🔄 [Cart] Force sync từ localStorage');
                 syncFromLocalStorage();
                 return;
             }
@@ -52,7 +52,6 @@ export default function Page() {
         // Sau 2 giây nếu vẫn không có user thì redirect
         const timer = setTimeout(() => {
             if (!userInfo && !accessToken) {
-                console.log('🚫 [Cart] No user found, redirecting to login');
                 router.push('/login');
             }
         }, 2000);
@@ -63,9 +62,7 @@ export default function Page() {
     useEffect(() => {
         const fetchCard = async () => {
             try {
-                console.log("🛒 [Cart] Fetching cart for user:", userInfo?.email);
                 if (!userInfo?.id) {
-                    console.log("🚫 [Cart] No user ID available");
                     setLoading(false);
                     return;
                 }
@@ -75,10 +72,12 @@ export default function Page() {
                     setCartData(res.data);
                     if (res.data.cartItems) {
                         setCartItems(res.data.cartItems);
+                        // Đồng bộ với Zustand store
+                        setStoreCartItems(res.data.cartItems);
                     }
                 }
             } catch (error) {
-                console.error('Lỗi khi tải giỏ hàng:', error);
+                // Error handling removed
             } finally {
                 setLoading(false);
             }
@@ -97,9 +96,12 @@ export default function Page() {
         
         try {
             const res = await UpdateCard_API(itemId.toString(), { quantity: newQuantity, variantId: variantId, cartId: cartId });
-            setCartItems(cartItems.map(item => 
+            const updatedItems = cartItems.map(item => 
                 item.id === itemId ? {...item, quantity: newQuantity} : item    
-            ));
+            );
+            setCartItems(updatedItems);
+            // Cập nhật store
+            updateQuantity(itemId, newQuantity);
         } catch (error) {
             toast.error("Không thể cập nhật số lượng");
         }
@@ -117,7 +119,10 @@ export default function Page() {
         if (result.isConfirmed) {
         try {
             await DeleteCard_API(itemId.toString());
-            setCartItems(cartItems.filter(item => item.id !== itemId));
+            const updatedItems = cartItems.filter(item => item.id !== itemId);
+            setCartItems(updatedItems);
+            // Cập nhật store
+            removeFromCart(itemId);
         } catch (error) {
                 toast.error("Không thể xóa sản phẩm");
             }

@@ -19,6 +19,7 @@ import Image from "next/image";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { authGetUserInfo_API, authLogout_API } from "@/app/_service/authClient";
 import { useUserStore } from "@/app/_zustand/client/InForUser";
+import { useCartStore } from "@/app/_zustand/client/CartStore";
 import { deleteCookie, setCookie } from "cookies-next";
 import ThemeToggle from "@/app/components/ThemeToggle";
 import { Button, Avatar } from "@nextui-org/react";
@@ -47,8 +48,9 @@ export default function Navbar() {
   
   // zustand
   const {setUser_Zustand} = useUserStore()
+  const { cartCount, clearCart } = useCartStore();
   // hook
-  const { accessToken, user: hookUser, refreshFromCookies } = useAuthInfor() 
+  const { accessToken, user: hookUser, refreshFromCookies, clearAuthData } = useAuthInfor() 
   const router = useRouter();
 
   const toggleMobileMenu = () => {
@@ -100,6 +102,12 @@ export default function Navbar() {
   }, [isMobileMenuOpen]);
 
   useEffect(() => {
+    console.log('🔍 [Navbar] Auth state changed:', { 
+      hasHookUser: !!hookUser, 
+      hasAccessToken: !!accessToken,
+      hookUserEmail: hookUser?.email 
+    });
+    
     // Nếu có user từ hook, sử dụng luôn
     if (hookUser) {
       setUser(hookUser);
@@ -124,14 +132,20 @@ export default function Navbar() {
     }
   }, [accessToken, hookUser, refreshFromCookies]);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (!accessToken) return;
-    router.push("/login");
-
-    authLogout_API(accessToken).then((res: any) => {
-        deleteCookie("accessToken");
-        deleteCookie("user");
-    });
+    
+    try {
+      // Gọi API logout nếu có accessToken
+      await authLogout_API(accessToken);
+    } catch (error) {
+      console.error('Logout API error:', error);
+    } finally {
+      // Luôn clear tất cả auth data bất kể API có lỗi hay không
+      clearAuthData(); // Clear tất cả auth data
+      clearCart(); // Clear giỏ hàng
+      router.push("/login");
+    }
   };
 
   const handleMobileLinkClick = () => {
@@ -161,9 +175,11 @@ export default function Navbar() {
             {/* Mobile Cart Icon */}
             <Link href="/cart" className="relative text-muted-foreground hover:text-primary transition-colors p-2">
               <ShoppingCart size={24} />
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">
-                0
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs rounded-full w-5 h-5 flex items-center justify-center text-[10px] font-bold">
+                  {cartCount}
+                </span>
+              )}
             </Link>
             
             <Button
@@ -208,9 +224,11 @@ export default function Navbar() {
                 {/* Shopping Cart */}
                 <Link href="/cart" className="relative group text-muted-foreground hover:text-primary transition-colors">
                   <ShoppingCart size={24} />
-                  <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full px-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                    0
-                  </span>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full px-1.5 min-w-[20px] h-5 flex items-center justify-center font-bold">
+                      {cartCount}
+                    </span>
+                  )}
                 </Link>
 
                 {/* User/Auth Button */}

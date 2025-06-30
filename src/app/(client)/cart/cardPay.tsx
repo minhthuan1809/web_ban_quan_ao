@@ -127,7 +127,7 @@ const handlePayment = async () => {
       "customerName": name.trim(),
       "customerEmail": userInfo?.email || "",
       "customerPhone": phone.trim(),
-      "shippingAddress": `${address.detail ? address.detail + ', ' : ''}${address.ward.wardName}, ${address.district.districtName}, ${address.city.cityName}`,
+      "shippingAddress": address.city.cityName,
       "shippingDistrict": address.district.districtName,
       "shippingWard": address.ward.wardName,
       "note": note.trim(),
@@ -185,8 +185,6 @@ const handlePayment = async () => {
       }
     }
   } catch (error: any) {
-    console.error("Lỗi đặt hàng:", error);
-    
     let errorMessage = "Có lỗi xảy ra khi đặt hàng";
     
     if (error.response?.data?.message) {
