@@ -1,7 +1,7 @@
 "use client"
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import React, { useEffect, useState } from 'react'
-import { getOrderById_API } from '@/app/_service/Oder';
+import { createOrder_API, getHistoryOrderVnpay_API, getOrderById_API } from '@/app/_service/Oder';
 import { Pagination } from '@nextui-org/react';
 import OrderLoader from './OrderLoader';
 import OrderTabs from './OrderTabs';
@@ -67,13 +67,24 @@ export default function HistoryOrderPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [error, setError] = useState<string | null>(null);
 const params = useSearchParams();
-console.log(params);
 
 
 useEffect(() => {
-  const limit = params.get('vnp_TransactionStatus') === '00' ? 'all' : params.get('vnp_TransactionStatus') ;
-  if(limit){
- 
+
+  const url = window.location.href;
+  const limit = params.get('vnp_ResponseCode') ;
+  if(limit === '00'){
+    const createOrder = async () => {
+      const data = sessionStorage.getItem('tempOrderData');
+      if(data){
+        const res = await createOrder_API(JSON.parse(data), Number(userInfo?.id), accessToken)      
+        if(res.status === 200){
+          const resVnpay = await getHistoryOrderVnpay_API(accessToken, true , res.data.id, url)
+          sessionStorage.removeItem('tempOrderData');
+        }
+      }
+    }
+    createOrder();
   }
 }, [params]);
 

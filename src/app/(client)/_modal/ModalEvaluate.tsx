@@ -8,6 +8,7 @@ import { toast } from 'react-toastify';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { uploadToCloudinary } from '@/app/_util/upload_img_cloudinary';
 import Image from 'next/image';
+import { formatImageUrl } from '@/app/_util/formatImageUrl';
 
 interface OrderItem {
   id: number;
@@ -130,7 +131,7 @@ export default function ModalEvaluate({ isOpen, onClose, dataOrder}: ModalEvalua
                       <CardBody className="flex gap-4">
                         <div className="w-24 h-24 relative">
                           <Image 
-                            src={`/products/${item.variantInfo.productCode}.jpg`}
+                            src={formatImageUrl(`/products/${item.variantInfo.productCode}.jpg`)}
                             alt={item.productName}
                             fill
                             className="object-cover"

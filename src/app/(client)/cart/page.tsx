@@ -14,6 +14,7 @@ import { ShoppingBag } from 'lucide-react';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
 import { useCartStore } from '@/app/_zustand/client/CartStore';
 import { createOrder_API } from '@/app/_service/Oder';
+import { formatProductImageUrl } from '@/app/_util/formatImageUrl';
 
 export default function Page() {
     const { user : userInfo, accessToken, syncFromLocalStorage } = useAuthInfor();
@@ -234,7 +235,7 @@ export default function Page() {
                                             {/* Product Image */}
                                             <div className="w-28 h-28 relative flex-shrink-0">
                                                 <Image
-                                                    src={item.variant.product.imageUrls[0]}
+                                                    src={formatProductImageUrl(item.variant.product.imageUrls, 0)}
                                                     alt={item.variant.product.name}
                                                     fill
                                                     className="object-cover rounded-xl shadow-md"

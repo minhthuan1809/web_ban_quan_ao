@@ -88,7 +88,6 @@ export default function UserProfile() {
     }
   };
 
-  const defaultAvatar = "https://plus.unsplash.com/premium_photo-1687686676757-9d849a16e4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGVyc2lvbnxlbnwwfHwwfHx8MA%3D%3D";
 
   return (
     <div className="w-full md:max-w-80 space-y-4">

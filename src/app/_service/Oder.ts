@@ -200,5 +200,29 @@ export const exportOrderPDF_API = async (orderId: number): Promise<Blob> => {
 }
 
 
+// history order vnp response code
+export const getHistoryOrderVnpay_API = async ( accessToken: string | null, status : boolean, orderId : string, url : string): Promise<any> => {
+    try {
+        const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/vnpay/payment-info?status=${status}?orderId=${orderId}?url=${url}`, 
+        );
+        return res;
+    } catch (error: any) {
+        console.error('Get history order API error:', error);
+        if (!accessToken) {
+            throw new Error('Token xác thực không hợp lệ');
+        }
+    }
+}   
 
-
+// get history order vnp response code
+export const getHistoryOrderVnpayResponseCode_API = async (page: number, size: number): Promise<any> => {
+    try {
+        const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/vnpay?page=${page}&size=${size}`, 
+        );
+        return res; 
+    } catch (error: any) {
+        console.error('Get history order API error:', error);
+    }
+}   
