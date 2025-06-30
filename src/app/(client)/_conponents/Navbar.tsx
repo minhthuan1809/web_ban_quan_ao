@@ -102,11 +102,6 @@ export default function Navbar() {
   }, [isMobileMenuOpen]);
 
   useEffect(() => {
-    console.log('🔍 [Navbar] Auth state changed:', { 
-      hasHookUser: !!hookUser, 
-      hasAccessToken: !!accessToken,
-      hookUserEmail: hookUser?.email 
-    });
     
     // Nếu có user từ hook, sử dụng luôn
     if (hookUser) {

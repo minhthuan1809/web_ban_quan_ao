@@ -221,10 +221,7 @@ export default function DashboardPage() {
     <div className="p-6 space-y-8  mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Dashboard Thống Kê</h1>
-          <p className="text-foreground/60 mt-1">Tổng quan và phân tích dữ liệu kinh doanh</p>
-        </div>
+     
         <div className="flex items-center space-x-4">
           <Select
             size="sm"

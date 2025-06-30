@@ -154,6 +154,7 @@ export interface ToastOptions {
 export interface SweetAlertOptions {
   title?: string;
   text?: string;
+  html?: string;
   icon?: 'success' | 'error' | 'warning' | 'info' | 'question';
   showCancelButton?: boolean;
   confirmButtonText?: string;

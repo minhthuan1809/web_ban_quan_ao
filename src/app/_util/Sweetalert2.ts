@@ -11,6 +11,7 @@ const showConfirmDialog = (options: LocalSweetAlertOptions) => {
   return Swal.fire({
     title: options.title,
     text: options.text,
+    html: options.html,
     icon: options.icon as any,
     showCancelButton: options.showCancelButton || false,
     confirmButtonText: options.confirmButtonText || 'Xác nhận',

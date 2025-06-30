@@ -56,7 +56,7 @@ export const useCartStore = create<CartState>()(
       }
     }),
     {
-      name: 'cart-storage',
+      name: 'tempOrderData',
       partialize: (state) => ({
         cartItems: state.cartItems,
         cartCount: state.cartCount

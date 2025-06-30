@@ -13,7 +13,6 @@ import { Button } from '@nextui-org/react';
 import { ShoppingBag } from 'lucide-react';
 import showConfirmDialog from '@/app/_util/Sweetalert2';
 import { useCartStore } from '@/app/_zustand/client/CartStore';
-import { createOrder_API } from '@/app/_service/Oder';
 import { formatProductImageUrl } from '@/app/_util/formatImageUrl';
 
 export default function Page() {
@@ -24,20 +23,6 @@ export default function Page() {
     const [cartData, setCartData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-    
-    // Debug user state
-    useEffect(() => {
-        const createOrder = async () => {
-        // User state tracking removed
-        const data = sessionStorage.getItem('tempOrderData');
-        if(data){
-                const res = await createOrder_API(JSON.parse(data), Number(userInfo?.id), accessToken);     
-                sessionStorage.removeItem('tempOrderData'); 
-            }   
-        }
-        createOrder();
-    }, [userInfo, accessToken]);
-    
     // Force sync nếu cần thiết
     useEffect(() => {
         if (!userInfo && !accessToken && typeof window !== 'undefined') {

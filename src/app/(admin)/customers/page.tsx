@@ -64,8 +64,7 @@ const FILTER_OPTIONS = [
 export default function PageUser() {        
   const [users, setUsers] = useState<any | null>(null);
   const { accessToken, user: currentUser } = useAuthInfor();
-  const [modalMode, setModalMode] = useState<'add' | 'edit'>('add');
-  const [editUser, setEditUser] = useState<UserData | null>(null);
+  const [modalMode] = useState<'add'>('add');
   const [filterRole, setFilterRole] = useState<'all' | '1' | '2'>('all');
   const [reload, setReload] = useState(false);
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
@@ -138,26 +137,7 @@ export default function PageUser() {
 
   // Handlers
   const handleAdd = useCallback(() => {
-    setModalMode('add');
     setFormData(INITIAL_FORM_DATA);
-    setEditUser(null);
-    setShowModal(true);
-  }, []);
-
-  const handleEdit = useCallback((user: UserData) => {
-    setModalMode('edit');
-    setEditUser(user);
-    setFormData({
-      fullName: user.fullName,
-      email: user.email,
-      password: '',
-      phone: user.phone,
-      address: user.address,
-      district: user.district,
-      ward: user.ward,
-      gender: user.gender,
-      roleId: user.role?.id ?? 1
-    });
     setShowModal(true);
   }, []);
 
@@ -288,16 +268,6 @@ export default function PageUser() {
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    color="primary"
-                    variant="flat"
-                    onPress={() => handleEdit(user)}
-                    startContent={<Edit3 className="w-4 h-4" />}
-                    className="flex-1"
-                  >
-                    Chỉnh sửa
-                  </Button>
-                  <Button
-                    size="sm"
                     color="danger"
                     variant="flat"
                     onPress={() => handleDelete(user.id)}
@@ -414,26 +384,15 @@ export default function PageUser() {
                   <TableCell>
                     <div className="flex items-center justify-center gap-2">
                       {!isCurrentUser(user.id) ? (
-                        <>
-                          <Button
-                            size="sm"
-                            color="primary"
-                            variant="flat"
-                            onPress={() => handleEdit(user)}
-                            startContent={<Edit3 className="w-4 h-4" />}
-                          >
-                            Sửa
-                          </Button>
-                          <Button
-                            size="sm"
-                            color="danger"
-                            variant="flat"
-                            onPress={() => handleDelete(user.id)}
-                            startContent={<Trash2 className="w-4 h-4" />}
-                          >
-                            Xóa
-                          </Button>
-                        </>
+                        <Button
+                          size="sm"
+                          color="danger"
+                          variant="flat"
+                          onPress={() => handleDelete(user.id)}
+                          startContent={<Trash2 className="w-4 h-4" />}
+                        >
+                          Xóa
+                        </Button>
                       ) : (
                         <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
                           <p className="text-blue-700 text-xs font-medium">Tài khoản hiện tại</p>
@@ -451,7 +410,6 @@ export default function PageUser() {
       {/* Modal */}
       {accessToken && (
         <ModalAddUse
-          editUser={editUser as any}
           isOpen={showModal}
           onClose={() => setShowModal(false)}
           modalMode={modalMode}

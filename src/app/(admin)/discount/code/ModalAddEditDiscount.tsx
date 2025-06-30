@@ -83,7 +83,6 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
         resetForm()
       }
     } catch (error: any) {
-      console.log(error)
       toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi xử lý mã giảm giá')
     } finally {
       setIsLoading(false)

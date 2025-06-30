@@ -1,7 +1,7 @@
 "use client"
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import React, { useEffect, useState } from 'react'
-import { createOrder_API, getHistoryOrderVnpay_API, getOrderById_API } from '@/app/_service/Oder';
+import { createOrder_API, getHistoryOrderVnpay_API, getHistoryOrderVnpayResponseCode_API, getOrderById_API } from '@/app/_service/Oder';
 import { Pagination } from '@nextui-org/react';
 import OrderLoader from './OrderLoader';
 import OrderTabs from './OrderTabs';
@@ -66,27 +66,12 @@ export default function HistoryOrderPage() {
   const [total, setTotal] = useState<number>(0);
   const [activeTab, setActiveTab] = useState<string>('all');
   const [error, setError] = useState<string | null>(null);
-const params = useSearchParams();
+  const [isCreatingOrder, setIsCreatingOrder] = useState<boolean>(false);
+  const [hasProcessedPayment, setHasProcessedPayment] = useState<boolean>(false);
+  const params = useSearchParams();
 
 
-useEffect(() => {
 
-  const url = window.location.href;
-  const limit = params.get('vnp_ResponseCode') ;
-  if(limit === '00'){
-    const createOrder = async () => {
-      const data = sessionStorage.getItem('tempOrderData');
-      if(data){
-        const res = await createOrder_API(JSON.parse(data), Number(userInfo?.id), accessToken)      
-        if(res.status === 200){
-          const resVnpay = await getHistoryOrderVnpay_API(accessToken, true , res.data.id, url)
-          sessionStorage.removeItem('tempOrderData');
-        }
-      }
-    }
-    createOrder();
-  }
-}, [params]);
 
 useEffect(() => {
       const fetchOrders = async (showLoading: boolean) => {
@@ -163,7 +148,50 @@ useEffect(() => {
       }
     }
   }, [userInfo?.id, accessToken]);
-
+  
+  useEffect(() => {
+    // Kiểm tra nếu đã xử lý thanh toán rồi thì không làm gì
+    if (hasProcessedPayment) return;
+    
+    const vnpResponseCode = params.get('vnp_ResponseCode');
+    
+    if(vnpResponseCode === '00' && userInfo?.id && accessToken){
+      const createOrder = async () => {
+        try {
+          setIsCreatingOrder(true);
+          setHasProcessedPayment(true); // Đánh dấu đã xử lý
+          
+          const data = sessionStorage.getItem('tempOrderData');
+          console.log("data" , data);
+          
+          if(data){
+            const res = await createOrder_API(JSON.parse(data), userInfo.id, accessToken);
+            console.log("res" , res);
+            if(res.status === 200) {
+              // Xóa dữ liệu tạm và thông báo thành công
+              const resVnpay = await getHistoryOrderVnpay_API(accessToken, "00", res.data.id, window.location.href);
+              if(resVnpay.status === 200){
+                sessionStorage.removeItem('tempOrderData');
+                window.location.href = "/history-order";
+              }
+              
+              // Xóa params khỏi URL mà không reload trang
+            } else {
+              toast.error("Có lỗi xảy ra khi tạo đơn hàng");
+              setHasProcessedPayment(false); // Reset để có thể thử lại
+            }
+          }
+        } catch (error) {
+          console.error("Lỗi khi tạo đơn hàng:", error);
+          toast.error("Có lỗi xảy ra khi tạo đơn hàng");
+          setHasProcessedPayment(false); // Reset để có thể thử lại
+        } finally {
+          setIsCreatingOrder(false);
+        }
+      }
+      createOrder();
+    }
+  }, [params, userInfo?.id, accessToken, hasProcessedPayment]);
   // Lọc đơn hàng theo trạng thái
   const filteredOrders = React.useMemo(() => {
     if (activeTab === 'all') return orders;
@@ -193,7 +221,7 @@ useEffect(() => {
     setActiveTab(tabId);
   };
 
-  if (loading) {
+  if (loading || isCreatingOrder) {
     return <OrderLoader />;
   }
 

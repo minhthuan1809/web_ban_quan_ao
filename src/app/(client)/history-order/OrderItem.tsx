@@ -26,7 +26,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
     setIsExportingInvoice(true);
     try {
       const res: any = await exportOrderPDF_API(id);
-      console.log('Xuất hóa đơn', res);
+      
       
       // Check if response has data property or is direct URL/Blob
       const url = res?.data || res;

@@ -11,10 +11,10 @@ import {
   Progress,
   Card
 } from "@nextui-org/react";
-import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { UserPlus, Edit3, User, Mail, Phone, MapPin, Users, Camera, Upload, Check, ArrowRight, ArrowLeft, Key } from "lucide-react";
+import React, { useState, useCallback } from "react";
+import { UserPlus, User, Mail, Phone, MapPin, Users, Camera, Upload, Check, ArrowRight, ArrowLeft, Key } from "lucide-react";
 import InputAddress from "@/app/components/ui/InputAddress";
-import { CreateUser_API, UpdateUser_API } from "@/app/_service/user";
+import { CreateUser_API } from "@/app/_service/user";
 import ImgUpload from "@/app/components/ui/ImgUpload";
 import { toast } from "react-toastify";
 import InputGender from "@/app/components/ui/InputGender";
@@ -47,10 +47,9 @@ interface User {
 }
 
 interface ModalAddUseProps {
-  editUser: User | null;
   isOpen: boolean;
   onClose: () => void;
-  modalMode: 'add' | 'edit';
+  modalMode: 'add';
   formData: any;
   setFormData: (data: any) => void;
   accessToken: string;
@@ -87,7 +86,6 @@ const VALIDATION_RULES: Record<string, ValidationRule> = {
 };
 
 export default function ModalAddUse({
-  editUser,
   isOpen,
   onClose,
   modalMode,
@@ -104,22 +102,16 @@ export default function ModalAddUse({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [step, setStep] = useState(1);
 
-  // Memoized values
-  const isEditMode = modalMode === 'edit';
-  const headerConfig = useMemo(() => ({
-    icon: isEditMode ? <Edit3 className="w-5 h-5 text-purple-600" /> : <UserPlus className="w-5 h-5 text-blue-600" />,
-    title: isEditMode ? "Chỉnh sửa thông tin người dùng" : "Thêm người dùng mới",
-    subtitle: isEditMode ? "Cập nhật thông tin người dùng" : "Điền thông tin để tạo tài khoản mới",
-    buttonText: isEditMode ? "Cập nhật" : "Thêm mới",
-    bgColor: isEditMode ? 'bg-purple-100' : 'bg-blue-100'
-  }), [isEditMode]);
+  // Header config
+  const headerConfig = {
+    icon: <UserPlus className="w-5 h-5 text-blue-600" />,
+    title: "Thêm người dùng mới",
+    subtitle: "Điền thông tin để tạo tài khoản mới",
+    buttonText: "Thêm mới",
+    bgColor: 'bg-blue-100'
+  };
 
-  // Set preview when editing
-  useEffect(() => {
-    if (isEditMode && editUser?.avatarUrl) {
-      setPreview(editUser.avatarUrl);
-    }
-  }, [isEditMode, editUser]);
+
 
   // Reset form
   const resetForm = useCallback(() => {
@@ -144,26 +136,24 @@ export default function ModalAddUse({
       return rule.message;
     }
     
-    if (field === 'password' && modalMode === 'add' && value && rule.minLength && value.length < rule.minLength) {
+    if (field === 'password' && value && rule.minLength && value.length < rule.minLength) {
       return rule.message;
     }
     
     return '';
-  }, [modalMode]);
+  }, []);
 
   const validateForm = useCallback(() => {
     const newErrors: Record<string, string> = {};
     
     Object.keys(VALIDATION_RULES).forEach(field => {
-      if (field === 'password' && isEditMode) return; // Skip password validation in edit mode
-      
       const error = validateField(field, formData[field]);
       if (error) newErrors[field] = error;
     });
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  }, [formData, validateField, isEditMode]);
+  }, [formData, validateField]);
 
   // Image upload
   const handleImageUpload = useCallback(async () => {
@@ -190,16 +180,16 @@ export default function ModalAddUse({
   const handleSuccess = useCallback(() => {
     setLoading(false);
     resetForm();
-    toast.success(`✅ ${isEditMode ? "Cập nhật" : "Thêm"} người dùng thành công!`);
+    toast.success("✅ Thêm người dùng thành công!");
     setReload(!reload);
     onClose();
-  }, [isEditMode, resetForm, setReload, reload, onClose]);
+  }, [resetForm, setReload, reload, onClose]);
 
   const handleError = useCallback((message?: string) => {
     setLoading(false);
     setUploadProgress(0);
-    toast.error(message || `❌ ${isEditMode ? "Cập nhật" : "Thêm"} người dùng thất bại!`);
-  }, [isEditMode]);
+    toast.error(message || "❌ Thêm người dùng thất bại!");
+  }, []);
 
   const handleSubmit = useCallback(async () => {
     if (!validateForm()) {
@@ -216,30 +206,22 @@ export default function ModalAddUse({
         if (avatarUrl) finalData.avatarUrl = avatarUrl;
       }
       
-      const apiCall = isEditMode 
-        ? UpdateUser_API(editUser!.id, finalData, accessToken)
-        : CreateUser_API(finalData, accessToken);
-      
-      const res = await apiCall;
+      const res = await CreateUser_API(finalData, accessToken);
       res.status === 200 ? handleSuccess() : handleError();
     } catch (error) {
       handleError();
     }
-  }, [validateForm, formData, file, handleImageUpload, isEditMode, editUser, accessToken, handleSuccess, handleError]);
+  }, [validateForm, formData, file, handleImageUpload, accessToken, handleSuccess, handleError]);
   // Step navigation
   const nextStep = useCallback(() => {
-
-    
     if (step === 1) {
-      const basicFields = ['fullName', 'email'];
-      if (modalMode === 'add') basicFields.push('password');
+      const basicFields = ['fullName', 'email', 'password'];
       
       const basicErrors: Record<string, string> = {};
       basicFields.forEach(field => {
         const error = validateField(field, formData[field]);
         if (error) basicErrors[field] = error;
       });
-      
       
       if (Object.keys(basicErrors).length > 0) {
         setErrors(basicErrors);
@@ -248,7 +230,7 @@ export default function ModalAddUse({
     }
 
     setStep(2);
-  }, [step, modalMode, validateField, formData, errors]);
+  }, [step, validateField, formData]);
 
   const prevStep = useCallback(() => setStep(1), []);
 
@@ -369,22 +351,20 @@ export default function ModalAddUse({
                   />  
                 </div>
 
-                {/* Add Password field for new users */}
-                {modalMode === 'add' && (
-                  <div className="mt-5">
-                    <InputPassword
-                      label="Mật khẩu"
-                      placeholder="Nhập mật khẩu"
-                      value={formData.password}
-                      onChange={(value) => updateField('password', value)}
-                      minLength={6}
-                      showStrengthIndicator={true}
-                    />
-                    {errors.password && (
-                      <p className="text-red-500 text-sm mt-1">{errors.password}</p>
-                    )}
-                  </div>
-                )}
+                {/* Password field */}
+                <div className="mt-5">
+                  <InputPassword
+                    label="Mật khẩu"
+                    placeholder="Nhập mật khẩu"
+                    value={formData.password}
+                    onChange={(value) => updateField('password', value)}
+                    minLength={6}
+                    showStrengthIndicator={true}
+                  />
+                  {errors.password && (
+                    <p className="text-red-500 text-sm mt-1">{errors.password}</p>
+                  )}
+                </div>
               </div>
             </div>
           )}

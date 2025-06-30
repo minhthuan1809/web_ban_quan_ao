@@ -61,7 +61,8 @@ function parseAuthToken(request: NextRequest): AuthResult {
     
     if (accessTokenCookie?.value && userCookie?.value) {
       const userData = JSON.parse(userCookie.value);
-      const isAdmin = userData.role?.name?.trim().toLowerCase() === 'admin';
+      const isAdmin = Number(userData.role?.id) === 2;
+    
       
       return {
         isAuthenticated: true,
@@ -165,7 +166,7 @@ function createResponse(
         redirectUrl = REDIRECT_PATHS.home;
       }
       
-      console.log(`Redirecting authenticated user from ${pathname} to ${redirectUrl}`);
+
       return NextResponse.redirect(new URL(redirectUrl, request.url));
     }
   }
@@ -209,8 +210,7 @@ export function middleware(request: NextRequest): NextResponse {
   // Parse authentication data
   const auth = parseAuthToken(request);
   
-  // Debug logging
-  console.log(`Middleware: ${pathname} - Auth: ${auth.isAuthenticated}, Admin: ${auth.isAdmin}`);
+
   
   // Log access attempts for admin routes (for security monitoring)
   if (matchesPath(pathname, ADMIN_PATHS) && !auth.isAdmin) {

@@ -13,20 +13,20 @@ const useAuthInfor = () => {
 
   // Khởi tạo từ cookie/localStorage khi component mount
   useEffect(() => {
-    console.log('🔍 [AuthInfor] Khởi tạo hook...');
+  
     
     // Ưu tiên lấy từ cookies trước
     const tokenFromCookie = getCookie('accessToken') as string;
     const userFromCookie = getCookie('user') as string;
     
     if (tokenFromCookie) {
-      console.log('✅ [AuthInfor] Lấy token từ cookies');
+
       setAccessToken(tokenFromCookie);
     } else if (typeof window !== 'undefined') {
       // Fallback sang localStorage
       const tokenFromStorage = localStorage.getItem('accessToken');
       if (tokenFromStorage) {
-        console.log('🔄 [AuthInfor] Sync token từ localStorage');
+
         setAccessToken(tokenFromStorage);
         setCookie('accessToken', tokenFromStorage, {
           maxAge: 60 * 60 * 24 * 7, // 7 days
@@ -39,7 +39,7 @@ const useAuthInfor = () => {
 
     if (userFromCookie) {
       try {
-        console.log('✅ [AuthInfor] Lấy user từ cookies');
+
         const userData = JSON.parse(decodeURIComponent(userFromCookie));
         setUser(userData);
       } catch (error) {
@@ -51,7 +51,7 @@ const useAuthInfor = () => {
       const userFromStorage = localStorage.getItem('user');
       if (userFromStorage) {
         try {
-          console.log('🔄 [AuthInfor] Sync user từ localStorage');
+
           const userData = JSON.parse(userFromStorage);
           setUser(userData);
           setCookie('user', JSON.stringify(userData), {
@@ -70,7 +70,7 @@ const useAuthInfor = () => {
 
   // Function để set accessToken mới
   const setAccessTokenNew = useCallback((token: string | null) => {
-    console.log('🔧 [AuthInfor] Set access token:', !!token);
+
     setAccessToken(token);
     
     if (token) {
@@ -95,7 +95,7 @@ const useAuthInfor = () => {
 
   // Function để set user mới
   const setUserNew = useCallback((userData: AuthUser | null) => {
-    console.log('🔧 [AuthInfor] Set user:', !!userData);
+
     setUser(userData);
     
     if (userData) {
@@ -121,7 +121,7 @@ const useAuthInfor = () => {
 
   // Function để clear tất cả data (sử dụng cho logout)
   const clearAuthData = useCallback(() => {
-    console.log('🗑️ [AuthInfor] Clearing all auth data...');
+
     
     // Clear state
     setAccessToken(null);
@@ -139,12 +139,12 @@ const useAuthInfor = () => {
       localStorage.removeItem('token');
     }
     
-    console.log('✅ [AuthInfor] Cleared all auth data');
+
   }, []);
 
   // Function để force refresh từ cookies/localStorage
   const refreshFromCookies = useCallback(() => {
-    console.log('🔄 [AuthInfor] Refreshing từ cookies...');
+
     
     const tokenFromCookie = getCookie('accessToken') as string;
     const userFromCookie = getCookie('user') as string;
@@ -182,7 +182,7 @@ const useAuthInfor = () => {
   const syncFromLocalStorage = useCallback(() => {
     if (typeof window === 'undefined') return;
     
-    console.log('🔄 [AuthInfor] Syncing từ localStorage...');
+
     
     const tokenFromStorage = localStorage.getItem('accessToken');
     const userFromStorage = localStorage.getItem('user');
@@ -218,16 +218,9 @@ const useAuthInfor = () => {
   const manualSync = useCallback(() => {
     if (typeof window === 'undefined') return;
     
-    console.log('🔧 [AuthInfor] Manual sync...');
+
     const tokenFromStorage = localStorage.getItem('accessToken');
     const userFromStorage = localStorage.getItem('user');
-    
-    console.log('Debug info:', {
-      tokenFromStorage: !!tokenFromStorage,
-      userFromStorage: !!userFromStorage,
-      currentToken: !!accessToken,
-      currentUser: !!user
-    });
     
     syncFromLocalStorage();
   }, [accessToken, user, syncFromLocalStorage]);

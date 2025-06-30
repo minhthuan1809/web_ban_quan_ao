@@ -2,6 +2,7 @@ import axios, { AxiosResponse } from "axios";
 
 // Create order
 export const createOrder_API = async (data: any, userId: number, accessToken: string | null): Promise<AxiosResponse> => {
+   
     try {
         if (!accessToken) {
             throw new Error('Token xác thực không hợp lệ');
@@ -9,18 +10,19 @@ export const createOrder_API = async (data: any, userId: number, accessToken: st
         
         const res = await axios.post(
             `${process.env.NEXT_PUBLIC_API_URL}/orders?userId=${userId}`, 
-            data, 
+           data,
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json'
                 },
-                timeout: 30000 // 30 seconds timeout
             }
         );
+        console.log("res" , res);
+        
         return res;
     } catch (error: any) {
-        console.error('Create order API error:', error);
+
         if (error.response?.status === 401) {
             throw new Error('Phiên đăng nhập đã hết hạn');
         } else if (error.response?.status === 403) {
@@ -51,7 +53,7 @@ export const getOrder_API = async (page: number, searchQuery: string, accessToke
         );
         return res;
     } catch (error: any) {
-        console.error('Get orders API error:', error);
+
         if (error.response?.status === 401) {
             throw new Error('Phiên đăng nhập đã hết hạn');
         } else if (error.response?.status === 403) {
@@ -83,7 +85,7 @@ export const updateOrderStatus_API = async (orderId: number, status: string, acc
         );
         return res;
     } catch (error: any) {
-        console.error('Update order status API error:', error);
+
         if (error.response?.status === 401) {
             throw new Error('Phiên đăng nhập đã hết hạn');
         } else if (error.response?.status === 403) {
@@ -158,7 +160,7 @@ export const createOrderWithPaymentMethod6_API = async (amount: number, orderId:
         );
         return res;
     } catch (error: any) {
-        console.error('Create VNPay payment API error:', error);
+
         if (error.response?.status === 401) {
             throw new Error('Phiên đăng nhập đã hết hạn');
         } else if (error.response?.status === 403) {
@@ -181,7 +183,7 @@ export const exportOrderPDF_API = async (orderId: number): Promise<Blob> => {
         
         return res.data;
     } catch (error: any) {
-        console.error('Export PDF API error:', error);
+
         if (error.response?.status === 401) {
             throw new Error('Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại');
         } else if (error.response?.status === 403) {
@@ -201,17 +203,32 @@ export const exportOrderPDF_API = async (orderId: number): Promise<Blob> => {
 
 
 // history order vnp response code
-export const getHistoryOrderVnpay_API = async ( accessToken: string | null, status : boolean, orderId : string, url : string): Promise<any> => {
+export const getHistoryOrderVnpay_API = async ( accessToken: string | null, status : string, orderId : string, url : string): Promise<any> => {
     try {
-        const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_API_URL}/vnpay/payment-info?status=${status}?orderId=${orderId}?url=${url}`, 
-        );
-        return res;
-    } catch (error: any) {
-        console.error('Get history order API error:', error);
         if (!accessToken) {
             throw new Error('Token xác thực không hợp lệ');
         }
+        
+        const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_API_URL}/vnpay/payment-info?status=${status}&orderId=${orderId}&url=${encodeURIComponent(url)}`, 
+            {
+                headers: {
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 30000
+            }
+        );
+        return res;
+    } catch (error: any) {
+        if (error.response?.status === 401) {
+            throw new Error('Phiên đăng nhập đã hết hạn');
+        } else if (error.response?.status === 403) {
+            throw new Error('Bạn không có quyền thực hiện thao tác này');
+        } else if (error.response?.status >= 500) {
+            throw new Error('Lỗi máy chủ, vui lòng thử lại sau');
+        }
+        throw error;
     }
 }   
 
@@ -221,8 +238,8 @@ export const getHistoryOrderVnpayResponseCode_API = async (page: number, size: n
         const res = await axios.get(
             `${process.env.NEXT_PUBLIC_API_URL}/vnpay?page=${page}&size=${size}`, 
         );
-        return res; 
+        return res.data; 
     } catch (error: any) {
-        console.error('Get history order API error:', error);
+
     }
 }   
