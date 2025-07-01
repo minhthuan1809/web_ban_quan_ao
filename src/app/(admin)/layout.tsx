@@ -405,7 +405,7 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
                 )}
             >
                 {/* Header */}
-                <div className="h-16 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 bg-gradient-to-r from-primary to-blue-600">
+                <div className="h-16 border-b border-divider flex items-center justify-between px-6 bg-content1">
                     {!isCollapsed && (
                         <div className="flex items-center space-x-3">
                             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
