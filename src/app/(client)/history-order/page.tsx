@@ -162,11 +162,9 @@ useEffect(() => {
           setHasProcessedPayment(true); // Đánh dấu đã xử lý
           
           const data = sessionStorage.getItem('tempOrderData');
-          console.log("data" , data);
           
           if(data){
             const res = await createOrder_API(JSON.parse(data), userInfo.id, accessToken);
-            console.log("res" , res);
             if(res.status === 200) {
               // Xóa dữ liệu tạm và thông báo thành công
               const resVnpay = await getHistoryOrderVnpay_API(accessToken, "00", res.data.id, window.location.href);
@@ -182,7 +180,6 @@ useEffect(() => {
             }
           }
         } catch (error) {
-          console.error("Lỗi khi tạo đơn hàng:", error);
           toast.error("Có lỗi xảy ra khi tạo đơn hàng");
           setHasProcessedPayment(false); // Reset để có thể thử lại
         } finally {

@@ -133,7 +133,8 @@ const handlePayment = async () => {
       "note": note.trim(),
       "couponCode": discountCode.code || null,
       "isAdmin": false,
-      "items": orderItems
+      "items": orderItems,
+      "totalAmount": calculateTotalAfterDiscount()
     };
     
     if (paymentMethod === 6) {

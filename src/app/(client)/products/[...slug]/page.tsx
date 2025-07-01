@@ -229,7 +229,7 @@ if(user){
           {/* Product Info */}
           <div className="space-y-6">
             {/* Product title and rating */}
-            <div className="bg-content1 backdrop-blur-sm rounded-2xl px-6 border border-divider">
+            <div className="bg-content1 backdrop-blur-sm rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Chip color="primary" size="md" variant="flat">
                   {product.code}
@@ -256,7 +256,7 @@ if(user){
             </div>
 
             {/* Price */}
-            <div className="bg-content1 backdrop-blur-sm rounded-2xl px-6 border border-divider">
+            <div className="bg-content1 backdrop-blur-sm rounded-2xl p-4">
               {product.salePrice > 0 ? (
                 <>
                   <div className="text-foreground/40 line-through text-lg mb-1">
@@ -312,69 +312,80 @@ if(user){
             </Card>
 
             {/* Size Selection */}
-            <div className="bg-content1 backdrop-blur-sm rounded-2xl px-6 border border-divider">
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-semibold text-foreground">
-                  Kích thước
-                </span>
-                <Button 
-                  size="sm" 
-                  variant="flat" 
-                  color="primary"
-                  onPress={() => setIsOpen(true)}
-                >
-                  Hướng dẫn chọn size
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {sizes.map((size: any) => (
-                  <Button
-                    key={size.id}
-                    size="md"
-                    variant={selectedSize === size.name ? "solid" : "bordered"}
-                    color={selectedSize === size.name ? "primary" : "default"}
-                    onPress={() => setSelectedSize(size.name)}
-                    className={selectedSize === size.name ? 
-                      "bg-primary text-primary-foreground" : 
-                      "border-divider text-foreground/80 hover:border-primary"
-                    }
-                  >
-                    {size.name}
-                  </Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Color Selection */}
-            {colors.length > 0 && selectedSize && (
-              <div className="bg-content1 backdrop-blur-sm rounded-2xl p-2 border border-divider">
-                <span className="text-sm font-semibold text-foreground mb-4 block">
-                  Màu sắc
-                </span>
-                <div className="flex flex-wrap gap-3 mb-4">
-                  {colors.map((color: any) => (
-                    <Button
-                      key={color.id}
-                      isIconOnly
-                      className={`w-12 h-12 rounded-full p-0.5 border-2 ${selectedColor?.id === color.id ? 'border-primary' : 'border-divider'}`}
-                      style={{ background: color.hexColor }}
-                      onPress={() => setSelectedColor(color)}
+            <div className="space-y-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-foreground/80">Kích thước</label>
+                <div className="flex flex-wrap gap-2">
+                  {sizes.map((size: any) => (
+                    <button
+                      key={size.id}
+                      onClick={() => setSelectedSize(size.name)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        selectedSize === size.name
+                          ? "bg-primary text-white"
+                          : "bg-default-100 hover:bg-default-200 text-foreground/80"
+                      }`}
                     >
-                      {selectedColor?.id === color.id && (
-                        <div className="bg-white/30 rounded-full p-1">
-                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M5 12L10 17L20 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                          </svg>
-                        </div>
-                      )}
-                    </Button>
+                      {size.name}
+                    </button>
                   ))}
                 </div>
-                {selectedColor && (
-                  <p className="text-sm text-foreground/60 bg-content2 p-2 rounded-lg">Đã chọn: <span className="font-medium">{selectedColor.name}</span></p>
-                )}
               </div>
-            )}
+
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-foreground/80">Màu sắc</label>
+                <div className="flex flex-wrap gap-2">
+                  {colors.map((color: any) => (
+                    <button
+                      key={color.id}
+                      onClick={() => setSelectedColor(color)}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                        selectedColor?.id === color.id
+                          ? "bg-primary text-white"
+                          : "bg-default-100 hover:bg-default-200 text-foreground/80"
+                      }`}
+                    >
+                      {color.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="flex items-center">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    className="p-2 rounded-l-lg bg-default-100 hover:bg-default-200 text-foreground/80"
+                  >
+                    <Minus size={20} />
+                  </button>
+                  <input
+                    type="number"
+                    value={quantity}
+                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    className="w-16 text-center border-y border-default-200 py-2 bg-transparent text-foreground"
+                  />
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="p-2 rounded-r-lg bg-default-100 hover:bg-default-200 text-foreground/80"
+                  >
+                    <Plus size={20} />
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                size="lg"
+                color="primary"
+                variant="shadow"
+                className="w-full"
+                onClick={handleAddToCard}
+                disabled={!selectedVariant}
+              >
+                <ShoppingCart className="mr-2" />
+                Thêm vào giỏ hàng
+              </Button>
+            </div>
 
             {/* Stock Info */}
             {selectedVariant && (
@@ -383,49 +394,8 @@ if(user){
               </div>
             )}
 
-            {/* Quantity and Add to Cart */}
-            <div className="bg-content1 backdrop-blur-sm rounded-2xl px-6 border border-divider">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center border-2 border-divider rounded-xl overflow-hidden">
-                  <Button
-                    isIconOnly
-                    size="md"
-                    variant="light"
-                    onPress={() => setQuantity(Math.max(1, quantity - 1))}
-                    isDisabled={!selectedVariant}
-                    className="text-foreground/60 hover:bg-content2"
-                  >
-                    <Minus size={16} />
-                  </Button>
-                  <span className="px-6 py-3 min-w-[80px] text-center text-foreground font-medium bg-content2">
-                    {quantity}
-                  </span>
-                  <Button
-                    isIconOnly
-                    size="md"
-                    variant="light"
-                    onPress={() => setQuantity(quantity + 1)}
-                    isDisabled={!selectedVariant || quantity >= selectedVariant?.stockQuantity}
-                    className="text-foreground/60 hover:bg-content2"
-                  >
-                    <Plus size={16} />
-                  </Button>
-                </div>
-                <Button 
-                  color="primary"
-                  size="lg"
-                  className="flex-1 bg-primary text-primary-foreground font-semibold"
-                  startContent={<ShoppingCart size={20} />}
-                  onPress={handleAddToCard}
-                  isDisabled={!selectedVariant}
-                >
-                  Thêm vào giỏ hàng
-                </Button>
-              </div>
-            </div>
-
             {/* Features */}
-            <div className="bg-content1 backdrop-blur-sm rounded-2xl px-6 border border-divider">
+            <div className="bg-content1 backdrop-blur-sm rounded-2xl p-4">
               <h3 className="text-lg font-semibold text-foreground mb-4">Chính sách & Ưu đãi</h3>
               <div className="space-y-4">
             
@@ -460,11 +430,7 @@ if(user){
         <div className="mt-8">
           <Card className="shadow-lg bg-content1 backdrop-blur-sm border border-divider">
             <CardBody className="p-8">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-2 h-8 bg-primary rounded-full"></div>
-                <h2 className="text-2xl font-bold text-foreground">Mô tả sản phẩm</h2>
-                <div className="flex-1 border-b border-divider"></div>
-              </div>
+              <h2 className="text-2xl font-bold text-foreground mb-6">Mô tả sản phẩm</h2>
               <div className="prose prose-sm max-w-none text-foreground/80 dark:prose-invert">
                 <RenderTextEditer value={product.description} type="sort" />
               </div>
