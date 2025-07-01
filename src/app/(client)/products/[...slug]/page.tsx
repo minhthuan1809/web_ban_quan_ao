@@ -339,37 +339,42 @@ if(user){
                     <button
                       key={color.id}
                       onClick={() => setSelectedColor(color)}
-                      className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                         selectedColor?.id === color.id
                           ? "bg-primary text-white"
                           : "bg-default-100 hover:bg-default-200 text-foreground/80"
                       }`}
                     >
+                      <div 
+                        className="w-4 h-4 rounded-full border border-default-300" 
+                        style={{ backgroundColor: color.hexColor }}
+                      />
                       {color.name}
                     </button>
                   ))}
                 </div>
               </div>
 
-              <div className="flex items-center gap-4">
-                <div className="flex items-center">
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-medium text-foreground/80">Số lượng</label>
+                <div className="inline-flex items-center h-11 rounded-lg border-2 border-default-200 bg-default-100/50 w-fit">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="p-2 rounded-l-lg bg-default-100 hover:bg-default-200 text-foreground/80"
+                    className="px-3 h-full rounded-l-md hover:bg-default-200 text-foreground/80 transition-colors"
                   >
-                    <Minus size={20} />
+                    <Minus size={18} />
                   </button>
                   <input
                     type="number"
                     value={quantity}
                     onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                    className="w-16 text-center border-y border-default-200 py-2 bg-transparent text-foreground"
+                    className="w-16 text-center bg-transparent text-foreground font-medium"
                   />
                   <button
                     onClick={() => setQuantity(quantity + 1)}
-                    className="p-2 rounded-r-lg bg-default-100 hover:bg-default-200 text-foreground/80"
+                    className="px-3 h-full rounded-r-md hover:bg-default-200 text-foreground/80 transition-colors"
                   >
-                    <Plus size={20} />
+                    <Plus size={18} />
                   </button>
                 </div>
               </div>

@@ -205,4 +205,5 @@ export interface AdminOrder {
 export interface AdminOrderTableProps {
   showStatusActions?: boolean;
   mode: 'history' | 'confirm';
+  title?: string;
 } 

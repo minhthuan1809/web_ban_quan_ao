@@ -33,7 +33,7 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
       const response = await GetAllSize_API(
         searchTerm,
         1,
-        accessToken
+        accessToken || ""
       );
       setSizeList(response.data.reverse());
     } catch (err: any) {

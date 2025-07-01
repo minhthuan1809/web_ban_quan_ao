@@ -32,13 +32,13 @@ export interface Material {
 }
 
 export interface Team {
-  id: number;
+  id: string;
   name: string;
   league?: string;
   country?: string;
   logoUrl?: string;
-  createdAt?: number;
-  updatedAt?: number;
+  createdAt?: string;
+  updatedAt?: string;
   isDeleted?: boolean;
 }
 

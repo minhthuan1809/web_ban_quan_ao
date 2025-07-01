@@ -212,6 +212,12 @@ export default function ModalAdd_Edit_Product({
     try {
       setLoadingBtn(true)
       const data = await callApiCloudinary();
+      
+      if (!accessToken) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        return;
+      }
+      
       const response = await CreateProduct_API(data, accessToken);
       
       if (response.status === 200) {
@@ -219,10 +225,10 @@ export default function ModalAdd_Edit_Product({
         handleClose();
         refetch();
       } else {
-        toast.error(response.data.message);
+        toast.error("Có lỗi xảy ra khi thêm sản phẩm");
       }
-    } catch (error) {
-      toast.error(edit ? "Có lỗi xảy ra khi cập nhật sản phẩm" : "Có lỗi xảy ra khi thêm sản phẩm");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi thêm sản phẩm");
       console.error(error);
     } finally {
       setLoadingBtn(false);
@@ -251,16 +257,22 @@ export default function ModalAdd_Edit_Product({
     try {
       setLoadingBtn(true)
       const data = await callApiCloudinary();
+      
+      if (!accessToken) {
+        toast.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!");
+        return;
+      }
+      
       const response = await UpdateProduct_API(edit.id, data, accessToken);
       if (response.status === 200) {
         toast.success("Cập nhật sản phẩm thành công");
         handleClose();
         refetch();
       } else {
-        toast.error(response.data.message);
+        toast.error("Có lỗi xảy ra khi cập nhật sản phẩm");
       }
-    } catch (error) {
-      toast.error(edit ? "Có lỗi xảy ra khi cập nhật sản phẩm" : "Có lỗi xảy ra khi thêm sản phẩm");
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi cập nhật sản phẩm");
       console.error(error);
     } finally {
       setLoadingBtn(false);

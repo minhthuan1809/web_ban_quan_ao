@@ -36,6 +36,20 @@ const nextConfig = {
       },
     ],
   },
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
+  experimental: {
+    optimizeCss: false,
+    optimizePackageImports: [
+      '@nextui-org/react',
+      '@tremor/react',
+      'framer-motion',
+      'react-icons',
+      'lucide-react'
+    ]
+  },
 };
 
 module.exports = nextConfig;

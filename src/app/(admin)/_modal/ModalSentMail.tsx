@@ -30,7 +30,7 @@ export default function ModalSentMail({
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("PENDING");
-  const { accessToken, userInfo } = useAuthInfor();
+  const { accessToken, user } = useAuthInfor();
 
   useEffect(() => {
     if (contactData && isOpen) {
@@ -54,7 +54,7 @@ export default function ModalSentMail({
   };
 
   const handleSendMail = async () => {
-    if (!accessToken || !userInfo?.id) {
+    if (!accessToken || !user?.id) {
       toast.error("Vui lòng đăng nhập lại");
       return;
     }
@@ -69,7 +69,7 @@ export default function ModalSentMail({
           "sendEmail": true // gửi email
         }, 
         accessToken, 
-        userInfo.id.toString()
+        user.id.toString()
       );
       if (res.status === 200) {
         toast.success("Gửi email thành công");  

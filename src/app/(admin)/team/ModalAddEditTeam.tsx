@@ -8,6 +8,7 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { toast } from 'react-toastify';
 import ImgUpload from '@/app/components/ui/ImgUpload';
 import { uploadToCloudinary } from '@/app/_util/upload_img_cloudinary';
+import type { Team } from '@/types/product';
 
 interface ModalAddEditTeamProps {
   id: string;
@@ -31,9 +32,20 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
   const [loading, setLoading] = React.useState(false);
 
   const handleAddTeam = async (logoUrl: string) => {
+    if (!accessToken) {
+      toast.error("Vui lòng đăng nhập lại!");
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await addTeam_API({...form, logoUrl}, accessToken);
+      const teamData: Partial<Team> = {
+        name: form.name,
+        league: form.league,
+        country: form.country,
+        logoUrl: logoUrl
+      };
+      const response = await addTeam_API(teamData, accessToken);
       if (response.status === 200) {
         toast.success("Thêm đội bóng thành công!");
         onClose();
@@ -59,10 +71,21 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
   }
 
   const handleEditTeam = async () => {
+    if (!accessToken) {
+      toast.error("Vui lòng đăng nhập lại!");
+      return;
+    }
+
     try {
       setLoading(true);
       const res = await addImg(logoFile || form.logoUrl);
-      const response = await updateTeam_API(id, {...form, logoUrl: res[0]}, accessToken);
+      const teamData: Partial<Team> = {
+        name: form.name,
+        league: form.league,
+        country: form.country,
+        logoUrl: res[0]
+      };
+      const response = await updateTeam_API(id, teamData, accessToken);
       if (response.status === 200) {
         toast.success("Cập nhật đội bóng thành công!");
         onClose();

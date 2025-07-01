@@ -60,7 +60,7 @@ export default function InputVariants({
   const fetchColors = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await GetAllColor_API("", 1, accessToken);
+      const res = await GetAllColor_API("", 1, accessToken || "");
       if (res && res.data) {
         setColorList(res.data);
       }
