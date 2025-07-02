@@ -25,13 +25,24 @@ export default function ModalChooseDiscount({ isOpen, onClose, setDiscountCode, 
             try {
                 const res = await getCouponById_API(String(userInfo.id), accessToken);
                 setDiscountList(res.data.content);
+
+                // Kiểm tra và áp dụng mã giảm giá từ sessionStorage
+                const savedCouponCode = sessionStorage.getItem('couponCode');
+                if (savedCouponCode && res.data.content) {
+                    const savedDiscount = res.data.content.find((discount: any) => discount.code === savedCouponCode);
+                    if (savedDiscount) {
+                        const discountAmount = calculateDiscountAmount(savedDiscount);
+                        setDiscountCode({...savedDiscount, name: savedDiscount.code});
+                        setDiscount(discountAmount);
+                        sessionStorage.removeItem('couponCode');
+                    }
+                }
             } catch (error) {
                 console.error('Error fetching discount list:', error);
             }
         }
         fetchDiscountList();
-    }, [userInfo?.id, accessToken]);
-
+    }, [userInfo?.id, accessToken, isOpen]);
     // Lọc mã giảm giá hợp lệ
     const validDiscounts = discountList?.filter(discount => {
         const currentDate = new Date();
