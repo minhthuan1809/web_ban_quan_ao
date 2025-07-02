@@ -23,9 +23,6 @@ export default function CardPay({
   calculateTotal,
   cartData
 }: CardPayProps) {
-  const [feeShip, setFeeShip] = useState<number>(
-    Number(process.env.NEXT_PUBLIC_FEE_SHIP || 0)
-  );
   const { user : userInfo, accessToken } = useAuthInfor();
   const [address, setAddress] = useState<any>({
     city: {
@@ -62,7 +59,7 @@ export default function CardPay({
     message: ''
   });
   const calculateTotalAfterDiscount = () => {
-    return calculateTotal() + feeShip - discount;
+    return calculateTotal() - discount;
   };
 
   const router = useRouter();
@@ -274,7 +271,7 @@ const handlePayment = async () => {
                 minRows={2}
                 classNames={{
                   input: "text-gray-900 dark:text-gray-100 resize-none",
-                  inputWrapper: "border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500 focus-within:border-blue-600 dark:focus-within:border-blue-400 bg-white dark:bg-gray-800",
+                  inputWrapper: "border-2 border-blue-200 dark:border-blue-700 hover:border-blue-400 dark:hover:border-blue-500 focus-within:border-blue-600 dark:focus-within:border-blue-400 bg-white dark:bg-gray-800",
                   label: "text-gray-700 dark:text-gray-300"
                 }}
               />
@@ -328,7 +325,9 @@ const handlePayment = async () => {
             {discount > 0 && (
               <div className="flex justify-between items-center text-sm bg-green-50 dark:bg-green-900/30 p-3 rounded-lg border border-green-200 dark:border-green-700">
                 <span className="text-foreground/70 font-medium">Giảm giá:</span>
-                <span className="text-green-600 dark:text-green-400 font-bold">-<FormatPrice price={discount} currency="₫" /></span>
+                <span className="text-green-600 dark:text-green-400 font-bold whitespace-nowrap">
+                  -<FormatPrice price={discount} currency="₫" className="inline-flex" />
+                </span>
               </div>
             )}
           </div>
@@ -347,15 +346,6 @@ const handlePayment = async () => {
                   price={calculateTotal()}
                   className="font-bold text-foreground"
                   currency="₫"
-                />
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-foreground/70 font-medium">Phí vận chuyển:</span>
-                <FormatPrice 
-                  price={feeShip} 
-                  className="font-bold text-foreground" 
-                  currency="₫" 
                 />
               </div>
 
