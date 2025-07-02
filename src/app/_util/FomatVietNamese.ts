@@ -28,3 +28,56 @@ const formatVietNamese = (text: string) => {
 }
 
 export default formatVietNamese
+
+export const formatOrderStatus = (status: string) => {
+  switch (status) {
+    case 'PENDING':
+      return {
+        label: 'Chờ xác nhận',
+        color: 'warning',
+        bgColor: 'bg-warning/20 text-warning-600'
+      };
+    case 'CONFIRMED':
+      return {
+        label: 'Đã xác nhận',
+        color: 'primary',
+        bgColor: 'bg-primary/20 text-primary-600'
+      };
+    case 'PROCESSING':
+      return {
+        label: 'Đang xử lý',
+        color: 'secondary',
+        bgColor: 'bg-secondary/20 text-secondary-600'
+      };
+    case 'SHIPPING':
+      return {
+        label: 'Đang giao hàng',
+        color: 'info',
+        bgColor: 'bg-info/20 text-info-600'
+      };
+    case 'DELIVERED':
+      return {
+        label: 'Đã giao hàng',
+        color: 'success',
+        bgColor: 'bg-success/20 text-success-600'
+      };
+    case 'CANCELLED':
+      return {
+        label: 'Đã hủy',
+        color: 'danger',
+        bgColor: 'bg-danger/20 text-danger-600'
+      };
+    case 'REFUNDED':
+      return {
+        label: 'Đã hoàn tiền',
+        color: 'default',
+        bgColor: 'bg-default/20 text-default-600'
+      };
+    default:
+      return {
+        label: 'Không xác định',
+        color: 'default',
+        bgColor: 'bg-default/20 text-default-600'
+      };
+  }
+};

@@ -52,10 +52,12 @@ interface Order {
 
 const statusMap = {
   PENDING: { label: 'Chờ xác nhận', color: 'bg-amber-100 text-amber-700 border-amber-200' },
-  PROCESSING: { label: 'Đang xử lý', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-  SHIPPED: { label: 'Đang giao hàng', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+  CONFIRMED: { label: 'Đã xác nhận', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+  PROCESSING: { label: 'Đang xử lý', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+  SHIPPING: { label: 'Đang giao hàng', color: 'bg-sky-100 text-sky-700 border-sky-200' },
   DELIVERED: { label: 'Đã giao hàng', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
   CANCELLED: { label: 'Đã hủy', color: 'bg-red-100 text-red-700 border-red-200' },
+  REFUNDED: { label: 'Đã hoàn tiền', color: 'bg-gray-100 text-gray-700 border-gray-200' }
 };
 
 export default function HistoryOrderPage() {
@@ -195,10 +197,12 @@ useEffect(() => {
     return orders.filter(order => {
       switch(activeTab) {
         case 'pending': return order.status === 'PENDING';
+        case 'confirmed': return order.status === 'CONFIRMED';
         case 'processing': return order.status === 'PROCESSING';
-        case 'shipped': return order.status === 'SHIPPED';
+        case 'shipping': return order.status === 'SHIPPING';
         case 'delivered': return order.status === 'DELIVERED';
         case 'cancelled': return order.status === 'CANCELLED';
+        case 'refunded': return order.status === 'REFUNDED';
         default: return true;
       }
     });
@@ -208,8 +212,9 @@ useEffect(() => {
   const orderTabs = [
     { id: 'all', label: 'Tất cả đơn hàng', count: orders?.length || 0 },
     { id: 'pending', label: 'Chờ xác nhận', count: orders?.filter(o => o.status === 'PENDING')?.length || 0 },
+    { id: 'confirmed', label: 'Đã xác nhận', count: orders?.filter(o => o.status === 'CONFIRMED')?.length || 0 },
     { id: 'processing', label: 'Đang xử lý', count: orders?.filter(o => o.status === 'PROCESSING')?.length || 0 },
-    { id: 'shipped', label: 'Đang giao hàng', count: orders?.filter(o => o.status === 'SHIPPED')?.length || 0 },
+    { id: 'shipping', label: 'Đang giao hàng', count: orders?.filter(o => o.status === 'SHIPPING')?.length || 0 },
     { id: 'delivered', label: 'Đã giao hàng', count: orders?.filter(o => o.status === 'DELIVERED')?.length || 0 },
     { id: 'cancelled', label: 'Đã hủy', count: orders?.filter(o => o.status === 'CANCELLED')?.length || 0 },
   ];

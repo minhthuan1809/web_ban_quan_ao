@@ -206,7 +206,10 @@ export default function PagePromotions() {
                   <Button 
                     color="primary"
                     className="w-full font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700" 
-                    onPress={() => router.push('/products')}
+                    onPress={() => {
+                      sessionStorage.setItem('couponCode', coupon.code);
+                      router.push('/products')
+                    }}
                     startContent={<ShoppingBag size={18} />}
                   >
                     Dùng ngay

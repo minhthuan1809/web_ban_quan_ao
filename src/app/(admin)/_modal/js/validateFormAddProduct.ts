@@ -67,6 +67,21 @@ export const validateForm = (form: any, setErrors: (errors: any) => void) => {
     if (!form.variants || form.variants.length === 0) {
         newErrors.variants = 'Vui lòng thêm ít nhất một biến thể sản phẩm';
         missingFields.push('Biến thể sản phẩm');
+    } else {
+        // Kiểm tra trùng size và màu
+        const variantMap = new Map();
+        for (let i = 0; i < form.variants.length; i++) {
+            const variant = form.variants[i];
+            const key = `${variant.size}-${variant.color[0]}`;
+            
+            if (variantMap.has(key)) {
+                newErrors.variants = `Biến thể có size ${variant.size} và màu ${variant.color[0]} đã tồn tại`;
+                missingFields.push('Biến thể trùng lặp');
+                break;
+            }
+            
+            variantMap.set(key, true);
+        }
     }
 
     setErrors(newErrors);

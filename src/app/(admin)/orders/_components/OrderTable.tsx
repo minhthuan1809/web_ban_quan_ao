@@ -1,149 +1,220 @@
-  "use client"
+"use client"
 
-  import { exportOrderPDF_API, getOrder_API, updateOrderStatus_API } from '@/app/_service/Oder';
-  import { Eye, PackageX } from 'lucide-react'
-  import React, { useCallback, useEffect, useState } from 'react'
-  import { format } from 'date-fns';
-  import Loading from '@/app/_util/Loading';
-  import { Pagination } from '@nextui-org/react';
-  import useAuthInfor from '@/app/customHooks/AuthInfor';
-  import type { AdminOrder as Order, AdminOrderItem as OrderItem, AdminOrderTableProps as OrderTableProps } from '../../../../types/order';  
+import { exportOrderPDF_API, getOrder_API, updateOrderStatus_API } from '@/app/_service/Oder';
+import { Eye, PackageX } from 'lucide-react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
+import { format } from 'date-fns';
+import Loading from '@/app/_util/Loading';
+import { Pagination, Tabs, Tab } from '@nextui-org/react';
+import useAuthInfor from '@/app/customHooks/AuthInfor';
+import type { AdminOrder as Order, AdminOrderItem as OrderItem, AdminOrderTableProps as OrderTableProps } from '../../../../types/order';  
+import { formatOrderStatus } from "@/app/_util/FomatVietNamese";
 
 
 
-  // Định nghĩa các trạng thái đơn hàng và tên hiển thị tiếng Việt
-  export const ORDER_STATUSES = {
-    PENDING: { label: 'Đang chờ', color: 'bg-warning/20 text-warning-600' },
-    CONFIRMED: { label: 'Đã xác nhận', color: 'bg-success/20 text-success-600' },
-    PROCESSING: { label: 'Đang xử lý', color: 'bg-primary/20 text-primary-600' },
-    SHIPPING: { label: 'Đang giao hàng', color: 'bg-secondary/20 text-secondary-600' },
-    DELIVERED: { label: 'Đã giao hàng', color: 'bg-success/20 text-success-600' },
-    CANCELLED: { label: 'Đã hủy', color: 'bg-danger/20 text-danger-600' },
-    REFUNDED: { label: 'Đã hoàn tiền', color: 'bg-warning/20 text-warning-600' }
+// Định nghĩa các trạng thái đơn hàng và tên hiển thị tiếng Việt
+export const ORDER_STATUSES = {
+  PENDING: { label: 'Chờ xác nhận', color: 'bg-warning/20 text-warning-600' },
+  CONFIRMED: { label: 'Đã xác nhận', color: 'bg-primary/20 text-primary-600' },
+  PROCESSING: { label: 'Đang xử lý', color: 'bg-secondary/20 text-secondary-600' },
+  SHIPPING: { label: 'Đang giao hàng', color: 'bg-info/20 text-info-600' },
+  DELIVERED: { label: 'Đã giao hàng', color: 'bg-success/20 text-success-600' },
+  CANCELLED: { label: 'Đã hủy', color: 'bg-danger/20 text-danger-600' },
+  REFUNDED: { label: 'Đã hoàn tiền', color: 'bg-warning/20 text-warning-600' }
+};
+
+// Định nghĩa luồng xử lý đơn hàng và các trạng thái tiếp theo có thể có
+const ORDER_FLOW = {
+  PENDING: ['CONFIRMED', 'CANCELLED'],
+  CONFIRMED: ['PROCESSING', 'CANCELLED'],
+  PROCESSING: ['SHIPPING', 'CANCELLED'],
+  SHIPPING: ['DELIVERED', 'CANCELLED'],
+  DELIVERED: ['REFUNDED'],
+  CANCELLED: [],
+  REFUNDED: []
+};
+
+// Component hiển thị trạng thái đơn hàng
+const OrderStatusBadge = ({ status }: { status: string }) => {
+  const statusInfo = formatOrderStatus(status);
+  return (
+    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor}`}>
+      {statusInfo.label}
+    </span>
+  );
+};
+
+const OrderStatusTabs = ({ orders, onStatusChange }: { orders: Order[], onStatusChange: (status: string) => void }) => {
+  // Tính số lượng đơn hàng cho mỗi trạng thái
+  const getOrderCountByStatus = (status: string) => {
+    return orders.filter(order => order.status === status).length;
   };
 
-  // Định nghĩa luồng xử lý đơn hàng và các trạng thái tiếp theo có thể có
-  const ORDER_FLOW = {
-    PENDING: ['CONFIRMED', 'CANCELLED'],
-    CONFIRMED: ['PROCESSING'],
-    PROCESSING: ['SHIPPING'],
-    SHIPPING: ['DELIVERED'],
-    DELIVERED: [],
-    CANCELLED: []
+  const tabs = [
+    { key: "ALL", label: "Tất cả đơn hàng", count: orders.length },
+    { key: "PENDING", label: "Chờ xác nhận", count: getOrderCountByStatus("PENDING") },
+    { key: "CONFIRMED", label: "Đã xác nhận", count: getOrderCountByStatus("CONFIRMED") },
+    { key: "PROCESSING", label: "Đang xử lý", count: getOrderCountByStatus("PROCESSING") },
+    { key: "SHIPPING", label: "Đang giao hàng", count: getOrderCountByStatus("SHIPPING") },
+    { key: "DELIVERED", label: "Đã giao hàng", count: getOrderCountByStatus("DELIVERED") },
+    { key: "CANCELLED", label: "Đã hủy", count: getOrderCountByStatus("CANCELLED") }
+  ];
+
+  return (
+    <div className="flex w-full flex-col">
+      <Tabs 
+        aria-label="Order status tabs" 
+        color="primary"
+        variant="light"
+        classNames={{
+          tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
+          cursor: "w-full bg-primary",
+          tab: "max-w-fit px-0 h-12",
+          tabContent: "group-data-[selected=true]:text-primary"
+        }}
+        onSelectionChange={(key) => onStatusChange(key.toString())}
+      >
+        {tabs.map((tab) => (
+          <Tab
+            key={tab.key}
+            title={
+              <div className="flex items-center space-x-2">
+                <span>{tab.label}</span>
+                <span className="px-2 py-1 text-xs font-bold bg-primary/10 text-primary rounded-full">
+                  {tab.count}
+                </span>
+              </div>
+            }
+          />
+        ))}
+      </Tabs>
+    </div>
+  );
+};
+
+export default function OrderTable({ showStatusActions = true, mode }: OrderTableProps) {    
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
+  const [page, setPage] = useState<number>(0);
+  const [total, setTotal] = useState<number>(0);
+  const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
+
+  const { accessToken } = useAuthInfor();
+
+
+  const fetchOrders = useCallback(async (loading = true) => {
+    if (!accessToken) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(loading);
+    try {
+      const res = await getOrder_API(page, searchQuery, accessToken);
+      let filteredOrders = res.data.content;
+
+      // Lọc đơn hàng dựa trên mode
+      if (mode === 'history') {
+        // Chỉ hiển thị đơn hàng đã giao hoặc đã hủy
+        filteredOrders = filteredOrders.filter((order: Order) => 
+          order.status === 'DELIVERED' || 
+          order.status === 'CANCELLED' ||
+          order.status === 'REFUNDED'
+        );
+      } else if (mode === 'confirm') {
+        // Hiển thị đơn hàng đang trong quá trình xử lý
+        filteredOrders = filteredOrders.filter((order: Order) => 
+          order.status === 'PENDING' || 
+          order.status === 'CONFIRMED' || 
+          order.status === 'PROCESSING' ||
+          order.status === 'SHIPPING'
+        );
+      }
+
+      setOrders(filteredOrders.reverse());
+      setTotal(Math.ceil(filteredOrders.length / 10)); // Giả sử mỗi trang có 10 đơn hàng
+    } catch (error) {
+      console.error("Lỗi khi tải danh sách đơn hàng:", error);
+      setOrders([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, searchQuery, accessToken, mode]); 
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchOrders(true);
+    }, accessToken ? 100 : 1000); // Wait longer if no token
+    return () => clearTimeout(timer);
+  }, [page, mode, searchQuery, accessToken]);
+
+
+  // chứ 2000 call api 1 lần 
+  useEffect(() => {
+    if (!accessToken) return; // Don't start interval without token
+    
+    const interval = setInterval(() => {
+      fetchOrders(false);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [fetchOrders, accessToken]);
+
+  const toggleOrderDetails = (orderId: number) => {
+    setExpandedOrder(expandedOrder === orderId ? null : orderId);
   };
 
+  const formatDate = (timestamp: number) => {
+    return format(new Date(timestamp), 'dd/MM/yyyy HH:mm');
+  };
 
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  };
 
-  export default function OrderTable({ showStatusActions = true, mode }: OrderTableProps) {    
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
-    const [searchQuery, setSearchQuery] = useState<string>("");
-    const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
-    const [page, setPage] = useState<number>(0);
-    const [total, setTotal] = useState<number>(0);
+  const handleUpdateStatus = async (orderId: number, newStatus: string) => {
+    if (!showStatusActions) return;
+    
+    setUpdatingOrderId(orderId);
+    try {
+      await updateOrderStatus_API(orderId, newStatus, accessToken);
+      await fetchOrders(); // Refresh orders after update
+    } catch (error) {
+      console.error("Lỗi khi cập nhật trạng thái:", error);
+    } finally {
+      setUpdatingOrderId(null);
+    }
+  };
 
-    const { accessToken } = useAuthInfor();
+  const getNextPossibleStatuses = (currentStatus: string): string[] => {
+    return ORDER_FLOW[currentStatus as keyof typeof ORDER_FLOW] || [];
+  };
 
-  
-    const fetchOrders = useCallback(async (loading = true) => {
-      if (!accessToken) {
-        setLoading(false);
-        return;
-      }
+  // Lọc đơn hàng theo trạng thái
+  const filteredOrders = useMemo(() => {
+    if (selectedStatus === "ALL") return orders;
+    return orders.filter(order => order.status === selectedStatus);
+  }, [orders, selectedStatus]);
 
-      setLoading(loading);
-      try {
-        const res = await getOrder_API(page, searchQuery, accessToken);
-        let filteredOrders = res.data.content;
-
-        // Lọc đơn hàng dựa trên mode
-        if (mode === 'history') {
-          // Chỉ hiển thị đơn hàng đã giao hoặc đã hủy
-          filteredOrders = filteredOrders.filter((order: Order) => 
-            order.status === 'DELIVERED' || 
-            order.status === 'CANCELLED' ||
-            order.status === 'REFUNDED'
-          );
-        } else if (mode === 'confirm') {
-          // Hiển thị đơn hàng đang trong quá trình xử lý
-          filteredOrders = filteredOrders.filter((order: Order) => 
-            order.status === 'PENDING' || 
-            order.status === 'CONFIRMED' || 
-            order.status === 'PROCESSING' ||
-            order.status === 'SHIPPING'
-          );
-        }
-
-        setOrders(filteredOrders.reverse());
-        setTotal(Math.ceil(filteredOrders.length / 10)); // Giả sử mỗi trang có 10 đơn hàng
-      } catch (error) {
-        console.error("Lỗi khi tải danh sách đơn hàng:", error);
-        setOrders([]);
-      } finally {
-        setLoading(false);
-      }
-    }, [page, searchQuery, accessToken, mode]); 
-
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        fetchOrders(true);
-      }, accessToken ? 100 : 1000); // Wait longer if no token
-      return () => clearTimeout(timer);
-    }, [page, mode, searchQuery, accessToken]);
-
-
-    // chứ 2000 call api 1 lần 
-    useEffect(() => {
-      if (!accessToken) return; // Don't start interval without token
-      
-      const interval = setInterval(() => {
-        fetchOrders(false);
-      }, 2000);
-      return () => clearInterval(interval);
-    }, [fetchOrders, accessToken]);
-
-    const toggleOrderDetails = (orderId: number) => {
-      setExpandedOrder(expandedOrder === orderId ? null : orderId);
-    };
-
-    const formatDate = (timestamp: number) => {
-      return format(new Date(timestamp), 'dd/MM/yyyy HH:mm');
-    };
-
-    const formatCurrency = (amount: number) => {
-      return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-    };
-
-    const handleUpdateStatus = async (orderId: number, newStatus: string) => {
-      if (!showStatusActions) return;
-      
-      setUpdatingOrderId(orderId);
-      try {
-        await updateOrderStatus_API(orderId, newStatus, accessToken);
-        await fetchOrders(); // Refresh orders after update
-      } catch (error) {
-        console.error("Lỗi khi cập nhật trạng thái:", error);
-      } finally {
-        setUpdatingOrderId(null);
-      }
-    };
-
-    const getNextPossibleStatuses = (currentStatus: string): string[] => {
-      return ORDER_FLOW[currentStatus as keyof typeof ORDER_FLOW] || [];
-    };
-
-    return (
-      <div className='mx-auto px-2 sm:px-4 py-4 sm:py-8'>
-        {loading ? (
-          <Loading />
-        ) : orders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-10 text-gray-400">
-            <PackageX className="w-16 h-16 mb-3 text-gray-300" />
-            <div className="text-lg font-semibold">Không có đơn hàng nào</div>
-            <div className="text-sm text-gray-400">Hãy thêm đơn hàng mới để bắt đầu quản lý!</div>
-          </div>
-        ) : (
+  return (
+    <div className='mx-auto px-2 sm:px-4 py-4 sm:py-8'>
+      {loading ? (
+        <Loading />
+      ) : orders.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-10 text-gray-400">
+          <PackageX className="w-16 h-16 mb-3 text-gray-300" />
+          <div className="text-lg font-semibold">Không có đơn hàng nào</div>
+          <div className="text-sm text-gray-400">Hãy thêm đơn hàng mới để bắt đầu quản lý!</div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <OrderStatusTabs 
+            orders={orders} 
+            onStatusChange={setSelectedStatus}
+          />
+          
           <div className="overflow-x-auto">
             {/* Bảng cho màn hình lớn */}
             <div className="hidden md:block">
@@ -159,7 +230,7 @@
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-divider">
-                  {orders.map((order) => (
+                  {filteredOrders.map((order) => (
                     <React.Fragment key={order.id}>
                       <tr className="hover:bg-content1 transition-colors">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{order.code}</td>
@@ -171,11 +242,7 @@
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground/80">{formatDate(order.createdAt)}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-foreground">{formatCurrency(order.totalAmount)}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            ORDER_STATUSES[order.status as keyof typeof ORDER_STATUSES]?.color || 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {ORDER_STATUSES[order.status as keyof typeof ORDER_STATUSES]?.label || order.status}
-                          </span>
+                          <OrderStatusBadge status={order.status} />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground/50">
                           <button
@@ -267,18 +334,14 @@
 
             {/* Giao diện cho mobile */}
             <div className="md:hidden space-y-4">
-              {orders.map((order) => (
+              {filteredOrders.map((order) => (
                 <div key={order.id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
                   <div className="flex justify-between items-start mb-2">
                     <div>
                       <p className="font-medium text-gray-900">Mã đơn: {order.code}</p>
                       <p className="text-sm text-gray-500">{formatDate(order.createdAt)}</p>
                     </div>
-                    <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                      ORDER_STATUSES[order.status as keyof typeof ORDER_STATUSES]?.color || 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {ORDER_STATUSES[order.status as keyof typeof ORDER_STATUSES]?.label || order.status}
-                    </span>
+                    <OrderStatusBadge status={order.status} />
                   </div>
                   
                   <div className="border-t border-gray-100 pt-2 mb-2">
@@ -373,7 +436,8 @@
               </div>
             )}
           </div>
-        )}
-      </div>
-    );
-  } 
+        </div>
+      )}
+    </div>
+  );
+} 

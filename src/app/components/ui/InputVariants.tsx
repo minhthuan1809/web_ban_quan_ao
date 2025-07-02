@@ -94,6 +94,20 @@ export default function InputVariants({
       newErrors.color = "Vui lòng chọn ít nhất một màu";
     }
 
+    // Kiểm tra trùng size và màu
+    const isDuplicate = variants.some((variant, index) => {
+      // Bỏ qua variant đang edit
+      if (editingIndex === index) return false;
+      
+      return variant.size === currentVariant.size && 
+             variant.color.some(color => currentVariant.color.includes(color));
+    });
+
+    if (isDuplicate) {
+      newErrors.size = "Biến thể với size và màu này đã tồn tại";
+      toast.error("Biến thể với size và màu này đã tồn tại");
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
