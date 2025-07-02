@@ -29,7 +29,7 @@ export default function ContactsPage() {
       setLoading(true);
       try {
         const res = await getContacts_API({
-          page: page - 1,
+          page: page,
           size: rowsPerPage,
           search: searchValue
           }, accessToken);

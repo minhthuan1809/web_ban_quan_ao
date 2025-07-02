@@ -27,6 +27,7 @@ const VIETNAM_PHONE_PATTERNS = [
   { pattern: /^(083|084|085|081|082)/, name: "Vinaphone" },
   { pattern: /^(056|058)/, name: "Vietnamobile" },
   { pattern: /^(059)/, name: "Gmobile" },
+  { pattern: /^(09)/, name: "Vietnamobile" },
 ];
 
 export default function InputPhone({

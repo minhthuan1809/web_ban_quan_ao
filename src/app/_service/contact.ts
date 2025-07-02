@@ -5,7 +5,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // admin
 export const getContacts_API = async (data: any, accessToken: string) => {
-    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/contacts?page=${data.page}&size=${data.size}&search=${data.search}`, {
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/contacts?page=${data.page || 0}&size=${data.size}&search=${data.search}`, {
         headers: {
             "Authorization": `Bearer ${accessToken}`
         }
@@ -38,7 +38,7 @@ export const sendMail_API = async (id: number, data: any, accessToken: string, a
 
 // history contact
 export const getHistoryContact_API = async (searchValue: string, accessToken: string, userEmail: string) => {
-    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/contacts/history?email=${userEmail}&search=${searchValue}`, {
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/contacts/history?email=&search=${searchValue}`, {
             headers: {
             "Authorization": `Bearer ${accessToken}`,
             "Content-Type": "application/json"
@@ -47,11 +47,11 @@ export const getHistoryContact_API = async (searchValue: string, accessToken: st
     return res.data;
 }
 
-export const getAllContacts_API = async (page: number = 1) => {
+export const getAllContacts_API = async (page: number = 0) => {
   try {
     const response = await axios.get(`${BASE_URL}/contacts`, {
       params: {
-        page: page - 1,
+        page,
         size: 10
       }
     });

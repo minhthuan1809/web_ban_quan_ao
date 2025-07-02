@@ -1,16 +1,18 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Checkbox, Select, SelectItem } from "@nextui-org/react"
+import { Modal, ModalContent, ModalHeader, ModalBody, ModalFooter, Button, Input, Textarea, Checkbox, Select, SelectItem, RadioGroup, Radio } from "@nextui-org/react"
 import { format } from 'date-fns'
 import InputUse from '@/app/components/ui/InputUse'
 import { createCoupon_API, updateCoupon_API } from '@/app/_service/discount'
 import { toast } from 'react-toastify'
 import useAuthInfor from '@/app/customHooks/AuthInfor'
+import { getUserById_API } from '@/app/_service/user'
 
 export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onSuccess }: any) {
   const isEditing = !!initialData?.id
   const { accessToken } = useAuthInfor()
   const [isLoading, setIsLoading] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
@@ -24,10 +26,35 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
   const [validTo, setValidTo] = useState(format(new Date(new Date().setMonth(new Date().getMonth() + 1)), 'yyyy-MM-dd'))
   const [userSpecific, setUserSpecific] = useState(false)
   const [userIds, setUserIds] = useState<number[]>([])
+  const [applyToAllUsers, setApplyToAllUsers] = useState(false)
+  const [allUserIds, setAllUserIds] = useState<number[]>([])
+  const [errors, setErrors] = useState<{[key: string]: string}>({})
 
   const handleCodeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCode(e.target.value.toUpperCase())
   }
+
+  const validateMaximumDiscount = (value: number) => {
+    if (value < 0) return 'Giá trị không được âm';
+    if (value === 0) return 'Vui lòng nhập giá trị giảm giá tối đa';
+    return '';
+  }
+
+  useEffect(() => {
+    if (applyToAllUsers) {
+      const getAllUserIds = async () => {
+        try {
+          const res = await getUserById_API(accessToken || "");
+          const ids = res.data.data.map((user: any) => user.id);
+          setAllUserIds(ids);
+        } catch (error) {
+          toast.error("Không thể lấy danh sách người dùng");
+          setApplyToAllUsers(false);
+        }
+      };
+      getAllUserIds();
+    }
+  }, [applyToAllUsers, accessToken]);
 
   const handleSubmit = async () => {
     if (!accessToken) {
@@ -35,7 +62,15 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
       return;
     }
 
+    // Validate maximumDiscount
+    const maxDiscountError = validateMaximumDiscount(maximumDiscount);
+    if (maxDiscountError) {
+      setErrors(prev => ({ ...prev, maximumDiscount: maxDiscountError }));
+      return;
+    }
+
     setIsLoading(true)
+    setIsSubmitting(true)
     try {
       // Chuyển đổi date string thành ISO format
       const validFromDate = new Date(validFrom)
@@ -57,12 +92,11 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
         "maxUsageCount": maxUsageCount,
         "validFrom": validFromISO,
         "validTo": validToISO,
-        "userSpecific": userSpecific,
-        "userIds": userIds,
+        "userSpecific": !applyToAllUsers && userSpecific,
+        "userIds": applyToAllUsers ? allUserIds : userIds,
         "isAdmin": true
       }
 
-      
       let res;
       if (isEditing) {
         res = await updateCoupon_API(initialData.id, data, accessToken);
@@ -86,6 +120,7 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
       toast.error(error?.response?.data?.message || 'Có lỗi xảy ra khi xử lý mã giảm giá')
     } finally {
       setIsLoading(false)
+      setIsSubmitting(false)
     }
   }
 
@@ -102,6 +137,8 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
     setValidTo(format(new Date(new Date().setMonth(new Date().getMonth() + 1)), 'yyyy-MM-dd'))
     setUserSpecific(false)
     setUserIds([])
+    setApplyToAllUsers(false)
+    setAllUserIds([])
   }
 
   useEffect(() => {
@@ -128,205 +165,254 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
     <Modal 
       isOpen={isOpen} 
       onClose={onClose} 
-      size="5xl" 
+      size="3xl"
       className='z-[100]'
       scrollBehavior="inside"
       backdrop="blur"
     >
       <ModalContent>
-          <ModalHeader className="flex flex-col gap-1">
-            <h2 className="text-xl font-semibold">
-              {isEditing ? 'Sửa mã giảm giá' : 'Thêm mã giảm giá mới'}
-            </h2>
-          </ModalHeader>
-          
-          <ModalBody className="gap-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Cột trái */}
-              <div className="flex flex-col gap-4">
+        <ModalHeader className="flex flex-col gap-1">
+          <h2 className="text-xl font-semibold">
+            {isEditing ? 'Sửa mã giảm giá' : 'Thêm mã giảm giá mới'}
+          </h2>
+        </ModalHeader>
+        
+        <ModalBody>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Cột trái */}
+            <div className="flex flex-col gap-4">
+              <Input
+                label="MÃ GIẢM GIÁ"
+                value={code}
+                onChange={e => {
+                  const val = e.target.value
+                    .toUpperCase()
+                    .replace(/[^A-Z0-9_]/g, "");
+                  setCode(val);
+                }}
+                placeholder="Nhập mã giảm giá (A-Z, 0-9, _)"
+                variant="bordered"
+                labelPlacement="outside"
+                isRequired
+                classNames={{
+                  label: "font-medium text-default-700"
+                }}
+              />
               
-                <Input
-                  label="Mã giảm giá"
-                  value={code}
-                  onChange={e => {
-                    const val = e.target.value
-                      .toUpperCase()
-                      .replace(/[^A-Z0-9_]/g, "");
-                    setCode(val);
-                  }}
-                  placeholder="Nhập mã giảm giá (A-Z, 0-9, _)"
-                  variant="bordered"
-                  labelPlacement="outside"
-                  isRequired
-                  className="uppercase"
-                />
-                
-                <Input
-                  label="Tên mã giảm giá"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Nhập tên mã giảm giá"
-                  variant="bordered"
-                  labelPlacement="outside"
-                  isRequired
-                />
-                
-                <Textarea
-                  label="Mô tả"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Nhập mô tả mã giảm giá"
-                  variant="bordered"
-                  labelPlacement="outside"
-                  minRows={3}
-                />
-                
-                <Select
-                  label="Loại giảm giá"
-                  placeholder="Chọn loại giảm giá"
-                  value={discountType}
-                  onChange={(e) => setDiscountType(e.target.value)}
-                  variant="bordered"
-                  labelPlacement="outside"
-                  isRequired
-                >
-                  <SelectItem key="PERCENTAGE" value="PERCENTAGE">Phần trăm (%)</SelectItem>
-                  <SelectItem key="FIXED_AMOUNT" value="FIXED_AMOUNT">Số tiền cố định (VNĐ)</SelectItem>
-                </Select>
-              </div>
+              <Input
+                label="Tên mã giảm giá"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Nhập tên mã giảm giá"
+                variant="bordered"
+                labelPlacement="outside"
+                isRequired
+                classNames={{
+                  label: "font-medium text-default-700"
+                }}
+              />
               
-              {/* Cột phải */}
-              <div className="flex flex-col gap-4">
-                <Input
-                  type="number"
-                  label="Giá trị giảm giá"
-                  value={discountValue.toString()}
-                  onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)}
-                  placeholder={discountType === 'PERCENTAGE' ? "Nhập % giảm giá" : "Nhập số tiền giảm giá"}
-                  variant="bordered"
-                  labelPlacement="outside"
-                  endContent={
-                    <span className="text-small text-default-400">
-                      {discountType === 'PERCENTAGE' ? '%' : 'VNĐ'}
-                    </span>
-                  }
-                />
-                
-                <Input
-                  type="number"
-                  label="Giảm giá tối đa"
-                  value={maximumDiscount.toString()}
-                  onChange={(e) => setMaximumDiscount(parseFloat(e.target.value) || 0)}
-                  placeholder="0 = không giới hạn"
-                  variant="bordered"
-                  labelPlacement="outside"
-                  endContent={
-                    <span className="text-small text-default-400">VNĐ</span>
-                  }
-                />
-                <Input
-                  type="number"
-                  label="Số tiền để áp dụng mã giảm giá"
-                  value={minimumAmount.toString()}
-                  onChange={(e) => setMinimumAmount(parseFloat(e.target.value) || 0)}
-                  placeholder="0 = không giới hạn"
-                  variant="bordered"
-                  labelPlacement="outside"
-                  endContent={
-                    <span className="text-small text-default-400">VNĐ</span>
-                  }
-                />
-                
-                <Input
-                  type="number"
-                  label="Số lần sử dụng tối đa"
-                  value={maxUsageCount.toString()}
-                  onChange={(e) => setMaxUsageCount(parseInt(e.target.value) || 1)}
-                  placeholder="Nhập số lần sử dụng"
-                  variant="bordered"
-                  labelPlacement="outside"
-                  min={1}
-                  isRequired
-                />
-                
-                {/* Date Inputs - Sử dụng input type="date" */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Ngày bắt đầu *
-                    </label>
-                    <Input
-                      type="date"
-                      value={validFrom}
-                      onChange={(e) => setValidFrom(e.target.value)}
-                      variant="bordered"
-                      isRequired
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Ngày kết thúc *
-                    </label>
-                    <Input
-                      type="date"
-                      value={validTo}
-                      onChange={(e) => setValidTo(e.target.value)}
-                      variant="bordered"
-                      isRequired
-                    />
-                  </div>
-                </div>
-              </div>
+              <Textarea
+                label="Mô tả"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Nhập mô tả mã giảm giá"
+                variant="bordered"
+                labelPlacement="outside"
+                minRows={3}
+                classNames={{
+                  label: "font-medium text-default-700"
+                }}
+              />
+              
+              <Select
+                label="Loại giảm giá"
+                placeholder="Chọn loại giảm giá"
+                value={discountType}
+                onChange={(e) => setDiscountType(e.target.value)}
+                variant="bordered"
+                labelPlacement="outside"
+                isRequired
+                classNames={{
+                  label: "font-medium text-default-700"
+                }}
+              >
+                <SelectItem key="PERCENTAGE" value="PERCENTAGE">Phần trăm (%)</SelectItem>
+                <SelectItem key="FIXED_AMOUNT" value="FIXED_AMOUNT">Số tiền cố định (VNĐ)</SelectItem>
+              </Select>
             </div>
             
-            {/* User Specific Section */}
-            <div className="border-t pt-4">
-              <div className="flex items-center gap-3 mb-4">
-                <Checkbox
-                  isSelected={userSpecific}
-                  onValueChange={(checked) => {
-                    setUserSpecific(checked)
-                    if (!checked) {
-                      setUserIds([])
+            {/* Cột phải */}
+            <div className="flex flex-col gap-4">
+              <Input
+                type="number"
+                label={discountType === 'PERCENTAGE' ? 'Phần trăm giảm giá (%)' : 'Số tiền giảm giá (VNĐ)'}
+                value={discountValue.toString()}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  if (discountType === 'PERCENTAGE') {
+                    if (value >= 0 && value <= 100) {
+                      setDiscountValue(value);
+                    } else if (value < 0) {
+                      setDiscountValue(0);
+                    } else if (value > 100) {
+                      setDiscountValue(100);
                     }
+                  } else {
+                    setDiscountValue(value >= 0 ? value : 0);
+                  }
+                }}
+                placeholder={discountType === 'PERCENTAGE' ? 'Nhập phần trăm giảm (0-100)' : 'Nhập số tiền giảm'}
+                variant="bordered"
+                labelPlacement="outside"
+                isRequired
+                description={discountType === 'PERCENTAGE' ? 'Giá trị từ 0-100%' : undefined}
+                classNames={{
+                  label: "font-medium text-default-700"
+                }}
+              />
+
+              <Input
+                type="number"
+                label="Giảm giá tối đa (VNĐ)"
+                value={maximumDiscount.toString()}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  setMaximumDiscount(value >= 0 ? value : 0);
+                  if (errors.maximumDiscount) {
+                    setErrors(prev => ({ ...prev, maximumDiscount: '' }));
+                  }
+                }}
+                placeholder="Nhập số tiền giảm giá tối đa"
+                variant="bordered"
+                labelPlacement="outside"
+                isRequired
+                isInvalid={!!errors.maximumDiscount}
+                errorMessage={errors.maximumDiscount}
+                startContent={
+                  <div className="pointer-events-none flex items-center">
+                    <span className="text-default-400 text-small">VNĐ</span>
+                  </div>
+                }
+                isDisabled={isSubmitting}
+                classNames={{
+                  label: "font-medium text-default-700"
+                }}
+              />
+
+              <Input
+                type="number"
+                label="Số tiền để áp dụng mã giảm giá"
+                value={minimumAmount.toString()}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  setMinimumAmount(value >= 0 ? value : 0);
+                }}
+                placeholder="Nhập số tiền tối thiểu"
+                variant="bordered"
+                labelPlacement="outside"
+                endContent={
+                  <div className="pointer-events-none flex items-center">
+                    <span className="text-default-400 text-small">VNĐ</span>
+                  </div>
+                }
+                classNames={{
+                  label: "font-medium text-default-700"
+                }}
+              />
+
+              <Input
+                type="number"
+                label="Số lần sử dụng tối đa"
+                value={maxUsageCount.toString()}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value);
+                  setMaxUsageCount(value >= 1 ? value : 1);
+                }}
+                placeholder="Nhập số lần sử dụng tối đa"
+                variant="bordered"
+                labelPlacement="outside"
+                isRequired
+                min={1}
+                classNames={{
+                  label: "font-medium text-default-700"
+                }}
+              />
+
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  type="date"
+                  label="Ngày bắt đầu"
+                  value={validFrom}
+                  onChange={(e) => setValidFrom(e.target.value)}
+                  variant="bordered"
+                  labelPlacement="outside"
+                  isRequired
+                  classNames={{
+                    label: "font-medium text-default-700"
                   }}
                 />
-                <span className="text-sm font-medium">Áp dụng cho người dùng cụ thể</span>
+
+                <Input
+                  type="date"
+                  label="Ngày kết thúc"
+                  value={validTo}
+                  onChange={(e) => setValidTo(e.target.value)}
+                  variant="bordered"
+                  labelPlacement="outside"
+                  isRequired
+                  classNames={{
+                    label: "font-medium text-default-700"
+                  }}
+                />
               </div>
-              
-              {userSpecific && (
-                <div className="ml-6">
-                  <p className="text-sm text-default-500 mb-3">
-                    Chọn người dùng được áp dụng mã giảm giá này:
-                  </p>
-                  <InputUse 
-                    setUse={(value: any) => setUserIds(Array.isArray(value) ? value.map((id: any) => Number(id)) : [])} 
-                    use={Array.isArray(userIds) ? userIds.map((id: any) => id.toString()) : []} 
-                  />
-                </div>
+
+              <RadioGroup
+                label="Đối tượng áp dụng"
+                orientation="vertical"
+                value={applyToAllUsers ? "all" : userSpecific ? "specific" : "none"}
+                onChange={(e) => {
+                  const value = e.target.value as string;
+                  if (value === "all") {
+                    setApplyToAllUsers(true);
+                    setUserSpecific(false);
+                  } else if (value === "specific") {
+                    setApplyToAllUsers(false);
+                    setUserSpecific(true);
+                  } else {
+                    setApplyToAllUsers(false);
+                    setUserSpecific(false);
+                  }
+                }}
+              >
+                <Radio value="all">Áp dụng cho tất cả người dùng</Radio>
+                <Radio value="specific">Áp dụng cho người dùng cụ thể</Radio>
+              </RadioGroup>
+
+              {userSpecific && !applyToAllUsers && (
+                <InputUse setUse={setUserIds} use={userIds} />
               )}
             </div>
-          </ModalBody>
-          
-          <ModalFooter>
-            <Button 
-              color="danger" 
-              variant="light" 
-              onPress={onClose} 
-              isDisabled={isLoading}
-            >
-              Hủy
-            </Button>
-            <Button 
-              color="primary" 
-              onPress={handleSubmit}
-              isLoading={isLoading}
-              className="font-medium"
-            >
-              {isEditing ? 'Cập nhật' : 'Tạo mã giảm giá'}
-            </Button>
-          </ModalFooter>
+          </div>
+        </ModalBody>
+        
+        <ModalFooter>
+          <Button 
+            color="danger" 
+            variant="light" 
+            onPress={onClose}
+            isDisabled={isSubmitting}
+          >
+            Hủy
+          </Button>
+          <Button 
+            color="primary" 
+            onPress={handleSubmit}
+            isLoading={isSubmitting}
+          >
+            Tạo mã giảm giá
+          </Button>
+        </ModalFooter>
       </ModalContent>
     </Modal>
   )

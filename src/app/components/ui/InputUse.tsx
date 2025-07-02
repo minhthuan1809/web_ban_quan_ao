@@ -4,6 +4,7 @@ import { toast } from 'react-toastify'
 import { Select, SelectItem, Chip, Avatar } from '@nextui-org/react';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import { getUserById_API } from '@/app/_service/user';
+import { User as UserIcon } from 'lucide-react';
 
 interface User {
   id: number;
@@ -112,11 +113,17 @@ export default function InputUse({ setUse, use }: any) {
               <Chip 
                 key={item.key} 
                 startContent={
-                  <div 
-                    className="w-3 h-3 rounded-full mr-1" 
-                    style={{ backgroundColor: "#000000" }}
+                  <Avatar
+                    src={item.data?.avatarUrl}
+                    fallback={
+                      <UserIcon className="w-4 h-4 text-default-500" />
+                    }
+                    size="sm"
+                    className="w-6 h-6"
                   />
                 }
+                variant="flat"
+                className="py-2 px-3"
               >
                 {item.data?.fullName}
               </Chip>
@@ -134,7 +141,10 @@ export default function InputUse({ setUse, use }: any) {
         <SelectItem key={useItem.id.toString()} textValue={useItem.fullName}>
           <div className="flex gap-2 items-center">
             <Avatar 
-              src={useItem.avatarUrl || "https://i.pravatar.cc/150"}
+              src={useItem.avatarUrl}
+              fallback={
+                <UserIcon className="w-5 h-5 text-default-500" />
+              }
               size="sm"
               className="flex-shrink-0"
             />

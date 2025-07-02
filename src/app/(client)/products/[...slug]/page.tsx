@@ -20,8 +20,8 @@ import ShareSocial from "@/app/components/ShareSocial ";
 import { CreateCard_API } from "@/app/_service/Card";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { Button, Card, CardBody, Chip } from "@nextui-org/react";
-import { calculateDiscountedPrice } from "@/app/_util/CalculateCartPrice";
 import { useCartStore } from "@/app/_zustand/client/CartStore";
+import ImageViewModal from "../../_modal/ImageViewModal";
 
 // Lazy load heavy components
 const EvaluateComment = lazy(() => import("@/app/components/EvaluateCommet"));
@@ -62,6 +62,8 @@ export default function ProductDetailPage({
   const [showProductInfo, setShowProductInfo] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string>("");
+  const [showImageModal, setShowImageModal] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -217,7 +219,13 @@ if(user){
           <Card className="shadow-lg bg-content1 backdrop-blur-sm border border-divider">
             <CardBody className="p-6">
               <div className="max-h-[500px] overflow-hidden rounded-xl">
-                <GalleryImg productImageUrls={product.imageUrls} />
+                <GalleryImg 
+                  productImageUrls={product.imageUrls} 
+                  onImageClick={(url) => {
+                    setSelectedImage(url);
+                    setShowImageModal(true);
+                  }}
+                />
               </div>
               <div className="flex justify-between items-center mt-6">
                 <p className="text-sm font-medium text-foreground/60">Chia sẻ sản phẩm</p>
@@ -225,6 +233,12 @@ if(user){
               </div>
             </CardBody>
           </Card>
+
+          <ImageViewModal 
+            isOpen={showImageModal}
+            onClose={() => setShowImageModal(false)}
+            imageUrl={selectedImage}
+          />
 
           {/* Product Info */}
           <div className="space-y-6">
@@ -385,7 +399,7 @@ if(user){
                 variant="shadow"
                 className="w-full"
                 onClick={handleAddToCard}
-                disabled={!selectedVariant}
+                isDisabled={!selectedSize || !selectedColor}
               >
                 <ShoppingCart className="mr-2" />
                 Thêm vào giỏ hàng
