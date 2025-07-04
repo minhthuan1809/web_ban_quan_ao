@@ -95,7 +95,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
                 </div>
               </div>
               <div className="text-right flex-shrink-0">
-                <p className="font-semibold text-foreground">{formatCurrency(item.unitPrice)}</p>
+                <p className="font-semibold text-foreground">{formatCurrency(item.productPrice)}</p>
                 {item.quantity > 1 && (
                   <p className="text-sm text-foreground/60">x{item.quantity}</p>
                 )}
@@ -116,7 +116,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
           <div className="lg:text-right space-y-1">
             <div className="flex justify-between lg:justify-end lg:gap-8 text-sm">
               <span className="text-foreground/60">Tạm tính:</span>
-              <span className="font-medium text-foreground">{formatCurrency(order.subtotal)}</span>
+              <span className="font-medium text-foreground">{formatCurrency(order.orderItems.reduce((total, item) => total + (item.productPrice * item.quantity), 0))}</span>
             </div>
             {order.discountAmount > 0 && (
               <div className="flex justify-between lg:justify-end lg:gap-8 text-sm">
