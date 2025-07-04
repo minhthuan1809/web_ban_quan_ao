@@ -70,10 +70,29 @@ export default function ProductDetailPage({
       try {
         setIsLoading(true);
         const resVariant = await getVariantDetail_API(id);
-        setProduct(resVariant.data);
-        
+        if (resVariant?.data) {
+          setProduct(resVariant.data);
+        }
       } catch (error) {
         console.error('Error fetching product:', error);
+        setProduct({
+          name: '',
+          price: 0,
+          salePrice: 0,
+          imageUrls: [],
+          variants: [],
+          team: {
+            name: '',
+            league: '',
+            logoUrl: '',
+            country: ''
+          },
+          season: '',
+          jerseyType: '',
+          material: { name: '' },
+          category: { name: '' },
+          description: ''
+        });
       } finally {
         setIsLoading(false);
       }
@@ -86,55 +105,64 @@ export default function ProductDetailPage({
   // Sản phẩm liên quan
   useEffect(() => {
     const fetchReviews = async () => {
-      const productPrice = Math.round(product.price);
-      const minPrice = Math.round(productPrice * 0.9); // Giá thấp hơn 10%
-      const maxPrice = Math.round(productPrice * 1.1); // Giá cao hơn 10%
-      
-      const response = await getProducts_API('', 1, 10, {
-        priceRange: [minPrice, maxPrice]
-      });
-    
-      setRelatedProducts(response.data.data);
+      try {
+        const productPrice = Math.round(product?.price || 0);
+        const minPrice = Math.round(productPrice * 0.9); // Giá thấp hơn 10%
+        const maxPrice = Math.round(productPrice * 1.1); // Giá cao hơn 10%
+        
+        const response = await getProducts_API('', 1, 10, {
+          priceRange: [minPrice, maxPrice]
+        });
+        
+        if (response?.data?.data) {
+          setRelatedProducts(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching related products:', error);
+        setRelatedProducts([]);
+      }
     }
     fetchReviews();
-  }, [product]);
+  }, [product?.price]);
 
   // Group variants by size and color
   const sizes = React.useMemo(() => {
-    if (!product.variants) return [];
+    if (!product?.variants) return [];
     const uniqueSizes = new Set();
     return product.variants
       .filter((v: any) => {
+        if (!v?.size?.id) return false;
         const sizeId = v.size.id;
         if (uniqueSizes.has(sizeId)) return false;
         uniqueSizes.add(sizeId);
         return true;
       })
       .map((v: any) => v.size);
-  }, [product.variants]);
+  }, [product?.variants]);
 
   const colors = React.useMemo(() => {
-    if (!product.variants) return [];
+    if (!product?.variants) return [];
     const uniqueColors = new Set();
     return product.variants
       .filter((v: any) => {
-        if (selectedSize && v.size.name !== selectedSize) return false;
+        if (selectedSize && v?.size?.name !== selectedSize) return false;
+        if (!v?.color?.id) return false;
         const colorId = v.color.id;
         if (uniqueColors.has(colorId)) return false;
         uniqueColors.add(colorId);
         return true;
       })
       .map((v: any) => v.color);
-  }, [product.variants, selectedSize]);
+  }, [product?.variants, selectedSize]);
 
   useEffect(() => {
-    if (product.variants && selectedSize && selectedColor) {
+    if (product?.variants && selectedSize && selectedColor) {
       const variant = product.variants.find((v: any) => 
-        v.size.name === selectedSize && v.color.id === selectedColor.id
+        v?.size?.name === selectedSize && v?.color?.id === selectedColor?.id
       );
-      setSelectedVariant(variant);
+      setSelectedVariant(variant || null);
     }
-  }, [selectedSize, selectedColor, product.variants]);
+  }, [selectedSize, selectedColor, product?.variants]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN").format(price) + "đ";
@@ -197,6 +225,14 @@ if(user){
             <div className="h-8 bg-default-200 rounded w-3/4"></div>
             <div className="h-6 bg-default-200 rounded w-1/2"></div>
             <div className="h-10 bg-default-200 rounded w-1/3"></div>
+            <div className="space-y-2">
+              <div className="h-6 bg-default-200 rounded w-1/4"></div>
+              <div className="flex gap-2">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="h-10 w-20 bg-default-200 rounded"></div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -220,7 +256,7 @@ if(user){
             <CardBody className="p-6">
               <div className="max-h-[500px] overflow-hidden rounded-xl">
                 <GalleryImg 
-                  productImageUrls={product.imageUrls} 
+                  productImageUrls={product?.imageUrls || []} 
                   onImageClick={(url) => {
                     setSelectedImage(url);
                     setShowImageModal(true);
@@ -246,12 +282,14 @@ if(user){
             <div className="bg-content1 backdrop-blur-sm rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-3">
                 <Chip color="primary" size="md" variant="flat">
-                  {product.code}
+                  {product?.code || 'N/A'}
                 </Chip>
-                <span className="text-sm text-foreground/60 bg-default-200 px-2 py-1 rounded-full">{product.category.name}</span>
+                <span className="text-sm text-foreground/60 bg-default-200 px-2 py-1 rounded-full">
+                  {product?.category?.name || 'N/A'}
+                </span>
               </div>
               <h1 className="text-3xl font-bold text-foreground mb-3">
-                {product.name}
+                {product?.name || 'N/A'}
               </h1>
               <div className="flex items-center gap-2 mb-1">
                 <div className="flex items-center">
@@ -302,8 +340,14 @@ if(user){
               <CardBody className="p-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <img src={product.team.logoUrl} alt={product.team.name} className="w-10 h-10 rounded-full"/>
-                    <span className="text-sm font-medium text-foreground">{product.team.name} - {product.team.league}</span>
+                    <img 
+                      src={product?.team?.logoUrl} 
+                      alt={product?.team?.name || 'Team logo'} 
+                      className="w-10 h-10 rounded-full"
+                    />
+                    <span className="text-sm font-medium text-foreground">
+                      {product?.team?.name || 'N/A'} - {product?.team?.league || 'N/A'}
+                    </span>
                   </div>
                   <ChevronDown 
                     className={`transition-transform duration-200 text-foreground/60 ${showProductInfo ? 'rotate-180' : ''}`}
@@ -313,12 +357,12 @@ if(user){
                   <div className="mt-4 space-y-3 text-sm text-foreground/60">
                     <p className="text-foreground font-semibold">Thông tin chi tiết về sản phẩm:</p>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      <div className="bg-primary/10 p-2 rounded-lg">• Mùa giải: {product.season}</div>
-                      <div className="bg-secondary/10 p-2 rounded-lg">• Loại: {product.jerseyType}</div>
-                      <div className="bg-success/10 p-2 rounded-lg">• Chất liệu: {product.material.name}</div>
-                      <div className="bg-warning/10 p-2 rounded-lg">• Danh mục: {product.category.name}</div>
-                      <div className="bg-danger/10 p-2 rounded-lg">• Đội bóng: {product.team.name}</div>
-                      <div className="bg-default/10 p-2 rounded-lg">• Quốc gia: {product.team.country}</div>
+                      <div className="bg-primary/10 p-2 rounded-lg">• Mùa giải: {product?.season || 'N/A'}</div>
+                      <div className="bg-secondary/10 p-2 rounded-lg">• Loại: {product?.jerseyType || 'N/A'}</div>
+                      <div className="bg-success/10 p-2 rounded-lg">• Chất liệu: {product?.material?.name || 'N/A'}</div>
+                      <div className="bg-warning/10 p-2 rounded-lg">• Danh mục: {product?.category?.name || 'N/A'}</div>
+                      <div className="bg-danger/10 p-2 rounded-lg">• Đội bóng: {product?.team?.name || 'N/A'}</div>
+                      <div className="bg-default/10 p-2 rounded-lg">• Quốc gia: {product?.team?.country || 'N/A'}</div>
                     </div>
                   </div>
                 )}

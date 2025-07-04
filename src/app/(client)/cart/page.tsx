@@ -228,10 +228,9 @@ export default function Page() {
 
                                             {/* Product Image */}
                                             <div className="w-28 h-28 relative flex-shrink-0">
-                                                <Image
-                                                    src={item.variant.product.imageUrls?.[0] || '/next.svg'}
-                                                    alt={item.variant.product.name}
-                                                    fill
+                                                <img
+                                                    src={item.variant?.product?.imageUrls?.[0] || '/default-product-image.jpg'}
+                                                    alt={item.variant?.product?.name || 'Product Image'}
                                                     className="object-cover rounded-xl shadow-md"
                                                 />
                                             </div>
@@ -240,7 +239,7 @@ export default function Page() {
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <h3 className="font-bold text-gray-900 dark:text-gray-100 text-xl">
-                                                        {item.variant.product.name}
+                                                        {item?.variant?.product?.name}
                                                     </h3>
                                                     <div className="flex items-center gap-2">
                                                         <button
@@ -255,12 +254,12 @@ export default function Page() {
                                                 {/* Always show basic info */}
                                                 <div className="flex flex-wrap gap-2 mb-4">
                                                     <span className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
-                                                        Size: {item.variant.size.name}
+                                                        Size: {item?.variant?.size?.name}
                                                     </span>
                                                     <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium flex items-center gap-1">
                                                         <span>Màu:</span> 
-                                                        <span>{item.variant.color.name}</span>
-                                                        <div className="w-3 h-3 rounded-full border border-white dark:border-gray-600 shadow-sm" style={{backgroundColor: item.variant.color.hexColor}}></div>
+                                                        <span>{item?.variant?.color?.name}</span>
+                                                        <div className="w-3 h-3 rounded-full border border-white dark:border-gray-600 shadow-sm" style={{backgroundColor: item?.variant?.color?.hexColor}}></div>
                                                     </span>
                                                 </div>
 
@@ -272,22 +271,22 @@ export default function Page() {
                                                         </p>
                                                         <div className="flex flex-wrap gap-2">
                                                             <span className="px-3 py-1 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded-full text-sm font-medium">
-                                                                Mùa: {item.variant.product.season}
+                                                                Mùa: {item?.variant?.product?.season}
                                                             </span>
                                                             <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300 rounded-full text-sm font-medium">
-                                                                {item.variant.product.category.name}
+                                                                {item?.variant?.product?.category?.name}
                                                             </span>
                                                             <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 rounded-full text-sm font-medium">
-                                                                {item.variant.product.team.name}
+                                                                {item?.variant?.product?.team?.name}
                                                             </span>
                                                             <span className="px-3 py-1 bg-pink-100 dark:bg-pink-900/50 text-pink-700 dark:text-pink-300 rounded-full text-sm font-medium">
-                                                                {item.variant.product.team.league}
+                                                                {item?.variant?.product?.team?.league}
                                                             </span>
                                                             <span className="px-3 py-1 bg-orange-100 dark:bg-orange-900/50 text-orange-700 dark:text-orange-300 rounded-full text-sm font-medium">
-                                                                {item.variant.product.material.name}
+                                                                {item?.variant?.product?.material?.name}
                                                             </span>
                                                             <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-sm font-medium">
-                                                                Mã: {item.variant.product.code}
+                                                                Mã: {item?.variant?.product?.code}
                                                             </span>
                                                         </div>
                                                     </div>
