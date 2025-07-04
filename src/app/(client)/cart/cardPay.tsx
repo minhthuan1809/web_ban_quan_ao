@@ -58,80 +58,156 @@ export default function CardPay({
     status: 'loading',
     message: ''
   });
-
-  // Kiểm tra và mở modal nếu có mã giảm giá trong sessionStorage và có sản phẩm được chọn
-  React.useEffect(() => {
-    const savedCouponCode = sessionStorage.getItem('couponCode');
-    if (savedCouponCode && selectedItems.length > 0) {
-      setIsOpen(true);
-    }
-  }, [selectedItems]); // Thêm selectedItems vào dependencies để theo dõi thay đổi
-
   const calculateTotalAfterDiscount = () => {
     return calculateTotal() - discount;
   };
 
   const router = useRouter();
 
-  const handlePayment = async () => {
-    try {
-      if (!userInfo?.id || !accessToken) {
-        toast.error("Vui lòng đăng nhập để thanh toán");
-        router.push("/login");
-        return;
-      }
+const handlePayment = async () => {
+  // Prevent multiple submissions
+  if (isProcessing) {
+    toast.warning("Đang xử lý đơn hàng, vui lòng chờ...");
+    return;
+  }
 
-      if (!name || !phone || !address.city.cityId || !address.district.districtId || !address.ward.wardId || !address.detail) {
-        toast.error("Vui lòng điền đầy đủ thông tin giao hàng");
-        return;
-      }
+  // Validation
+  if (!name.trim()) {
+    toast.error("Vui lòng nhập tên người nhận");
+    return;
+  }
 
-      setIsProcessing(true);
+  if (!phone.trim()) {
+    toast.error("Vui lòng nhập số điện thoại");
+    return;
+  }
 
-      const orderData = {
-        userId: userInfo.id,
-        cartItemIds: selectedItems,
-        shippingAddress: address.detail,
-        shippingCity: address.city.cityName,
-        shippingDistrict: address.district.districtName,
-        shippingWard: address.ward.wardName,
-        recipientName: name,
-        recipientPhone: phone,
-        note: note,
-        paymentMethod: paymentMethod,
-        discountCode: discountCode?.code || null,
-        totalAmount: calculateTotalAfterDiscount()
-      };
+  if (!address.city.cityName || !address.district.districtName || !address.ward.wardName) {
+    toast.error("Vui lòng chọn đầy đủ địa chỉ giao hàng");
+    return;
+  }
 
-      if (paymentMethod === 6) {
+  if (!userInfo?.id || !accessToken) {
+    toast.error("Vui lòng đăng nhập để đặt hàng");
+    return;
+  }
+
+  if (selectedItems.length === 0) {
+    toast.error("Vui lòng chọn ít nhất một sản phẩm");
+    return;
+  }
+
+  const result = await showConfirmDialog({
+    title: 'Xác nhận đặt hàng?',
+    text: `Bạn có chắc chắn muốn đặt hàng với tổng tiền ${calculateTotalAfterDiscount().toLocaleString('vi-VN')}₫?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Đặt hàng',
+    cancelButtonText: 'Hủy'
+  });
+
+  if (!result.isConfirmed) return;
+
+  try {
+    setIsProcessing(true);
+
+    const orderItems = cartData.cartItems.filter((item: any) => 
+      selectedItems.includes(item.id)
+    ).map((item: any) => ({
+      "variantId": item.variant.id,
+      "quantity": item.quantity
+    }));
+
+    const orderData = {
+      "paymentMethodId": paymentMethod,
+      "cartId": cartData.id,
+      "customerName": name.trim(),
+      "customerEmail": userInfo?.email || "",
+      "customerPhone": phone.trim(),
+      "shippingAddress": address.city.cityName,
+      "shippingDistrict": address.district.districtName,
+      "shippingWard": address.ward.wardName,
+      "note": note.trim(),
+      "couponCode": discountCode.code || null,
+      "isAdmin": false,
+      "items": orderItems,
+      "totalAmount": calculateTotalAfterDiscount()
+    };
+    
+    if (paymentMethod === 6) {
+      // VNPay payment - Show loading modal
+      setVnpayLoading({
+        isOpen: true,
+        status: 'loading',
+        message: ''
+      });
+
+      try {
+        const res = await createOrderWithPaymentMethod6_API(calculateTotalAfterDiscount(), userInfo.id, accessToken);
+        
+        if (res.status === 200 && res.data) {
+          sessionStorage.setItem("tempOrderData", JSON.stringify(orderData));
+          setVnpayLoading({
+            isOpen: true,
+            status: 'success',
+            message: 'Đang chuyển hướng đến trang thanh toán'
+          });
+          setTimeout(() => {
+            window.location.href = res.data;
+          }, 1500);
+        } else {
+          throw new Error("Không thể tạo liên kết thanh toán VNPay");
+        }
+      } catch (vnpayError: any) {
+        // Show error in modal
         setVnpayLoading({
           isOpen: true,
-          status: 'loading',
-          message: 'Đang chuyển hướng đến cổng thanh toán VNPay...'
+          status: 'error',
+          message: vnpayError.message || "Không thể kết nối đến VNPay"
         });
-
-        const res = await createOrderWithPaymentMethod6_API(orderData.totalAmount, userInfo.id, accessToken);
-        if (res.data) {
-          window.location.href = res.data;
-        }
-      } else {
-        const res = await createOrder_API(orderData, userInfo.id, accessToken);
-        if (res.status === 200) {
-          toast.success("Đặt hàng thành công");
-          router.push("/history-order");
-        }
+        throw vnpayError; // Re-throw to be caught by outer catch
       }
-    } catch (error: any) {
-      toast.error(error.message || "Có lỗi xảy ra khi đặt hàng");
+    } else {
+      // Direct payment methods (COD, etc.)
+      const res = await createOrder_API(orderData, userInfo.id, accessToken);
+      
+      if (res.status === 200) {
+        toast.success("Đặt hàng thành công!");
+        
+        // Navigate to order history with a small delay for better UX
+        setTimeout(() => {
+          router.push("/history-order");
+        }, 1000);
+      } else {
+        throw new Error("Không thể tạo đơn hàng");
+      }
+    }
+  } catch (error: any) {
+    let errorMessage = "Có lỗi xảy ra khi đặt hàng";
+    
+    if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    // If VNPay modal is not already showing error, show toast
+    if (paymentMethod !== 6 || vnpayLoading.status !== 'error') {
+      toast.error(errorMessage);
+    }
+  } finally {
+    setIsProcessing(false);
+    
+    // Close VNPay modal on any error if not already in error state
+    if (vnpayLoading.isOpen && vnpayLoading.status === 'loading') {
       setVnpayLoading({
         isOpen: true,
         status: 'error',
-        message: error.message || "Có lỗi xảy ra khi xử lý thanh toán"
+        message: "Có lỗi xảy ra khi xử lý thanh toán"
       });
-    } finally {
-      setIsProcessing(false);
     }
-  };
+  }
+}
 
   return (
     <div className="lg:col-span-1">
@@ -231,14 +307,7 @@ export default function CardPay({
                 <Gift className="text-blue-600 dark:text-blue-400" size={18} />
                 <span className="font-semibold text-gray-900 dark:text-gray-100">Mã giảm giá</span> 
               </div>
-              <span 
-                className={`text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline text-sm cursor-pointer font-semibold ${
-                  selectedItems.length === 0 ? 'opacity-50 pointer-events-none' : ''
-                }`} 
-                onClick={() => selectedItems.length > 0 && setIsOpen(true)}
-              >
-                Chọn mã giảm giá
-              </span>
+              <span className="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline text-sm cursor-pointer font-semibold" onClick={() => setIsOpen(true)}>Chọn mã giảm giá</span>
             </div>
             <Input
               placeholder="Nhập mã giảm giá (nếu có)"
