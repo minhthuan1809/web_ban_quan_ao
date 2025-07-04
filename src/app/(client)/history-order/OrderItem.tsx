@@ -116,17 +116,53 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
           <div className="lg:text-right space-y-1">
             <div className="flex justify-between lg:justify-end lg:gap-8 text-sm">
               <span className="text-foreground/60">Tạm tính:</span>
-              <span className="font-medium text-foreground">{formatCurrency(order.orderItems.reduce((total, item) => total + (item.productPrice * item.quantity), 0))}</span>
+              <span className="font-medium text-foreground">
+                {formatCurrency(order.orderItems.reduce((total: number, item: any) => total + (item.productPrice * item.quantity), 0))}
+              </span>
             </div>
-            {order.discountAmount > 0 && (
+            {order.orderItems.some((item: any) => item.productSalePrice > 0) && (
               <div className="flex justify-between lg:justify-end lg:gap-8 text-sm">
-                <span className="text-foreground/60">Giảm giá:</span>
-                <span className="font-medium text-danger">-{formatCurrency(order.discountAmount)}</span>
+                <span className="text-foreground/60">
+                  Giảm giá sản phẩm ({order.orderItems.map((item: any) => item.productSalePrice > 0 ? `${item.productName}: ${item.productSalePrice}%` : '').filter(Boolean).join(', ')}):
+                </span>
+                <span className="font-medium text-danger">
+                  -{formatCurrency(order.orderItems.reduce((total: number, item: any) => {
+                    const itemTotal = item.productPrice * item.quantity;
+                    const saleDiscount = item.productSalePrice > 0 ? itemTotal * (item.productSalePrice / 100) : 0;
+                    return total + saleDiscount;
+                  }, 0))}
+                </span>
+              </div>
+            )}
+            {order.coupon && (
+              <div className="flex justify-between lg:justify-end lg:gap-8 text-sm">
+                <span className="text-foreground/60">Mã giảm giá ({order.coupon.discountValue}%):</span>
+                <span className="font-medium text-danger">
+                  -{formatCurrency(order.orderItems.reduce((total: number, item: any) => {
+                    const itemTotal = item.productPrice * item.quantity;
+                    // Tính giá sau khi trừ giảm giá sản phẩm
+                    const afterSalePrice = item.productSalePrice > 0 
+                      ? itemTotal * (1 - item.productSalePrice / 100) 
+                      : itemTotal;
+                    // Áp dụng mã giảm giá lên giá đã giảm
+                    return total + (afterSalePrice * (order.coupon?.discountValue / 100));
+                  }, 0))}
+                </span>
               </div>
             )}
             <div className="flex justify-between lg:justify-end lg:gap-8 text-base font-bold border-t border-divider pt-2">
               <span className="text-foreground">Tổng cộng:</span>
-              <span className="text-primary">{formatCurrency(order.totalAmount)}</span>
+              <span className="text-primary">
+                {formatCurrency(order.orderItems.reduce((total: number, item: any) => {
+                  const itemTotal = item.productPrice * item.quantity;
+                  // Tính giảm giá sản phẩm
+                  const saleDiscount = item.productSalePrice > 0 ? itemTotal * (item.productSalePrice / 100) : 0;
+                  const afterSalePrice = itemTotal - saleDiscount;
+                  // Tính giảm giá coupon
+                  const couponDiscount = order.coupon ? afterSalePrice * (order.coupon.discountValue / 100) : 0;
+                  return total + (afterSalePrice - couponDiscount);
+                }, 0))}
+              </span>
             </div>
           </div>
         </div>

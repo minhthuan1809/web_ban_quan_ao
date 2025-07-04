@@ -158,11 +158,14 @@ export default function RenderProductTable({
                             <div className="line-through text-muted-foreground text-sm">
                               {(product.price || 0).toLocaleString()} đ
                             </div>
-                            <div className="text-danger font-semibold">
+                            <div className="text-danger font-semibold flex flex-col">
                               <FormatPrice
                                 price={calculateDiscountedPrice(product.price, product.salePrice)}
                                 className="text-danger font-semibold"
                               />
+                              <span className="text-xs bg-danger/10 text-danger px-2 py-0.5 rounded-full mt-1">
+                                Giảm {product.salePrice}%
+                              </span>
                             </div>
                           </div>
                         ) : (
