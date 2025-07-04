@@ -125,7 +125,7 @@ useEffect(() => {
           toast.error('Lỗi máy chủ, vui lòng thử lại sau');
         } else {
           setError(error.message || 'Có lỗi xảy ra khi tải đơn hàng');
-          toast.error('Có lỗi xảy ra khi tải đơn hàng');
+          // toast.error('Có lỗi xảy ra khi tải đơn hàng');
         }
         setOrders([]);
       } finally {
