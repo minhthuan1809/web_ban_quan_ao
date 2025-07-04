@@ -93,31 +93,25 @@ export default function page() {
   }
 
   const handleDelete = async (id: string) => {
-    const result = await showConfirmDialog({
-      title: 'Xác nhận xóa?',
-      text: `Bạn có chắc chắn muốn xóa kích cỡ này?`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Xóa',
-      cancelButtonText: 'Hủy'
-    })
-    if (result.isConfirmed) {
-        try {
+    try {
       setLoadingBtn(true)
       const res = await DeleteSize_API(id, accessToken || "")
-      if (res.status === 204 ) {
+      if (res.status === 204) {
         toast.success('Xóa kích cỡ thành công')
         fetchData()
       } else {
         toast.error('Xóa kích cỡ thất bại')
       }
     } catch (error: any) {
-      toast.error(error.message || 'Xóa kích cỡ thất bại')
+      if (error.response?.status === 400) {
+        toast.error('Không thể xóa kích cỡ đang được sử dụng')
+      } else {
+        toast.error(error.response?.data?.message || 'Xóa kích cỡ thất bại')
+      }
     } finally {
       setLoadingBtn(false)
     }
-    }
-  }     
+  }
 
   const handleEdit = async (item: SizeData) => {
     setEditSize(item)

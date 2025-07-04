@@ -70,11 +70,21 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
         <div className="space-y-4">
           {order.orderItems.map((item: any) => (
             <div key={item.id} className="flex items-center gap-4 p-4 bg-default-100 rounded-xl">
-              <div className="w-16 h-16 bg-content1 rounded-lg flex items-center justify-center border border-divider flex-shrink-0">
-                <span className="text-xs text-foreground/60 font-mono">{item.variantInfo.productCode}</span>
+              <div className="w-16 h-16 bg-content1 rounded-lg flex items-center justify-center border border-divider flex-shrink-0 overflow-hidden">
+                {item.productImages && item.productImages.length > 0 ? (
+                  <img 
+                    src={item.productImages[0]} 
+                    alt={item.productName}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-xs text-foreground/60 font-mono">{item.variantInfo.productCode}</span>
+                )}
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="font-medium text-foreground truncate">{item.productName}</h4>
+                <Link href={`/products/${item.productSlug}`} className="font-medium text-foreground hover:text-primary truncate block">
+                  {item.productName}
+                </Link>
                 <div className="flex flex-wrap gap-3 mt-1 text-sm text-foreground/60">
                   <span className="flex items-center gap-1">
                     <div className="w-3 h-3 rounded-full bg-default-300"></div>

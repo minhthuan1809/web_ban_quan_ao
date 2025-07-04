@@ -22,8 +22,13 @@ export default function ProductPage() {
   const { search: searchValue, type: searchType } = useAdminSearchStore();
   const [totalPage, setTotalPage] = useState(0)
 
-  const fetchProducts = useCallback(async () => {
-    setLoading(true);
+  const fetchProducts = useCallback(async (loading = true) => {
+    if (!accessToken) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(loading);
     try {
       const response = await getProducts_API(searchValue, page, limit, {})
       
@@ -44,6 +49,8 @@ export default function ProductPage() {
         
         setProducts(processedData.reverse())
         setTotalPage((response.data as any).metadata?.total_page || 1)
+        // Reset isRefetch sau khi load xong
+        setIsRefetch(false);
       } else {
         toast.error("Đã có lỗi xảy ra !")
       }
@@ -53,7 +60,7 @@ export default function ProductPage() {
     } finally {
       setLoading(false);
     }
-  }, [searchValue, page, limit]);
+  }, [searchValue, page, limit, accessToken]);
 
   useEffect(() => {
     if (searchType === 'product' || searchType === '') {
@@ -63,6 +70,13 @@ export default function ProductPage() {
       return () => clearTimeout(timer);
     }
   }, [fetchProducts, searchType]);
+
+  // Thêm useEffect để load lại API khi isRefetch thay đổi
+  useEffect(() => {
+    if (isRefetch) {
+      fetchProducts(false); // Không hiển thị loading khi refetch
+    }
+  }, [isRefetch, fetchProducts]);
 
   const handleDeleteProduct = async (product: any) => {
     try {

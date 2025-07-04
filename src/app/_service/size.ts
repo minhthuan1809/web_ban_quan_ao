@@ -24,7 +24,7 @@ export const DeleteSize_API = async (id: string, accessToken?: string) => {
             ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
         },
     });
-    return res.data;
+    return res;
 }
 
 export const addSize_API = async (name: string, accessToken?: string) => {

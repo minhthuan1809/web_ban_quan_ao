@@ -135,7 +135,7 @@ export default function OrderTable({ showStatusActions = true, mode }: OrderTabl
       }
 
       setOrders(filteredOrders.reverse());
-      setTotal(Math.ceil(filteredOrders.length / 10)); // Giả sử mỗi trang có 10 đơn hàng
+      setTotal(Math.ceil(filteredOrders.length / 10));
     } catch (error) {
       console.error("Lỗi khi tải danh sách đơn hàng:", error);
       setOrders([]);
@@ -210,10 +210,12 @@ export default function OrderTable({ showStatusActions = true, mode }: OrderTabl
         </div>
       ) : (
         <div className="space-y-4">
-          <OrderStatusTabs 
-            orders={orders} 
-            onStatusChange={setSelectedStatus}
-          />
+          {mode === 'confirm' && (
+            <OrderStatusTabs 
+              orders={orders} 
+              onStatusChange={setSelectedStatus}
+            />
+          )}
           
           <div className="overflow-x-auto">
             {/* Bảng cho màn hình lớn */}

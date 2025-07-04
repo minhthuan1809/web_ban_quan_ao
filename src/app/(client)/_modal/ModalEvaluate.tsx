@@ -18,6 +18,7 @@ interface OrderItem {
   totalPrice: number;
   unitPrice: number;
   variantId: number;
+  productImages: string[];
   variantInfo: {
     sizeName: string;
     colorName: string;
@@ -129,24 +130,27 @@ export default function ModalEvaluate({ isOpen, onClose, dataOrder}: ModalEvalua
                   <div key={item.productId} className="space-y-4">
                     <Card>
                       <CardBody className="flex gap-4">
-                        <div className="w-24 h-24 relative">
-                          <Image 
-                            src={`/products/${item.variantInfo.productCode}.jpg`}
-                            alt={item.productName}
-                            fill
-                            className="object-cover"
-                          />
+                        <div className="w-24 h-24 relative bg-content1 rounded-lg flex items-center justify-center border border-divider flex-shrink-0 overflow-hidden">
+                          {item.productImages && item.productImages.length > 0 ? (
+                            <img 
+                              src={item.productImages[0]} 
+                              alt={item.productName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span className="text-xs text-foreground/60 font-mono">{item.variantInfo.productCode}</span>
+                          )}
                         </div>
                         <div>
-                          <h3>{item.productName}</h3>
-                          <p>
+                          <h3 className="font-medium text-foreground">{item.productName}</h3>
+                          <p className="text-sm text-foreground/60">
                             {item.variantInfo.sizeName} - {item.variantInfo.colorName}
                           </p>
-                          <p>
+                          <p className="text-sm text-foreground/60">
                             Số lượng: {item.quantity}
                           </p>
-                          <p>
-                            {item.unitPrice.toLocaleString('vi-VN')}đ
+                          <p className="font-medium text-foreground">
+                            {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.unitPrice)}
                           </p>
                         </div>
                       </CardBody>

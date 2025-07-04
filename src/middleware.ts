@@ -62,7 +62,10 @@ function parseAuthToken(request: NextRequest): AuthResult {
     if (accessTokenCookie?.value && userCookie?.value) {
       const userData = JSON.parse(userCookie.value);
       const isAdmin = Number(userData.role?.id) === 2;
-    
+      
+      console.log('User Data:', userData);
+      console.log('Is Admin:', isAdmin);
+      console.log('Role ID:', userData.role?.id);
       
       return {
         isAuthenticated: true,
@@ -95,6 +98,10 @@ function parseAuthToken(request: NextRequest): AuthResult {
 
     const isAdmin = tokenData.userInfo.role?.name?.trim().toLowerCase() === 'admin';
 
+    console.log('Token Data:', tokenData);
+    console.log('Is Admin (old format):', isAdmin);
+    console.log('User Role:', tokenData.userInfo.role?.name);
+
     return {
       isAuthenticated: true,
       isAdmin,
@@ -126,11 +133,11 @@ function createResponse(
   
   // Handle admin route protection
   if (matchesPath(pathname, ADMIN_PATHS)) {
-    if (!auth.isAuthenticated) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-    if (!auth.isAdmin) {
-      // Return 404 instead of redirect for non-admin users
+    if (!auth.isAuthenticated || !auth.isAdmin) {
+      // Chuyển hướng về trang not-found nếu không phải admin
+      console.log('Access denied - Not authenticated or not admin');
+      console.log('Auth status:', auth.isAuthenticated);
+      console.log('Admin status:', auth.isAdmin);
       return NextResponse.rewrite(new URL('/not-found', request.url));
     }
     // Only redirect /admin to dashboard, not other admin routes

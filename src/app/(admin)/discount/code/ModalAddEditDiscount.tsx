@@ -56,6 +56,33 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
     }
   }, [applyToAllUsers, accessToken]);
 
+  // Validate giá trị giảm giá khi thay đổi loại giảm giá
+  useEffect(() => {
+    if (discountType === 'PERCENTAGE' && discountValue > 100) {
+      setDiscountValue(100);
+    }
+  }, [discountType]);
+
+  const handleDiscountValueChange = (value: string) => {
+    const numValue = parseInt(value);
+    if (isNaN(numValue)) {
+      setDiscountValue(0);
+      return;
+    }
+
+    if (discountType === 'PERCENTAGE') {
+      if (numValue < 0) {
+        setDiscountValue(0);
+      } else if (numValue > 100) {
+        setDiscountValue(100);
+      } else {
+        setDiscountValue(numValue);
+      }
+    } else {
+      setDiscountValue(numValue >= 0 ? numValue : 0);
+    }
+  };
+
   const handleSubmit = async () => {
     if (!accessToken) {
       toast.error('Không có quyền truy cập');
@@ -229,7 +256,11 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
                 label="Loại giảm giá"
                 placeholder="Chọn loại giảm giá"
                 value={discountType}
-                onChange={(e) => setDiscountType(e.target.value)}
+                onChange={(e) => {
+                  setDiscountType(e.target.value);
+                  // Reset giá trị khi chuyển loại
+                  setDiscountValue(0);
+                }}
                 variant="bordered"
                 labelPlacement="outside"
                 isRequired
@@ -248,20 +279,10 @@ export default function ModalAddEditDiscount({ isOpen, onClose, initialData, onS
                 type="number"
                 label={discountType === 'PERCENTAGE' ? 'Phần trăm giảm giá (%)' : 'Số tiền giảm giá (VNĐ)'}
                 value={discountValue.toString()}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value);
-                  if (discountType === 'PERCENTAGE') {
-                    if (value >= 0 && value <= 100) {
-                      setDiscountValue(value);
-                    } else if (value < 0) {
-                      setDiscountValue(0);
-                    } else if (value > 100) {
-                      setDiscountValue(100);
-                    }
-                  } else {
-                    setDiscountValue(value >= 0 ? value : 0);
-                  }
-                }}
+                onChange={(e) => handleDiscountValueChange(e.target.value)}
+                min={0}
+                max={discountType === 'PERCENTAGE' ? 100 : undefined}
+                step={1}
                 placeholder={discountType === 'PERCENTAGE' ? 'Nhập phần trăm giảm (0-100)' : 'Nhập số tiền giảm'}
                 variant="bordered"
                 labelPlacement="outside"
