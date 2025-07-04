@@ -111,8 +111,8 @@ export default function CardPay({
         });
 
         const res = await createOrderWithPaymentMethod6_API(orderData.totalAmount, userInfo.id, accessToken);
-        if (res.data?.url) {
-          window.location.href = res.data.url;
+        if (res.data) {
+          window.location.href = res.data;
         }
       } else {
         const res = await createOrder_API(orderData, userInfo.id, accessToken);
