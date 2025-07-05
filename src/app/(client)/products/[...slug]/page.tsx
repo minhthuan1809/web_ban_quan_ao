@@ -70,6 +70,7 @@ export default function ProductDetailPage({
       try {
         setIsLoading(true);
         const resVariant = await getVariantDetail_API(id);
+        console.log(resVariant);
         if (resVariant?.data) {
           setProduct(resVariant.data);
         }
@@ -170,7 +171,17 @@ export default function ProductDetailPage({
 
   // Tính giá theo variant được chọn
   const getCurrentPrice = () => {
-    return selectedVariant?.priceAdjustment || product.price || 0;
+    if (!product?.variants?.length) return 0;
+    
+    // Tìm variant có priceAdjustment thấp nhất
+    const minPriceVariant = product.variants.reduce((min: any, current: any) => {
+      if (!min || current.priceAdjustment < min.priceAdjustment) {
+        return current;
+      }
+      return min;
+    }, null);
+
+    return selectedVariant ? selectedVariant.priceAdjustment : minPriceVariant.priceAdjustment;
   };
 
   const getCurrentSalePrice = () => {
@@ -178,8 +189,6 @@ export default function ProductDetailPage({
     const salePercent = product.salePrice || 0;
     return currentPrice * (1 - salePercent/100);
   };
-
-  
 
   const handleAddToCard = async () => {
 if(user){
@@ -316,7 +325,7 @@ if(user){
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-bold text-danger">
-                      {formatPrice(getCurrentSalePrice())}
+                    {formatPrice(getCurrentPrice())}
                     </span>
                     <span className="bg-danger text-danger-foreground px-3 py-1 rounded-full text-sm font-bold">
                       -{product.salePrice}%

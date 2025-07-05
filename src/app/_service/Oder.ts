@@ -42,7 +42,7 @@ export const getOrder_API = async (page: number, searchQuery: string, accessToke
         }
         
         const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_API_URL}/orders?page=${page}&Search=${searchQuery}&size=100`, 
+            `${process.env.NEXT_PUBLIC_API_URL}/orders?page=${page}&search=${searchQuery}&size=100`, 
             {
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,

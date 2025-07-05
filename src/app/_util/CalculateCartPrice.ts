@@ -7,15 +7,32 @@ export const calculateDiscountedPrice = (originalPrice: number, discountPercent:
     return originalPrice;
 };
 
+// Tính giá của 1 sản phẩm (có tính giảm giá)
+export const calculateProductPrice = (product: any): { 
+    finalPrice: number;
+    originalPrice: number;
+    hasDiscount: boolean;
+} => {
+    // Tính giá gốc: price + priceAdjustment
+    const basePrice = (product.price || 0) + (product.priceAdjustment || 0);
+    const salePrice = product.salePrice || 0;
+    
+    return {
+        finalPrice: salePrice > 0 ? calculateDiscountedPrice(basePrice, salePrice) : basePrice,
+        originalPrice: basePrice,
+        hasDiscount: salePrice > 0
+    };
+};
+
 // Tính giá của 1 sản phẩm trong giỏ hàng (có tính giảm giá)
 export const calculateCartItemPrice = (item: any): number => {
-    const originalPrice = item.variant?.priceAdjustment || 0;
+    const basePrice = (item.variant?.product?.price || 0) + (item.variant?.priceAdjustment || 0);
     const salePrice = item.variant?.product?.salePrice || 0;
     
     if (salePrice > 0) {
-        return calculateDiscountedPrice(originalPrice, salePrice);
+        return calculateDiscountedPrice(basePrice, salePrice);
     }
-    return originalPrice;
+    return basePrice;
 };
 
 // Tính tổng tiền của 1 sản phẩm trong giỏ hàng (giá × số lượng)
@@ -42,7 +59,7 @@ export const calculateAverageRating = (ratings: number[]): number => {
 
 // Tính giá gốc trước khi giảm
 export const getOriginalPrice = (item: any) => {
-    return item.variant?.priceAdjustment || item.variant?.product?.price || 0;
+    return (item.variant?.product?.price || 0) + (item.variant?.priceAdjustment || 0);
 };
 
 // Kiểm tra xem có giảm giá không

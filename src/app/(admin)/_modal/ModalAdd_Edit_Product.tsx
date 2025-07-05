@@ -174,7 +174,7 @@ export default function ModalAdd_Edit_Product({
         "isFeatured": form.isFeatured,
         "description": form.description,
         "price": form.price,
-        "salePrice": form.salePrice,
+        "salePrice": 0,
         "variants": form.variants.map(v => ({
           priceAdjustment: v.priceAdjustment,
           code: `${form.name}-${v.size}-${v.color.join('-')}`.replace(/\s+/g, '-').toLowerCase(),
@@ -335,7 +335,6 @@ export default function ModalAdd_Edit_Product({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <Input
                 label="Giá"
@@ -358,29 +357,7 @@ export default function ModalAdd_Edit_Product({
               />
             </div>
 
-            <div>
-              <Input
-                label="Giá khuyến mãi"
-                labelPlacement="outside"
-                type="number"
-                name="salePrice"
-                size="lg"
-                max={100}
-                min={0}
-                value={form.salePrice?.toString() || '0'}
-                onChange={(e) => handleInputChange('salePrice', Number(e.target.value))}
-                variant="bordered"
-                startContent={
-                  <Percent className="w-4 h-4 text-default-400" />
-                }
-                classNames={{
-                  label: "font-medium text-foreground",
-                  input: "text-foreground",
-                  inputWrapper: "bg-background"
-                }}
-              />
-            </div>
-          </div>
+          
 
           <div>
             <InputCategory

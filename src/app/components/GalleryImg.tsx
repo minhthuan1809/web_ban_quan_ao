@@ -32,69 +32,40 @@ export default function GalleryImg({ productImageUrls = [], onImageClick }: Gall
   // Nếu không có ảnh, hiển thị ảnh mặc định
   if (!productImageUrls || productImageUrls.length === 0) {
     return (
-      <div className="space-y-4 border-b border-gray-200 p-2 flex flex-col-reverse md:flex-row">
-        <div className="flex-1 relative">
-          <div className="w-[500px] h-[500px] bg-gray-100 rounded overflow-hidden">
-            <img 
-              src={defaultImage}
-              alt="Default product image"
-              className="w-[500px] h-[500px] object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = 'https://via.placeholder.com/500x500?text=No+Image';
-              }}
-            />
-          </div>
+      <div className="relative w-full h-full">
+        <div className="w-full h-full bg-gray-100 rounded overflow-hidden">
+          <img 
+            src={defaultImage}
+            alt="Default product image"
+            className="w-full h-full object-contain"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = 'https://via.placeholder.com/500x500?text=No+Image';
+            }}
+          />
         </div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-4 border-b border-gray-200 p-2 flex flex-col-reverse md:flex-row">
-      {/* Thumbnail sidebar */}
-      <div className="flex lg:hidden gap-2 overflow-x-auto pb-2 mt-2 md:mt-0 scrollbar-hide max-w-[calc(5*5rem)]">
-        {productImageUrls.map((url: string, idx: number) => (
-          <div 
-            key={idx}
-            className={`flex-shrink-0 w-20 h-20 rounded border-2 cursor-pointer overflow-hidden ${
-              selectedImage === idx ? 'border-black' : 'border-gray-200'
-            }`}
-            onClick={() => {
-              setSelectedImage(idx);
-              handleImageClick(url);
-            }}
-          >
-            <img 
-              src={url} 
-              alt={`Ảnh ${idx + 1}`} 
-              className="w-20 h-20 object-cover"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = 'https://via.placeholder.com/80x80?text=Error';
-              }}
-            />
-          </div>
-        ))}
-      </div>
-
+    <div className="flex flex-col-reverse md:flex-row gap-4 w-full h-full">
       {/* Desktop thumbnail sidebar */}
-      <div className="hidden lg:flex flex-col gap-2 overflow-y-auto max-h-[calc(5*5rem)] scrollbar-hide">
+      <div className="hidden md:flex flex-col gap-3 overflow-y-auto max-h-[500px] pr-2">
         {productImageUrls.map((url: string, idx: number) => (
           <div 
             key={idx}
-            className={`w-20 h-24 rounded border-2 cursor-pointer overflow-hidden flex-shrink-0 ${
-              selectedImage === idx ? 'border-black' : 'border-gray-200'
+            className={`w-20 h-20 rounded-lg border-2 cursor-pointer overflow-hidden ${
+              selectedImage === idx ? 'border-primary' : 'border-gray-200 hover:border-gray-300'
             }`}
             onClick={() => {
               setSelectedImage(idx);
-              handleImageClick(url);
             }}
           >
             <img 
               src={url} 
               alt={`Ảnh ${idx + 1}`} 
-              className="w-20 h-20 object-cover"
+              className="w-full h-full object-cover"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.src = 'https://via.placeholder.com/80x80?text=Error';
@@ -106,11 +77,11 @@ export default function GalleryImg({ productImageUrls = [], onImageClick }: Gall
 
       {/* Main image */}
       <div className="flex-1 relative">
-        <div className="w-[500px] h-[500px] bg-gray-100 rounded overflow-hidden">
+        <div className="w-full h-full bg-gray-100 rounded-lg overflow-hidden aspect-square">
           <img 
             src={productImageUrls[selectedImage]} 
             alt={`Ảnh ${selectedImage + 1}`}
-            className="w-[500px] h-[500px] object-cover cursor-zoom-in"
+            className="w-full h-full object-contain cursor-zoom-in"
             onClick={() => handleImageClick(productImageUrls[selectedImage])}
             onError={(e) => {
               const target = e.target as HTMLImageElement;
@@ -124,18 +95,45 @@ export default function GalleryImg({ productImageUrls = [], onImageClick }: Gall
           <>
             <button 
               onClick={prevImage}
-              className="absolute left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50"
+              className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center hover:bg-white transition-colors"
+              aria-label="Previous image"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={18} />
             </button>
             <button 
               onClick={nextImage}
-              className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50"
+              className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full shadow-md flex items-center justify-center hover:bg-white transition-colors"
+              aria-label="Next image"
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={18} />
             </button>
           </>
         )}
+      </div>
+
+      {/* Mobile thumbnail carousel */}
+      <div className="md:hidden flex gap-2 overflow-x-auto py-3 scrollbar-hide">
+        {productImageUrls.map((url: string, idx: number) => (
+          <div 
+            key={idx}
+            className={`flex-shrink-0 w-16 h-16 rounded-md border-2 cursor-pointer overflow-hidden ${
+              selectedImage === idx ? 'border-primary' : 'border-gray-200'
+            }`}
+            onClick={() => {
+              setSelectedImage(idx);
+            }}
+          >
+            <img 
+              src={url} 
+              alt={`Ảnh ${idx + 1}`} 
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = 'https://via.placeholder.com/64x64?text=Error';
+              }}
+            />
+          </div>
+        ))}
       </div>
     </div>
   )

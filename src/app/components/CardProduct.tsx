@@ -11,6 +11,12 @@ const formatPrice = (price : number) => {
 };
 
 const CardProduct = ({ product } : { product : any }  ) => {
+  // Tìm variant có priceAdjustment cao nhất
+  const maxPriceAdjustment = React.useMemo(() => {
+    if (!product?.variants?.length) return product.price;
+    return Math.max(...product.variants.map((v: any) => v.priceAdjustment || 0));
+  }, [product]);
+
   return (
     <div className="group bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm rounded-xl hover:shadow-xl dark:hover:shadow-gray-900/30 transition-all duration-300 overflow-hidden border-2 border-gray-200/60 dark:border-gray-600/60 hover:border-blue-300 dark:hover:border-blue-600">
       {/* Product Image */}
@@ -68,15 +74,15 @@ const CardProduct = ({ product } : { product : any }  ) => {
           {product.salePrice && product.salePrice > 0 ? (
             <>
               <span className="text-base font-bold text-red-600 dark:text-red-400">
-                {formatPrice(calculateDiscountedPrice(product.price, product.salePrice))}
+                {formatPrice(maxPriceAdjustment * (1 - product.salePrice/100))}
               </span>
-              <span className="text-xs text-gray-400 dark:text-gray-500 line-through">
-                {formatPrice(product.price)}
+              <span className="text-sm text-gray-500 line-through">
+                {formatPrice(maxPriceAdjustment)}
               </span>
             </>
           ) : (
             <span className="text-base font-bold text-red-600 dark:text-red-400">
-              {formatPrice(product.price)}
+              {formatPrice(maxPriceAdjustment)}
             </span>
           )}
         </div>
