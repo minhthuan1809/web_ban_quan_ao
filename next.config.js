@@ -1,5 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
+  output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -49,6 +51,16 @@ const nextConfig = {
       'react-icons',
       'lucide-react'
     ]
+  },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: '/api/:path*',
+          destination: '/api/:path*',
+        },
+      ],
+    };
   },
 };
 
