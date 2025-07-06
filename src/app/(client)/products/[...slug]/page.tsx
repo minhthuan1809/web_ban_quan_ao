@@ -70,7 +70,6 @@ export default function ProductDetailPage({
       try {
         setIsLoading(true);
         const resVariant = await getVariantDetail_API(id);
-        console.log(resVariant);
         if (resVariant?.data) {
           setProduct(resVariant.data);
         }
@@ -290,9 +289,6 @@ if(user){
             {/* Product title and rating */}
             <div className="bg-content1 backdrop-blur-sm rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-3">
-                <Chip color="primary" size="md" variant="flat">
-                  {product?.code || 'N/A'}
-                </Chip>
                 <span className="text-sm text-foreground/60 bg-default-200 px-2 py-1 rounded-full">
                   {product?.category?.name || 'N/A'}
                 </span>

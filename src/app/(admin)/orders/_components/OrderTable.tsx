@@ -2,13 +2,14 @@
 
 import { exportOrderPDF_API, getOrder_API, updateOrderStatus_API } from '@/app/_service/Oder';
 import { Eye, PackageX } from 'lucide-react'
-import React, { useCallback, useEffect, useState, useMemo } from 'react'
+import React, { useCallback, useEffect, useState, useMemo, Fragment } from 'react'
 import { format } from 'date-fns';
 import Loading from '@/app/_util/Loading';
-import { Pagination, Tabs, Tab } from '@nextui-org/react';
+import { Pagination, Tabs, Tab, Select, SelectItem } from '@nextui-org/react';
 import useAuthInfor from '@/app/customHooks/AuthInfor';
 import type { AdminOrder as Order, AdminOrderItem as OrderItem, AdminOrderTableProps as OrderTableProps } from '../../../../types/order';  
 import { formatOrderStatus } from "@/app/_util/FomatVietNamese";
+import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore';
 
 
 
@@ -44,66 +45,21 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-const OrderStatusTabs = ({ orders, onStatusChange }: { orders: Order[], onStatusChange: (status: string) => void }) => {
-  // Tính số lượng đơn hàng cho mỗi trạng thái
-  const getOrderCountByStatus = (status: string) => {
-    return orders.filter(order => order.status === status).length;
-  };
 
-  const tabs = [
-    { key: "ALL", label: "Tất cả đơn hàng", count: orders.length },
-    { key: "PENDING", label: "Chờ xác nhận", count: getOrderCountByStatus("PENDING") },
-    { key: "CONFIRMED", label: "Đã xác nhận", count: getOrderCountByStatus("CONFIRMED") },
-    { key: "PROCESSING", label: "Đang xử lý", count: getOrderCountByStatus("PROCESSING") },
-    { key: "SHIPPING", label: "Đang giao hàng", count: getOrderCountByStatus("SHIPPING") },
-    { key: "DELIVERED", label: "Đã giao hàng", count: getOrderCountByStatus("DELIVERED") },
-    { key: "CANCELLED", label: "Đã hủy", count: getOrderCountByStatus("CANCELLED") }
-  ];
 
-  return (
-    <div className="flex w-full flex-col">
-      <Tabs 
-        aria-label="Order status tabs" 
-        color="primary"
-        variant="light"
-        classNames={{
-          tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
-          cursor: "w-full bg-primary",
-          tab: "max-w-fit px-0 h-12",
-          tabContent: "group-data-[selected=true]:text-primary"
-        }}
-        onSelectionChange={(key) => onStatusChange(key.toString())}
-      >
-        {tabs.map((tab) => (
-          <Tab
-            key={tab.key}
-            title={
-              <div className="flex items-center space-x-2">
-                <span>{tab.label}</span>
-                <span className="px-2 py-1 text-xs font-bold bg-primary/10 text-primary rounded-full">
-                  {tab.count}
-                </span>
-              </div>
-            }
-          />
-        ))}
-      </Tabs>
-    </div>
-  );
-};
-
-export default function OrderTable({ showStatusActions = true, mode }: OrderTableProps) {    
+    export default function OrderTable({ showStatusActions = true, mode, filter = [] }: OrderTableProps) {    
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [expandedOrder, setExpandedOrder] = useState<number | null>(null);
-  const [searchQuery, setSearchQuery] = useState<string>("");
   const [updatingOrderId, setUpdatingOrderId] = useState<number | null>(null);
   const [page, setPage] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
   const [selectedStatus, setSelectedStatus] = useState<string>("ALL");
 
-  const { accessToken } = useAuthInfor();
+  // Default filter options if none provided
 
+  const { accessToken } = useAuthInfor();
+  const { search: searchQuery } = useAdminSearchStore();
 
   const fetchOrders = useCallback(async (loading = true) => {
     if (!accessToken) {
@@ -114,6 +70,8 @@ export default function OrderTable({ showStatusActions = true, mode }: OrderTabl
     setLoading(loading);
     try {
       const res = await getOrder_API(page, searchQuery, accessToken);
+      setTotal(res.data.totalPages
+      );
       let filteredOrders = res.data.content;
 
       // Lọc đơn hàng dựa trên mode
@@ -135,7 +93,6 @@ export default function OrderTable({ showStatusActions = true, mode }: OrderTabl
       }
 
       setOrders(filteredOrders.reverse());
-      setTotal(Math.ceil(filteredOrders.length / 10));
     } catch (error) {
       console.error("Lỗi khi tải danh sách đơn hàng:", error);
       setOrders([]);
@@ -198,6 +155,22 @@ export default function OrderTable({ showStatusActions = true, mode }: OrderTabl
     return orders.filter(order => order.status === selectedStatus);
   }, [orders, selectedStatus]);
 
+  // Tạo các SelectItem trước khi render
+  const renderSelectItems = () => {
+    const items = [];
+    items.push(<SelectItem key="ALL" value="ALL">Tất cả đơn hàng</SelectItem>);
+    
+    for (const status of filter) {
+      items.push(
+        <SelectItem key={status} value={status}>
+          {formatOrderStatus(status).label || status}
+        </SelectItem>
+      );
+    }
+    
+    return items;
+  };
+
   return (
     <div className='mx-auto px-2 sm:px-4 py-4 sm:py-8'>
       {loading ? (
@@ -210,12 +183,18 @@ export default function OrderTable({ showStatusActions = true, mode }: OrderTabl
         </div>
       ) : (
         <div className="space-y-4">
-          {mode === 'confirm' && (
-            <OrderStatusTabs 
-              orders={orders} 
-              onStatusChange={setSelectedStatus}
-            />
-          )}
+          <div className="flex justify-end mb-4">
+            <Select
+              size="sm"
+              label="Trạng thái đơn hàng"
+              placeholder="Chọn trạng thái"
+              className="max-w-xs"
+              selectedKeys={[selectedStatus]}
+              onSelectionChange={(keys) => setSelectedStatus(Array.from(keys)[0] as string)}
+            >
+              {renderSelectItems()}
+            </Select>
+          </div>
           
           <div className="overflow-x-auto">
             {/* Bảng cho màn hình lớn */}

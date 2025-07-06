@@ -68,6 +68,7 @@ export default function DashboardPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('today')
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [selectedDay, setSelectedDay] = useState(new Date().getDate())
   const { accessToken } = useAuthInfor()
 
   const formatCurrency = (value: number) => {
@@ -78,7 +79,11 @@ export default function DashboardPage() {
     return new Intl.NumberFormat('vi-VN').format(value)
   }
 
-  const today = new Date().toISOString().split('T')[0]
+  const formatDate = (year: number, month: number, day: number) => {
+    return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+  }
+
+  const today = formatDate(selectedYear, selectedMonth, selectedDay)
 
   const fetchAllStats = async () => {
     if (!accessToken) return;
@@ -127,7 +132,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchAllStats()
-  }, [accessToken, selectedYear, selectedMonth])
+  }, [accessToken, selectedYear, selectedMonth, selectedDay])
 
   const getRevenueByPeriod = (): { revenue: number; orders: number; label: string } => {
     switch (selectedPeriod) {
@@ -216,6 +221,13 @@ export default function DashboardPage() {
 
   const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i)
   const months = Array.from({ length: 12 }, (_, i) => i + 1)
+  
+  // Tính số ngày trong tháng đã chọn
+  const getDaysInMonth = (year: number, month: number) => {
+    return new Date(year, month, 0).getDate();
+  }
+  
+  const days = Array.from({ length: getDaysInMonth(selectedYear, selectedMonth) }, (_, i) => i + 1)
 
   return (
     <div className="p-6 space-y-8  mx-auto">
@@ -223,38 +235,60 @@ export default function DashboardPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
      
         <div className="flex items-center space-x-4">
-          <Select
-            size="sm"
-            label="Năm"
-            selectedKeys={[selectedYear.toString()]}
-            onSelectionChange={(keys) => setSelectedYear(Number(Array.from(keys)[0]))}
-            className="w-24"
-            isDisabled={loading}
-          >
-            {years.map(year => (
-              <SelectItem key={year.toString()} value={year.toString()}>
-                {year.toString()}
-              </SelectItem>
-            ))}
-          </Select>
-          <Select
-            size="sm"
-            label="Tháng"
-            selectedKeys={[selectedMonth.toString()]}
-            onSelectionChange={(keys) => setSelectedMonth(Number(Array.from(keys)[0]))}
-            className="w-24"
-            isDisabled={loading}
-          >
-            {months.map(month => (
-              <SelectItem key={month.toString()} value={month.toString()}>
-                {month.toString()}
-              </SelectItem>
-            ))}
-          </Select>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Năm</label>
+              <Select
+                size="sm"
+                selectedKeys={[selectedYear.toString()]}
+                onSelectionChange={(keys) => setSelectedYear(Number(Array.from(keys)[0]))}
+                className="w-24"
+                isDisabled={loading}
+              >
+                {years.map(year => (
+                  <SelectItem key={year.toString()} value={year.toString()}>
+                    {year.toString()}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Tháng</label>
+              <Select
+                size="sm"
+                selectedKeys={[selectedMonth.toString()]}
+                onSelectionChange={(keys) => setSelectedMonth(Number(Array.from(keys)[0]))}
+                className="w-24"
+                isDisabled={loading}
+              >
+                {months.map(month => (
+                  <SelectItem key={month.toString()} value={month.toString()}>
+                    {month.toString()}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-foreground/70 mb-1">Ngày</label>
+              <Select
+                size="sm"
+                selectedKeys={[selectedDay.toString()]}
+                onSelectionChange={(keys) => setSelectedDay(Number(Array.from(keys)[0]))}
+                className="w-24"
+                isDisabled={loading}
+              >
+                {days.map(day => (
+                  <SelectItem key={day.toString()} value={day.toString()}>
+                    {day.toString()}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+          </div>
           <button
             onClick={fetchAllStats}
             disabled={loading}
-            className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
             title="Làm mới dữ liệu"
           >
             <RefreshCw className={`w-4 h-4 text-primary ${loading ? 'animate-spin' : ''}`} />
