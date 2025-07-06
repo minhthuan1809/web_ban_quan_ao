@@ -59,7 +59,7 @@ const initialFormState: FormData = {
   jerseyType: '',
   isFeatured: false,
   description: '',
-  price: 0,
+  price: 1,
   salePrice: 0,
   variants: [],
   materialList: [],
@@ -173,7 +173,7 @@ export default function ModalAdd_Edit_Product({
         "jerseyType": form.jerseyType,
         "isFeatured": form.isFeatured,
         "description": form.description,
-        "price": form.price,
+        "price": 1,
         "salePrice": 0,
         "variants": form.variants.map(v => ({
           priceAdjustment: v.priceAdjustment,
@@ -194,19 +194,19 @@ export default function ModalAdd_Edit_Product({
     if (!validateForm(form, setErrors)) {
       const errorFields = Object.keys(errors).map(key => {
         switch(key) {
-          case 'name': return 'Tên sản phẩm';
-          case 'categoryId': return 'Danh mục';
-          case 'imageUrls': return 'Hình ảnh';
-          case 'materialId': return 'Chất liệu';
-          case 'season': return 'Mùa giải';
-          case 'jerseyType': return 'Loại áo';
-          case 'description': return 'Mô tả';
-          case 'price': return 'Giá';
-          case 'variants': return 'Biến thể sản phẩm';
+          case 'name': return errors.name || 'Tên sản phẩm';
+          case 'categoryId': return errors.categoryId || 'Danh mục';
+          case 'imageUrls': return errors.imageUrls || 'Hình ảnh';
+          case 'materialId': return errors.materialId || 'Chất liệu';
+          case 'season': return errors.season || 'Mùa giải';
+          case 'jerseyType': return errors.jerseyType || 'Loại áo';
+          case 'description': return errors.description || 'Mô tả';
+          case 'price': return errors.price || 'Giá';
+          case 'variants': return errors.variants || 'Biến thể sản phẩm';
           default: return key;
         }
       });
-      toast.error(`Vui lòng điền đầy đủ thông tin: ${errorFields.join(', ')}`);
+      toast.error(`Vui lòng kiểm tra lại thông tin: ${errorFields.join(', ')}`);
       return;
     }
     try {
@@ -239,19 +239,19 @@ export default function ModalAdd_Edit_Product({
     if (!validateForm(form, setErrors)) {
       const errorFields = Object.keys(errors).map(key => {
         switch(key) {
-          case 'name': return 'Tên sản phẩm';
-          case 'categoryId': return 'Danh mục';
-          case 'imageUrls': return 'Hình ảnh';
-          case 'materialId': return 'Chất liệu';
-          case 'season': return 'Mùa giải';
-          case 'jerseyType': return 'Loại áo';
-          case 'description': return 'Mô tả';
-          case 'price': return 'Giá';
-          case 'variants': return 'Biến thể sản phẩm';
+          case 'name': return errors.name || 'Tên sản phẩm';
+          case 'categoryId': return errors.categoryId || 'Danh mục';
+          case 'imageUrls': return errors.imageUrls || 'Hình ảnh';
+          case 'materialId': return errors.materialId || 'Chất liệu';
+          case 'season': return errors.season || 'Mùa giải';
+          case 'jerseyType': return errors.jerseyType || 'Loại áo';
+          case 'description': return errors.description || 'Mô tả';
+          case 'price': return errors.price || 'Giá';
+          case 'variants': return errors.variants || 'Biến thể sản phẩm';
           default: return key;
         }
       });
-      toast.error(`Vui lòng điền đầy đủ thông tin: ${errorFields.join(', ')}`);
+      toast.error(`Vui lòng kiểm tra lại thông tin: ${errorFields.join(', ')}`);
       return;
     }
     try {
@@ -335,30 +335,6 @@ export default function ModalAdd_Edit_Product({
             />
           </div>
 
-            <div>
-              <Input
-                label="Giá"
-                labelPlacement="outside"
-                type="number"
-                value={form.price?.toString() || '0'}
-                onChange={(e) => handleInputChange('price', Number(e.target.value))}
-                variant="bordered"
-                size="lg"
-                isInvalid={!!errors.price}
-                errorMessage={errors.price}
-                startContent={
-                  <DollarSign className="w-4 h-4 text-default-400" />
-                }
-                classNames={{
-                  label: "font-medium text-foreground",
-                  input: "text-foreground",
-                  inputWrapper: "bg-background"
-                }}
-              />
-            </div>
-
-          
-
           <div>
             <InputCategory
               setCategory={(value) => handleInputChange('categoryId', value)}
@@ -426,10 +402,9 @@ export default function ModalAdd_Edit_Product({
             setVariants={(value) => handleInputChange('variants', value)}
             basePrice={form.price}
           />
+          {errors.variants && <p className="text-red-500 text-sm mt-1">{errors.variants}</p>}
        </div>
 
-      
-   
         <div className="mt-6">
           <InputTextEditor
             value={form.description}

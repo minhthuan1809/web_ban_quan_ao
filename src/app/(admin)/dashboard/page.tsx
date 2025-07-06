@@ -83,8 +83,6 @@ export default function DashboardPage() {
     return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
   }
 
-  const today = formatDate(selectedYear, selectedMonth, selectedDay)
-
   const fetchAllStats = async () => {
     if (!accessToken) return;
 
@@ -107,10 +105,10 @@ export default function DashboardPage() {
           month: selectedMonth,
           day: selectedDay
         }),
-        getDailyRevenue(today, accessToken),
+        getDailyRevenue(`${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`, accessToken),
         getMonthlyRevenue(selectedYear, selectedMonth, accessToken),
         getYearlyRevenue(selectedYear, accessToken),
-        getTopSellingProductsDaily(today, 5, accessToken),
+        getTopSellingProductsDaily(`${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`, 5, accessToken),
         getTopSellingProductsMonthly(selectedYear, selectedMonth, 5, accessToken),
         getTopSellingProductsYearly(selectedYear, 5, accessToken),
         getTopCustomers(5, accessToken)

@@ -366,22 +366,10 @@ export default function InputVariants({
                     setErrors({ ...errors, priceAdjustment: undefined });
                   }}
                 />
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    isSelected={currentVariant.useBasePrice}
-                    onChange={(e) => {
-                      setCurrentVariant({ 
-                        ...currentVariant, 
-                        useBasePrice: e.target.checked,
-                        priceAdjustment: e.target.checked ? basePrice : 0 
-                      });
-                    }}
-                  />
-                  <span className="text-sm text-foreground/80">Theo giá gốc ({basePrice.toLocaleString('vi-VN')}đ)</span>
-                </div>
+
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <Input
                   type="number"
                   label="Số lượng"
