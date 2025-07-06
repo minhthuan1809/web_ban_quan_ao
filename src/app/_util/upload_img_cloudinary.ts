@@ -32,6 +32,7 @@ export const uploadToCloudinary = async (files: (File | string)[], type: string)
 
         reader.readAsDataURL(fileObj);
       });
+      
       try {
         const response = await fetch('/api/cloudinary', {
           method: 'POST',

@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
-  output: 'standalone',
   images: {
     remotePatterns: [
       {
@@ -26,10 +25,6 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'res.cloudinary.com',
-      },
-      {
-        protocol: 'https',
         hostname: 'aobongdathietke.vn',
       },
       {
@@ -43,7 +38,6 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   experimental: {
-    optimizeCss: false,
     optimizePackageImports: [
       '@nextui-org/react',
       '@tremor/react',
@@ -51,16 +45,6 @@ const nextConfig = {
       'react-icons',
       'lucide-react'
     ]
-  },
-  async rewrites() {
-    return {
-      beforeFiles: [
-        {
-          source: '/api/:path*',
-          destination: '/api/:path*',
-        },
-      ],
-    };
   },
 };
 

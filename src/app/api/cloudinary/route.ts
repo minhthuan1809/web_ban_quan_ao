@@ -1,8 +1,7 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { NextResponse } from 'next/server';
 
-
-let foder = 'kick-style'
+let foder = 'kick-style';
 
 const handleFolder = (type: string) => {
   switch (type) {
@@ -10,7 +9,8 @@ const handleFolder = (type: string) => {
       return 'kick-style';
     case 'category':
       return 'kick-style-avatar';
-
+    default:
+      return 'kick-style';
   }
 }
 
@@ -18,13 +18,13 @@ const handleFolder = (type: string) => {
 if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
   !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_APIKEY ||
   !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_RECRET) {
-  throw new Error('Missing required Cloudinary environment variables');
+  console.error('Missing required Cloudinary environment variables');
 }
 
 cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_APIKEY,
-  api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_RECRET,
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '',
+  api_key: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_APIKEY || '',
+  api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_RECRET || '',
 });
 
 export async function POST(request: Request) {
@@ -60,7 +60,6 @@ export async function POST(request: Request) {
     );
   }
 }
-
 
 export async function DELETE(request: Request) {
   try {

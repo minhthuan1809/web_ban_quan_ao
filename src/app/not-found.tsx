@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-export default function NotFoundPage() {
+export default function CustomNotFoundPage() {
   const router = useRouter();
   const [countdown, setCountdown] = useState(5);
 
