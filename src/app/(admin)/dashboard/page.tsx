@@ -102,7 +102,11 @@ export default function DashboardPage() {
         topProductsYearlyRes,
         topCustomersRes
       ] = await Promise.allSettled([
-        getDashboardSummary(accessToken),
+        getDashboardSummary(accessToken, {
+          year: selectedYear,
+          month: selectedMonth,
+          day: selectedDay
+        }),
         getDailyRevenue(today, accessToken),
         getMonthlyRevenue(selectedYear, selectedMonth, accessToken),
         getYearlyRevenue(selectedYear, accessToken),
@@ -295,33 +299,6 @@ export default function DashboardPage() {
           </button>
         </div>
       </div>
-
-      {/* Period Selector */}
-      <Card className="border-none shadow-lg bg-content1">
-        <CardBody className="p-6">
-          <Tabs
-            selectedKey={selectedPeriod}
-            onSelectionChange={(key) => setSelectedPeriod(key as PeriodType)}
-            color="primary"
-            variant="underlined"
-            isDisabled={loading}
-            classNames={{
-              tabList: "gap-6 w-full relative rounded-none p-0 border-b border-divider",
-              cursor: "w-full bg-primary",
-              tab: "max-w-fit px-0 h-12",
-              tabContent: "group-data-[selected=true]:text-primary"
-            }}
-          >
-            <Tab key="today" title={
-              <div className="flex items-center space-x-2">
-                <Calendar className="w-4 h-4" />
-                <span>Hôm nay</span>
-              </div>
-            } />
-          
-          </Tabs>
-        </CardBody>
-      </Card>
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

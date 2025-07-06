@@ -88,8 +88,7 @@ export default function RenderProductTable({
           <div className="grid grid-cols-12 gap-4 p-4 text-sm font-medium text-foreground">
             <div className="col-span-0.5"></div>
             <div className="col-span-4">Tên Sản Phẩm</div>
-            <div className="col-span-2 text-center">Giá</div>
-            <div className="col-span-2 text-center">Số Lượng</div>
+            <div className="col-span-4 text-center">Số Lượng</div>
             <div className="col-span-2 text-center">Trạng Thái</div>
             <div className="col-span-1 text-center">Hành Động</div>
           </div>
@@ -150,8 +149,8 @@ export default function RenderProductTable({
                       </div>
                     </div>
 
-                    {/* Price */}
-                    <div className="col-span-2 flex items-center justify-center">
+                    {/* Price - Hidden now */}
+                    {/* <div className="col-span-2 flex items-center justify-center">
                       <div className="text-center">
                         {product?.salePrice ? (
                           <div>
@@ -174,17 +173,17 @@ export default function RenderProductTable({
                           </span>
                         )}
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* Quantity */}
-                    <div className="col-span-2 flex items-center justify-center">
+                    <div className="col-span-4 flex items-center justify-center">
                       <span className="font-medium text-foreground">
                         {product.variants ? product.variants.reduce((total: number, variant: any) => total + (variant.stockQuantity || 0), 0) : 0}
                       </span>
                     </div>
 
                     {/* Status */}
-                    <div className="col-span-2 flex items-center justify-center   ">
+                    <div className="col-span-2 flex items-center justify-center">
                       <Chip
                         color={product.status === "ACTIVE" ? "success" : "danger"}
                         variant="solid"

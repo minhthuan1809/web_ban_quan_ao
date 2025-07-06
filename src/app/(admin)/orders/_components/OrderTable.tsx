@@ -69,9 +69,20 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
 
     setLoading(loading);
     try {
+      console.log("Gọi API với page:", page, "search:", searchQuery);
       const res = await getOrder_API(page, searchQuery, accessToken);
-      setTotal(res.data.totalPages
-      );
+      console.log("API Response:", res);
+      console.log("Content:", res.data?.content);
+      console.log("Total Pages:", res.data?.totalPages);
+      
+      setTotal(res.data.totalPages);
+      
+      if (!res.data?.content || res.data?.content.length === 0) {
+        console.warn("API trả về mảng content rỗng!");
+        setOrders([]);
+        return;
+      }
+      
       let filteredOrders = res.data.content;
 
       // Lọc đơn hàng dựa trên mode
@@ -92,6 +103,7 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
         );
       }
 
+      console.log("Sau khi lọc:", filteredOrders);
       setOrders(filteredOrders.reverse());
     } catch (error) {
       console.error("Lỗi khi tải danh sách đơn hàng:", error);

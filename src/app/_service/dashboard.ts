@@ -14,13 +14,13 @@ export const getDashboardSummary = async (
   params?: {
     year?: number;
     month?: number;
-    date?: string;
+    day?: number;
   }
 ): Promise<DashboardSummaryResponse> => {
   const queryParams = new URLSearchParams();
   if (params?.year) queryParams.append('year', params.year.toString());
   if (params?.month) queryParams.append('month', params.month.toString());
-  if (params?.date) queryParams.append('date', params.date);
+  if (params?.day) queryParams.append('day', params.day.toString());
 
   const res = await axios.get(`${API_URL}/statistics/dashboard?${queryParams}`, {
     headers: {
@@ -36,7 +36,12 @@ export const getDailyRevenue = async (
   date: string,
   accessToken?: string
 ): Promise<RevenueStatResponse> => {
-  const res = await axios.get(`${API_URL}/statistics/revenue/daily?date=${date}`, {
+  const dateObj = new Date(date);
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth() + 1;
+  const day = dateObj.getDate();
+  
+  const res = await axios.get(`${API_URL}/statistics/revenue/daily?year=${year}&month=${month}&day=${day}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -80,7 +85,12 @@ export const getTopSellingProductsDaily = async (
   limit: number = 10,
   accessToken?: string
 ): Promise<ProductSalesResponse[]> => {
-  const res = await axios.get(`${API_URL}/statistics/products/top-selling/daily?date=${date}&limit=${limit}`, {
+  const dateObj = new Date(date);
+  const year = dateObj.getFullYear();
+  const month = dateObj.getMonth() + 1;
+  const day = dateObj.getDate();
+  
+  const res = await axios.get(`${API_URL}/statistics/products/top-selling/daily?year=${year}&month=${month}&day=${day}&limit=${limit}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -150,12 +160,29 @@ export const getTopCustomers = async (
 // Legacy function for backward compatibility
 export const getDashboardStats = getDashboardSummary;
 
-const getDashboard_API = async (accessToken: string) => {
-    const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/statistics/dashboard`, {
+const getDashboard_API = async (
+  accessToken: string,
+  params?: {
+    year?: number;
+    month?: number;
+    day?: number;
+  }
+) => {
+    const queryParams = new URLSearchParams();
+    if (params?.year) queryParams.append('year', params.year.toString());
+    if (params?.month) queryParams.append('month', params.month.toString());
+    if (params?.day) queryParams.append('day', params.day.toString());
+    
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+    
+    const response = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/statistics/dashboard${queryString}`,
+      {
         headers: {
-            Authorization: `Bearer ${accessToken}`
+          Authorization: `Bearer ${accessToken}`
         }
-    });
+      }
+    );
     return response.data;
 }
 
