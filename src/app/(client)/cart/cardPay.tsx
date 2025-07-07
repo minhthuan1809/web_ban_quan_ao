@@ -335,10 +335,7 @@ const handlePayment = async () => {
           {/* Chi tiết thanh toán */}
           <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-700/50 dark:to-gray-800/50 rounded-xl p-4 border border-blue-100 dark:border-gray-600">
             <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-foreground/70 font-medium">Số lượng sản phẩm:</span>
-                <span className="font-bold text-foreground">{selectedItems.length}</span>
-              </div>
+           
 
               <div className="flex justify-between items-center">
                 <span className="text-foreground/70 font-medium">Tạm tính:</span>
