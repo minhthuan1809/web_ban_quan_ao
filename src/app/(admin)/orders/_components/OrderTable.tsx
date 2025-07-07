@@ -21,25 +21,40 @@ export const ORDER_STATUSES = {
   SHIPPING: { label: 'Đang giao hàng', color: 'bg-info/20 text-info-600' },
   DELIVERED: { label: 'Đã giao hàng', color: 'bg-success/20 text-success-600' },
   CANCELLED: { label: 'Đã hủy', color: 'bg-danger/20 text-danger-600' },
-  REFUNDED: { label: 'Đã hoàn tiền', color: 'bg-warning/20 text-warning-600' }
+  NOT_RECEIVED: { label: 'Khách không nhận', color: 'bg-warning/20 text-warning-600' },
+  DELIVERING: { label: 'Đã thành công', color: 'bg-success/20 text-success-600' }
 };
 
 // Định nghĩa luồng xử lý đơn hàng và các trạng thái tiếp theo có thể có
 const ORDER_FLOW = {
   PENDING: ['CONFIRMED', 'CANCELLED'],
-  CONFIRMED: ['PROCESSING', 'CANCELLED'],
-  PROCESSING: ['SHIPPING', 'CANCELLED'],
-  SHIPPING: ['DELIVERED', 'CANCELLED'],
+  CONFIRMED: ['PROCESSING', ],
+  PROCESSING: ['SHIPPING', ],
+  SHIPPING: ['DELIVERED', ],
   DELIVERED: ['REFUNDED'],
   CANCELLED: [],
-  REFUNDED: []
+  REFUNDED: [],
+  DELIVERING: []
 };
 
 // Component hiển thị trạng thái đơn hàng
 const OrderStatusBadge = ({ status }: { status: string }) => {
   const statusInfo = formatOrderStatus(status);
   return (
-    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusInfo.bgColor}`}>
+    <span style={{
+      padding: '4px 12px',
+      borderRadius: '9999px',
+      fontSize: '0.875rem',
+      fontWeight: 500,
+      color: status === 'PENDING' ? '#ff9900' : 
+             status === 'CONFIRMED' ? '#0066cc' : 
+             status === 'PROCESSING' ? '#6120a2' : 
+             status === 'SHIPPING' ? '#0091ff' : 
+             status === 'DELIVERED' ? '#00aa55' : 
+             status === 'NOT_RECEIVED' ? '#ff3300' : 
+             status === 'DELIVERING' ? '#00aa55' : 
+             status === 'CANCELLED' ? '#ff3300' : '#333333'
+    }}>
       {statusInfo.label}
     </span>
   );
