@@ -139,7 +139,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
                 </div>
               </div>
               <div className="text-right flex-shrink-0">
-                <p className="font-semibold text-foreground">{formatCurrency(item.productPrice)}</p>
+                <p className="font-semibold text-foreground">{formatCurrency(item.unitPrice || 0)}</p>
                 {item.quantity > 1 && (
                   <p className="text-sm text-foreground/60">x{item.quantity}</p>
                 )}
@@ -161,7 +161,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
             <div className="flex justify-between lg:justify-end lg:gap-8 text-sm">
               <span className="text-foreground/60">Tạm tính:</span>
               <span className="font-medium text-foreground">
-                {formatCurrency(order.orderItems.reduce((total: number, item: any) => total + (item.productPrice * item.quantity), 0))}
+                {formatCurrency(order.orderItems.reduce((total: number, item: any) => total + (item.unitPrice * item.quantity), 0))}
               </span>
             </div>
             {order.orderItems.some((item: any) => item.productSalePrice > 0) && (
@@ -171,7 +171,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
                 </span>
                 <span className="font-medium text-danger">
                   -{formatCurrency(order.orderItems.reduce((total: number, item: any) => {
-                    const itemTotal = item.productPrice * item.quantity;
+                    const itemTotal = item.unitPrice * item.quantity;
                     const saleDiscount = item.productSalePrice > 0 ? itemTotal * (item.productSalePrice / 100) : 0;
                     return total + saleDiscount;
                   }, 0))}
@@ -183,7 +183,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
                 <span className="text-foreground/60">Mã giảm giá ({order.coupon.discountValue}%):</span>
                 <span className="font-medium text-danger">
                   -{formatCurrency(order.orderItems.reduce((total: number, item: any) => {
-                    const itemTotal = item.productPrice * item.quantity;
+                    const itemTotal = item.unitPrice * item.quantity;
                     // Tính giá sau khi trừ giảm giá sản phẩm
                     const afterSalePrice = item.productSalePrice > 0 
                       ? itemTotal * (1 - item.productSalePrice / 100) 
@@ -197,15 +197,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
             <div className="flex justify-between lg:justify-end lg:gap-8 text-base font-bold border-t border-divider pt-2">
               <span className="text-foreground">Tổng cộng:</span>
               <span className="text-primary">
-                {formatCurrency(order.orderItems.reduce((total: number, item: any) => {
-                  const itemTotal = item.productPrice * item.quantity;
-                  // Tính giảm giá sản phẩm
-                  const saleDiscount = item.productSalePrice > 0 ? itemTotal * (item.productSalePrice / 100) : 0;
-                  const afterSalePrice = itemTotal - saleDiscount;
-                  // Tính giảm giá coupon
-                  const couponDiscount = order.coupon ? afterSalePrice * (order.coupon.discountValue / 100) : 0;
-                  return total + (afterSalePrice - couponDiscount);
-                }, 0))}
+                {formatCurrency(order.totalAmount)}
               </span>
             </div>
           </div>
