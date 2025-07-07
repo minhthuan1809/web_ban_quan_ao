@@ -190,31 +190,37 @@ export default function ProductDetailPage({
   };
 
   const handleAddToCard = async () => {
-if(user){
-    const data = {
-      "cartId": user.cartId,
-      "variantId": selectedVariant.id,
-      "quantity": quantity
+    // Kiểm tra sản phẩm đã hết hàng chưa
+    if (selectedVariant && selectedVariant.stockQuantity <= 0) {
+      toast.error("Sản phẩm đã hết hàng");
+      return;
     }
     
-    try {
-      const res = await CreateCard_API(data);
-      if (res.status === 200) {
-        toast.success("Thêm vào giỏ hàng thành công");
-        // Cập nhật Zustand store
-        const cartItem = {
-          id: res.data?.id || Date.now(), // Sử dụng ID từ response hoặc timestamp
-          quantity: quantity,
-          variant: selectedVariant
-        };
-        addToCart(cartItem);
+    if(user){
+      const data = {
+        "cartId": user.cartId,
+        "variantId": selectedVariant.id,
+        "quantity": quantity
       }
-    } catch (error) {
-      toast.error("Thêm vào giỏ hàng thất bại");
+      
+      try {
+        const res = await CreateCard_API(data);
+        if (res.status === 200) {
+          toast.success("Thêm vào giỏ hàng thành công");
+          // Cập nhật Zustand store
+          const cartItem = {
+            id: res.data?.id || Date.now(), // Sử dụng ID từ response hoặc timestamp
+            quantity: quantity,
+            variant: selectedVariant
+          };
+          addToCart(cartItem);
+        }
+      } catch (error) {
+        toast.error("Thêm vào giỏ hàng thất bại");
+      }
+    }else{
+      toast.error("Vui lòng đăng nhập để thêm vào giỏ hàng");
     }
-  }else{
-    toast.error("Vui lòng đăng nhập để thêm vào giỏ hàng");
-  }
   }
 
   if (isLoading) {
@@ -448,17 +454,22 @@ if(user){
                 variant="shadow"
                 className="w-full"
                 onClick={handleAddToCard}
-                isDisabled={!selectedSize || !selectedColor}
+                isDisabled={!selectedSize || !selectedColor || (selectedVariant && selectedVariant.stockQuantity <= 0)}
               >
                 <ShoppingCart className="mr-2" />
-                Thêm vào giỏ hàng
+                {selectedVariant && selectedVariant.stockQuantity <= 0 ? "Hết hàng" : "Thêm vào giỏ hàng"}
               </Button>
             </div>
 
             {/* Stock Info */}
             {selectedVariant && (
-              <div className="bg-success/10 border border-success/20 rounded-xl p-4">
-                <span className="text-sm text-success">Còn lại: <span className="font-bold">{selectedVariant.stockQuantity}</span> sản phẩm</span>
+              <div className={`${selectedVariant.stockQuantity > 0 ? "bg-success/10 border border-success/20" : "bg-danger/10 border border-danger/20"} rounded-xl p-4`}>
+                <span className={`text-sm ${selectedVariant.stockQuantity > 0 ? "text-success" : "text-danger font-medium"}`}>
+                  {selectedVariant.stockQuantity > 0 ? 
+                    <>Còn lại: <span className="font-bold">{selectedVariant.stockQuantity}</span> sản phẩm</> : 
+                    <>Sản phẩm đã hết hàng</>
+                  }
+                </span>
               </div>
             )}
 
