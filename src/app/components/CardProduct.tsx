@@ -11,7 +11,6 @@ const formatPrice = (price : number) => {
 };
 
 const CardProduct = ({ product } : { product : any }  ) => {
-  console.log(product);
   // Tìm variant có priceAdjustment thấp nhất
   const minPriceAdjustment = React.useMemo(() => {
     if (!product?.variants?.length) return product.price;

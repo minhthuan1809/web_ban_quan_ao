@@ -1,6 +1,6 @@
 'use client'
 import { addCategory_API, deleteCategory_API, getCategory_API, updateCategory_API } from '@/app/_service/category';
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Button, Input, Spinner } from "@nextui-org/react";
 import { Plus, Search } from 'lucide-react';
 
@@ -11,6 +11,7 @@ import Loading from '@/app/_util/Loading';
 import RenderTable from '../_conponents/RenderTable';
 import { CategorySkeleton } from '../_skeleton';
 import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore';
+import { useParams } from 'next/navigation';
 
 interface Category {
     id: string;
@@ -32,8 +33,9 @@ export default function Category() {
     const [totalPage, setTotalPage] = useState(0);
     const { accessToken } = useAuthInfor();
     const { search: searchValue, type: searchType } = useAdminSearchStore();
-
-    const fetchCategory = useCallback(async () => {
+    const params = useParams()
+    
+    const fetchCategory = async () => {
         try {
             setLoading(true);
             const response = await getCategory_API({
@@ -50,16 +52,19 @@ export default function Category() {
         } finally {
             setLoading(false);
         }
-        }, [currentPage, searchValue, refresh, accessToken]);
+    };
 
     useEffect(() => {
-        if (searchType === 'category' || searchType === '') {
+        fetchCategory();
+    }, [currentPage, refresh, accessToken, params]);
+
+    
+    useEffect(() => {
             const timer = setTimeout(() => {
                 fetchCategory();
-            }, 400);
+            }, 300);
             return () => clearTimeout(timer);
-        }
-    }, [fetchCategory, searchValue, searchType]);
+    }, [searchValue]);
 
     // xóa phân loại
     const handleDelete = async (id: string) => {
@@ -107,6 +112,7 @@ export default function Category() {
     const handleEdit = async (item: any) => {
         setEditCategory(item);
         setIsOpen(true);
+        setName(item.name);
     }
 
     const handleFinishEdit = async () => {
@@ -128,11 +134,6 @@ export default function Category() {
             setLoadingBtn(false);
         }
     }
-
-    if (loading) {
-        return <CategorySkeleton/>
-    }
-
     
     return (
         <div className="p-6 w-full">
@@ -153,7 +154,7 @@ export default function Category() {
             </div>
           </div>
 
-            { loading ? <Loading/>: <RenderTable data={category as any  } handleDelete={handleDelete} handleEdit={handleEdit} totalPage={totalPage} currentPage={currentPage} setCurrentPage={setCurrentPage} title="danh mục"/>}
+            { loading ? <CategorySkeleton/> : <RenderTable data={category as any  } handleDelete={handleDelete} handleEdit={handleEdit} totalPage={totalPage} currentPage={currentPage} setCurrentPage={setCurrentPage} title="danh mục"/>}
             {/* modal thêm sửa danh mục */}
             <ModalAdd_Edit_Category_Material
                 isOpen={loading ? false : isOpen}

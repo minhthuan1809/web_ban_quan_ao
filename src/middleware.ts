@@ -63,10 +63,6 @@ function parseAuthToken(request: NextRequest): AuthResult {
       const userData = JSON.parse(userCookie.value);
       const isAdmin = Number(userData.role?.id) === 2;
       
-      console.log('User Data:', userData);
-      console.log('Is Admin:', isAdmin);
-      console.log('Role ID:', userData.role?.id);
-      
       return {
         isAuthenticated: true,
         isAdmin,
@@ -86,21 +82,15 @@ function parseAuthToken(request: NextRequest): AuthResult {
     
     // Validate token structure
     if (!tokenData.accessToken || !tokenData.userInfo) {
-      console.warn('Invalid token structure');
       return defaultResult;
     }
 
     // Check token expiration if available
     if (tokenData.expiresIn && Date.now() > tokenData.expiresIn) {
-      console.warn('Token has expired');
       return defaultResult;
     }
 
     const isAdmin = tokenData.userInfo.role?.name?.trim().toLowerCase() === 'admin';
-
-    console.log('Token Data:', tokenData);
-    console.log('Is Admin (old format):', isAdmin);
-    console.log('User Role:', tokenData.userInfo.role?.name);
 
     return {
       isAuthenticated: true,
@@ -110,7 +100,6 @@ function parseAuthToken(request: NextRequest): AuthResult {
     };
 
   } catch (error) {
-    console.error('Error parsing authentication token:', error);
     return defaultResult;
   }
 }
@@ -135,9 +124,6 @@ function createResponse(
   if (matchesPath(pathname, ADMIN_PATHS)) {
     if (!auth.isAuthenticated || !auth.isAdmin) {
       // Chuyển hướng về trang not-found nếu không phải admin
-      console.log('Access denied - Not authenticated or not admin');
-      console.log('Auth status:', auth.isAuthenticated);
-      console.log('Admin status:', auth.isAdmin);
       return NextResponse.rewrite(new URL('/not-found', request.url));
     }
     // Only redirect /admin to dashboard, not other admin routes
@@ -221,7 +207,6 @@ export function middleware(request: NextRequest): NextResponse {
   
   // Log access attempts for admin routes (for security monitoring)
   if (matchesPath(pathname, ADMIN_PATHS) && !auth.isAdmin) {
-    console.warn(`Unauthorized admin access attempt: ${pathname} by ${auth.user?.email || 'anonymous'}`);
   }
 
   // Create and return appropriate response

@@ -18,7 +18,6 @@ const handleFolder = (type: string) => {
 if (!process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME ||
   !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_APIKEY ||
   !process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_RECRET) {
-  console.error('Missing required Cloudinary environment variables');
 }
 
 cloudinary.config({
@@ -50,7 +49,6 @@ export async function POST(request: Request) {
     });
 
   } catch (error) {
-    console.error('Cloudinary upload error:', error);
     return NextResponse.json(
       {
         error: 'Failed to upload image',
@@ -94,7 +92,6 @@ export async function DELETE(request: Request) {
     }
 
   } catch (error) {
-    console.error('Cloudinary delete error:', error);
     return NextResponse.json(
       {
         error: 'Failed to delete image',

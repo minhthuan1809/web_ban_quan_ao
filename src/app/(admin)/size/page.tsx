@@ -11,6 +11,7 @@ import { SizeSkeleton } from '../_skeleton'
 import { Button } from "@nextui-org/react"
 import { Plus } from "lucide-react"
 import { useAdminSearchStore } from '@/app/_zustand/admin/SearchStore'
+import { useParams } from 'next/navigation'
 
 interface SizeData {
   id: number;
@@ -51,7 +52,7 @@ export default function page() {
   const [currentPage, setCurrentPage] = useState(0)
   const [loading, setLoading] = useState(false)
   const { accessToken } = useAuthInfor()
-
+  const params = useParams()
   const fetchData = useCallback(async () => {
     if (!accessToken) return;
     setLoading(true);
@@ -65,6 +66,11 @@ export default function page() {
       setLoading(false);
     }
   }, [searchValue, currentPage, accessToken]);
+
+  // Gọi API khi component mount lần đầu tiên
+  useEffect(() => {
+    fetchData();
+  }, [fetchData , params]);
 
   useEffect(() => {
     if (searchType === 'size' || searchType === '') {

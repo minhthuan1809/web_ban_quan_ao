@@ -59,8 +59,12 @@ export default function RenderTable({
             <TableRow key={item.id}>
               <TableCell className="text-center">{index + 1}</TableCell>
               <TableCell className="text-center">{item.name}</TableCell>
-              <TableCell className="text-center">{new Date(item.createdAt).toLocaleDateString('vi-VN')}</TableCell>
-              <TableCell className="text-center">{new Date(item.updatedAt).toLocaleDateString('vi-VN')}</TableCell>
+              <TableCell className="text-center">
+                {new Date(parseInt(item.createdAt)).toLocaleDateString('vi-VN')}
+              </TableCell>
+              <TableCell className="text-center">
+                {new Date(parseInt(item.updatedAt)).toLocaleDateString('vi-VN')}
+              </TableCell>
               <TableCell className="text-center">{item.isDeleted ? 'Đã xóa' : 'Hoạt động'}</TableCell>
               <TableCell className="flex justify-center">
                 <div className="flex gap-2">

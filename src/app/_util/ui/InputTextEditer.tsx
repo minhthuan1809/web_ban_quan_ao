@@ -65,7 +65,6 @@ const InputTextEditor: React.FC<InputTextEditorProps> = ({ value, onChange, heig
                     });
 
                 } catch (error) {
-                    console.error('Error uploading image:', error);
                     return false;
                 }
             }}

@@ -26,7 +26,6 @@ productApiClient.interceptors.request.use(
 productApiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('Product API Error:', error.response?.data || error.message);
     return Promise.reject(error);
   }
 );
@@ -175,7 +174,6 @@ export class ProductService {
       
       return response;
     } catch (error) {
-      console.error('Error in getProducts:', error);
       throw new Error('Failed to fetch products');
     }
   }
@@ -188,7 +186,6 @@ export class ProductService {
       const response = await productApiClient.get<Product>(`/products/${id}`);
       return response;
     } catch (error) {
-      console.error('Error fetching product details:', error);
       throw new Error('Failed to fetch product details');
     }
   }
@@ -201,7 +198,6 @@ export class ProductService {
       const response = await productApiClient.get<ServiceProductVariant>(`/products/detail/${id}`);
       return response;
     } catch (error) {
-      console.error('Error fetching variant details:', error);
       throw new Error('Failed to fetch variant details');
     }
   }
@@ -218,7 +214,6 @@ export class ProductService {
       });
       return response;
     } catch (error) {
-      console.error('Error creating product:', error);
       throw new Error('Failed to create product');
     }
   }
@@ -235,7 +230,6 @@ export class ProductService {
       });
       return response;
     } catch (error) {
-      console.error('Error updating product:', error);
       throw new Error('Failed to update product');
     }
   }
@@ -252,7 +246,6 @@ export class ProductService {
       });
       return response;
     } catch (error) {
-      console.error('Error deleting product:', error);
       throw new Error('Failed to delete product');
     }
   }
@@ -267,7 +260,6 @@ export class ProductService {
       });
       return response;
     } catch (error) {
-      console.error('Error fetching featured products:', error);
       throw new Error('Failed to fetch featured products');
     }
   }
@@ -282,7 +274,6 @@ export class ProductService {
       });
       return response;
     } catch (error) {
-      console.error('Error fetching related products:', error);
       throw new Error('Failed to fetch related products');
     }
   }
@@ -297,7 +288,6 @@ export class ProductService {
       });
       return response;
     } catch (error) {
-      console.error('Error searching products:', error);
       throw new Error('Failed to search products');
     }
   }

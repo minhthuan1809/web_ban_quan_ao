@@ -57,7 +57,6 @@ export const uploadToCloudinary = async (files: (File | string)[], type: string)
         return data.data.secure_url;
 
       } catch (error) {
-        console.error(`Error uploading ${fileObj.name}:`, error);
         throw error;
       }
     });
@@ -66,7 +65,6 @@ export const uploadToCloudinary = async (files: (File | string)[], type: string)
     return results;
 
   } catch (error) {
-    console.error('Upload process failed:', error);
     throw error;
   }
 }; 

@@ -59,7 +59,6 @@ export default function Page() {
                     setCartData(res.data);
                     if (res.data.cartItems) {
                         setCartItems(res.data.cartItems);
-                        console.log(res.data.cartItems);
                         // Đồng bộ với Zustand store
                         setStoreCartItems(res.data.cartItems);
                     }

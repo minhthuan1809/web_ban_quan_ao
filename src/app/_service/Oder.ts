@@ -18,7 +18,6 @@ export const createOrder_API = async (data: any, userId: number, accessToken: st
                 },
             }
         );
-        console.log("res" , res);
         
         return res;
     } catch (error: any) {
