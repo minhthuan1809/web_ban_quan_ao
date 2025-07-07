@@ -11,10 +11,11 @@ const formatPrice = (price : number) => {
 };
 
 const CardProduct = ({ product } : { product : any }  ) => {
-  // Tìm variant có priceAdjustment cao nhất
-  const maxPriceAdjustment = React.useMemo(() => {
+  console.log(product);
+  // Tìm variant có priceAdjustment thấp nhất
+  const minPriceAdjustment = React.useMemo(() => {
     if (!product?.variants?.length) return product.price;
-    return Math.max(...product.variants.map((v: any) => v.priceAdjustment || 0));
+    return Math.min(...product.variants.map((v: any) => v.priceAdjustment || 0));
   }, [product]);
 
   return (
@@ -74,15 +75,15 @@ const CardProduct = ({ product } : { product : any }  ) => {
           {product.salePrice && product.salePrice > 0 ? (
             <>
               <span className="text-base font-bold text-red-600 dark:text-red-400">
-                {formatPrice(maxPriceAdjustment * (1 - product.salePrice/100))}
+                {formatPrice(minPriceAdjustment * (1 - product.salePrice/100))}
               </span>
               <span className="text-sm text-gray-500 line-through">
-                {formatPrice(maxPriceAdjustment)}
+                {formatPrice(minPriceAdjustment)}
               </span>
             </>
           ) : (
             <span className="text-base font-bold text-red-600 dark:text-red-400">
-              {formatPrice(maxPriceAdjustment)}
+              {formatPrice(minPriceAdjustment)}
             </span>
           )}
         </div>
