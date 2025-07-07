@@ -56,7 +56,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
           case 'NOT_RECEIVED':
             statusMessage = "Không nhận hàng";
             break;
-          case 'DELIVERING':
+          case 'RECEIVED':
             statusMessage = "Đã thành công";
             break;
           default:
@@ -92,7 +92,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
                        order.status === 'SHIPPING' ? '#0091ff' : 
                        order.status === 'DELIVERED' ? '#00aa55' : 
                        order.status === 'NOT_RECEIVED' ? '#ff3300' : 
-                       order.status === 'DELIVERING' ? '#00aa55' : 
+                       order.status === 'RECEIVED' ? '#00aa55' : 
                        order.status === 'CANCELLED' ? '#ff3300' : '#333333'
               }}>
                 {statusMap[order.status as keyof typeof statusMap]?.label || order.status}
@@ -207,7 +207,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
         {order.status.toUpperCase().trim() === 'DELIVERED' && (
           <div className="mt-4 flex flex-wrap justify-end gap-3">
             <button 
-              onClick={() => handleUpdateOrderStatus('DELIVERING')}
+              onClick={() => handleUpdateOrderStatus('RECEIVED')}
               disabled={isUpdatingStatus}
               className={`inline-flex items-center px-4 py-2 bg-success hover:bg-success-600 text-white rounded-lg transition-colors duration-200 ${
                 isUpdatingStatus ? 'opacity-50 cursor-not-allowed' : ''
@@ -257,8 +257,8 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
           </div>
         )}
 
-        {/* Các nút khi trạng thái là DELIVERING */}
-        {order.status.toUpperCase().trim() === 'DELIVERING' && (
+        {/* Các nút khi trạng thái là RECEIVED */}
+        {order.status.toUpperCase().trim() === 'RECEIVED' && (
           <>
             {(!order.isReviewed) && (
               <div className="mt-4 flex justify-end">

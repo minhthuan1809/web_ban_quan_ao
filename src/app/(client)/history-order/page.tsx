@@ -58,7 +58,7 @@ const statusMap = {
   DELIVERED: { label: 'Đã giao hàng', color: 'bg-emerald-100 text-emerald-700 border-emerald-200' },
   CANCELLED: { label: 'Đã hủy', color: 'bg-red-100 text-red-700 border-red-200' },
   NOT_RECEIVED: { label: 'Không nhận hàng', color: 'bg-warning-100 text-warning-700 border-warning-200' },
-  DELIVERING: { label: 'Đã thành công', color: 'bg-success-100 text-success-700 border-success-200' },
+  RECEIVED: { label: 'Đã thành công', color: 'bg-success-100 text-success-700 border-success-200' },
   REFUNDED: { label: 'Đã hoàn tiền', color: 'bg-gray-100 text-gray-700 border-gray-200' }
 };
 
@@ -204,7 +204,7 @@ useEffect(() => {
         case 'shipping': return order.status === 'SHIPPING';
         case 'delivered': return order.status === 'DELIVERED';
         case 'not_received': return order.status === 'NOT_RECEIVED';
-        case 'delivering': return order.status === 'DELIVERING';
+        case 'RECEIVED': return order.status === 'RECEIVED';
         case 'cancelled': return order.status === 'CANCELLED';
         case 'refunded': return order.status === 'REFUNDED';
         default: return true;
@@ -220,7 +220,7 @@ useEffect(() => {
     { id: 'processing', label: 'Đang xử lý', count: orders?.filter(o => o.status === 'PROCESSING')?.length || 0 },
     { id: 'shipping', label: 'Đang giao hàng', count: orders?.filter(o => o.status === 'SHIPPING')?.length || 0 },
     { id: 'delivered', label: 'Đã giao hàng', count: orders?.filter(o => o.status === 'DELIVERED')?.length || 0 },
-    { id: 'delivering', label: 'Đã thành công', count: orders?.filter(o => o.status === 'DELIVERING')?.length || 0 },
+    { id: 'RECEIVED', label: 'Đã thành công', count: orders?.filter(o => o.status === 'RECEIVED')?.length || 0 },
     { id: 'not_received', label: 'Không nhận hàng', count: orders?.filter(o => o.status === 'NOT_RECEIVED')?.length || 0 },
     { id: 'cancelled', label: 'Đã hủy', count: orders?.filter(o => o.status === 'CANCELLED')?.length || 0 },
   ];

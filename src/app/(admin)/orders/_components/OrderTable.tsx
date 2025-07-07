@@ -22,7 +22,7 @@ export const ORDER_STATUSES = {
   DELIVERED: { label: 'Đã giao hàng', color: 'bg-success/20 text-success-600' },
   CANCELLED: { label: 'Đã hủy', color: 'bg-danger/20 text-danger-600' },
   NOT_RECEIVED: { label: 'Khách không nhận', color: 'bg-warning/20 text-warning-600' },
-  DELIVERING: { label: 'Đã thành công', color: 'bg-success/20 text-success-600' }
+  RECEIVED: { label: 'Đã thành công', color: 'bg-success/20 text-success-600' }
 };
 
 // Định nghĩa luồng xử lý đơn hàng và các trạng thái tiếp theo có thể có
@@ -34,7 +34,7 @@ const ORDER_FLOW = {
   DELIVERED: ['REFUNDED'],
   CANCELLED: [],
   REFUNDED: [],
-  DELIVERING: []
+  RECEIVED: []
 };
 
 // Component hiển thị trạng thái đơn hàng
@@ -52,7 +52,7 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
              status === 'SHIPPING' ? '#0091ff' : 
              status === 'DELIVERED' ? '#00aa55' : 
              status === 'NOT_RECEIVED' ? '#ff3300' : 
-             status === 'DELIVERING' ? '#00aa55' : 
+             status === 'RECEIVED' ? '#00aa55' : 
              status === 'CANCELLED' ? '#ff3300' : '#333333'
     }}>
       {statusInfo.label}
