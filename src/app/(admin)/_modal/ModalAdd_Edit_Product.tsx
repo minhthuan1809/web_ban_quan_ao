@@ -35,6 +35,7 @@ interface FormData {
     stockQuantity: number;
     color: string[];
     useBasePrice?: boolean;
+    isEnabled: boolean;
   }[];
   materialList: any[];
 }
@@ -46,6 +47,7 @@ interface Variant {
   sizeId: number;
   status: string;
   colorId: number;
+  isEnabled: boolean;
 }
 
 const initialFormState: FormData = {
@@ -110,7 +112,8 @@ export default function ModalAdd_Edit_Product({
           color: [v.color.id.toString()] ,   
           priceAdjustment: v.priceAdjustment || 0,
           stockQuantity: v.stockQuantity || 0,
-          useBasePrice: false
+          useBasePrice: false,
+          isEnabled: v.isEnabled !== undefined ? v.isEnabled : true
         })) : [],
         materialList: [],
   
@@ -158,7 +161,8 @@ export default function ModalAdd_Edit_Product({
           color: form.variants[0].color,
           priceAdjustment: 0,
           stockQuantity: 100,
-          useBasePrice: true
+          useBasePrice: true,
+          isEnabled: true
         });
       }
 
@@ -181,7 +185,8 @@ export default function ModalAdd_Edit_Product({
           stockQuantity: v.stockQuantity,
           sizeId: Number(v.size),
           status: form.status,
-          colorId: Number(v.color[0])
+          colorId: Number(v.color[0]),
+          isEnabled: v.isEnabled !== undefined ? v.isEnabled : true
         }))
       };
     } catch (error) {

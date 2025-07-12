@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback } from "react";
 import { PlusIcon, PencilIcon, TrashIcon } from "lucide-react";
 import FormatPrice from "@/app/_util/FormatPrice";
 import InputSize from "./inputSize";
-import { Checkbox, Input } from "@nextui-org/react";
+import { Checkbox, Input, Switch } from "@nextui-org/react";
 import { NumberInput } from "@tremor/react";
 import InputColor from "./InputColor";
 import { GetAllColor_API } from "@/app/_service/color";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
 import { toast } from "react-toastify";
+import axios from "axios";
+import { GetAllSize_API } from "@/app/_service/size";
 
 interface Variant {
   size: string;
@@ -17,6 +19,8 @@ interface Variant {
   useBasePrice?: boolean;
   sizeId?: number | string;
   colorId?: number | string;
+  isEnabled: boolean;
+  id?: number;
 }
 
 interface Errors {
@@ -30,6 +34,11 @@ interface Color {
   id: number;
   name: string;
   hexColor: string;
+}
+
+interface Size {
+  id: number;
+  name: string;
 }
 
 export default function InputVariants({
@@ -49,13 +58,30 @@ export default function InputVariants({
     priceAdjustment: 0,
     stockQuantity: 0,
     color: [],
-    useBasePrice: false
+    useBasePrice: false,
+    isEnabled: true
   });
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [errors, setErrors] = useState<Errors>({});
   const [colorList, setColorList] = useState<Color[]>([]);
+  const [sizeList, setSizeList] = useState<Size[]>([]);
   const [loading, setLoading] = useState(false);
   const { accessToken } = useAuthInfor();
+
+  // Thêm hàm toggle status biến thể
+  const toggleVariantStatus = async (variant: Variant, index: number, isEnabled: boolean) => {
+    // Cập nhật state local
+    const newVariants = [...variants];
+    newVariants[index] = {
+      ...newVariants[index],
+      isEnabled
+    };
+    setVariants(newVariants);
+
+    
+    
+    toast.success(`Đã ${isEnabled ? 'bật' : 'tắt'} trạng thái biến thể`);
+  };
 
   const fetchColors = useCallback(async () => {
     try {
@@ -70,13 +96,31 @@ export default function InputVariants({
       setLoading(false);
     }
   }, [accessToken]);
+  
+  // Thêm hàm để fetch sizes
+  const fetchSizes = useCallback(async () => {
+    try {
+      setLoading(true);
+      const res = await GetAllSize_API("", 1, accessToken || "");
+      if (res && res.data) {
+        setSizeList(res.data);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Không thể tải danh sách kích cỡ");
+    } finally {
+      setLoading(false);
+    }
+  }, [accessToken]);
 
   useEffect(() => {
     fetchColors();
-  }, [fetchColors]);
+    fetchSizes();
+  }, [fetchColors, fetchSizes]);
 
   const validateForm = () => {
     const newErrors: Errors = {};
+    const MAX_PRICE = 30000000;
+    const MAX_QUANTITY = 1000000;
 
     if (!currentVariant.size) {
       newErrors.size = "Vui lòng chọn kích cỡ";
@@ -84,10 +128,14 @@ export default function InputVariants({
 
     if (currentVariant.stockQuantity <= 0) {
       newErrors.stockQuantity = "Số lượng phải lớn hơn 0";
+    } else if (currentVariant.stockQuantity > MAX_QUANTITY) {
+      newErrors.stockQuantity = `Số lượng không được vượt quá ${MAX_QUANTITY.toLocaleString('vi-VN')}`;
     }
 
     if (currentVariant.priceAdjustment <= 0) {
       newErrors.priceAdjustment = "Điều chỉnh giá phải lớn hơn 0";
+    } else if (currentVariant.priceAdjustment > MAX_PRICE) {
+      newErrors.priceAdjustment = `Giá không được vượt quá ${MAX_PRICE.toLocaleString('vi-VN')} VNĐ`;
     }
 
     if (!currentVariant.color || currentVariant.color.length === 0) {
@@ -130,7 +178,8 @@ export default function InputVariants({
       priceAdjustment: 0,
       stockQuantity: 0,
       color: [],
-      useBasePrice: false
+      useBasePrice: false,
+      isEnabled: true
     });
     setErrors({});
   };
@@ -152,7 +201,8 @@ export default function InputVariants({
       color: colors,
       priceAdjustment: variantToEdit.priceAdjustment || 0,
       stockQuantity: variantToEdit.stockQuantity || 0,
-      useBasePrice: variantToEdit.useBasePrice || false
+      useBasePrice: variantToEdit.useBasePrice || false,
+      isEnabled: variantToEdit.isEnabled !== undefined ? variantToEdit.isEnabled : true
     });
     
     setEditingIndex(index);
@@ -179,6 +229,12 @@ export default function InputVariants({
   const getColorInfo = (colorId: string) => {
     const color = colorList.find(c => c.id.toString() === colorId);
     return color || null;
+  };
+  
+  // Hàm để lấy thông tin size từ ID
+  const getSizeInfo = (sizeId: string) => {
+    const size = sizeList.find(s => s.id.toString() === sizeId);
+    return size ? size.name : sizeId;
   };
 
   // Thêm useEffect để fetch colors khi component mount hoặc khi có variant được edit
@@ -219,7 +275,8 @@ export default function InputVariants({
               priceAdjustment: 0,
               stockQuantity: 0,
               color: [],
-              useBasePrice: false
+              useBasePrice: false,
+              isEnabled: true
             });
             setErrors({});
             setShowModal(true);
@@ -245,6 +302,9 @@ export default function InputVariants({
                 Số lượng
               </th>
               <th className="px-4 py-3 text-left text-sm font-medium text-foreground/80">
+                Trạng thái
+              </th>
+              <th className="px-4 py-3 text-left text-sm font-medium text-foreground/80">
                 Thao tác
               </th>
             </tr>
@@ -252,7 +312,7 @@ export default function InputVariants({
           <tbody className="divide-y divide-divider">
             {variants.map((variant, index) => (
               <tr key={index} className="hover:bg-content2 transition-colors">
-                <td className="px-4 py-3 text-foreground">{variant.size}</td>
+                <td className="px-4 py-3 text-foreground">{getSizeInfo(variant.size)}</td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2 flex-wrap">
                     {variant.color && variant.color.map((colorId, idx) => {
@@ -286,6 +346,13 @@ export default function InputVariants({
                 </td>
                 <td className="px-4 py-3 text-foreground">{variant.stockQuantity}</td>
                 <td className="px-4 py-3">
+                  <div className="flex items-center">
+                    <span className={`px-2 py-1 text-xs rounded-full ${variant.isEnabled ? 'bg-success/20 text-success' : 'bg-danger/20 text-danger'}`}>
+                      {variant.isEnabled ? 'Bật' : 'Tắt'}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-4 py-3">
                   <div className="flex gap-2">
                     <button
                       onClick={() => handleEdit(index)}
@@ -303,7 +370,7 @@ export default function InputVariants({
             ))}
             {variants.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-4 py-3 text-center text-foreground/40">
+                <td colSpan={6} className="px-4 py-3 text-center text-foreground/40">
                   Chưa có biến thể nào được thêm
                 </td>
               </tr>
@@ -352,18 +419,23 @@ export default function InputVariants({
                   size="lg"
                   isInvalid={!!errors.priceAdjustment}
                   errorMessage={errors.priceAdjustment}
+                  max={30000000}
                   classNames={{
                     label: "font-medium text-foreground",
                     input: "text-foreground",
                     inputWrapper: "bg-background"
                   }}
                   onChange={(e) => {
-                    setCurrentVariant({
-                      ...currentVariant,
-                      priceAdjustment: Number(e.target.value),
-                      useBasePrice: false
-                    });
-                    setErrors({ ...errors, priceAdjustment: undefined });
+                    const value = Number(e.target.value);
+                    // Giới hạn giá không vượt quá 30 triệu
+                    if (value <= 30000000) {
+                      setCurrentVariant({
+                        ...currentVariant,
+                        priceAdjustment: value,
+                        useBasePrice: false
+                      });
+                      setErrors({ ...errors, priceAdjustment: undefined });
+                    }
                   }}
                 />
 
@@ -380,17 +452,22 @@ export default function InputVariants({
                   size="lg"
                   isInvalid={!!errors.stockQuantity}
                   errorMessage={errors.stockQuantity}
+                  max={1000000}
                   classNames={{
                     label: "font-medium text-foreground",
                     input: "text-foreground",
                     inputWrapper: "bg-background"
                   }}
                   onChange={(e) => {
-                    setCurrentVariant({
-                      ...currentVariant,
-                      stockQuantity: Number(e.target.value),
-                    });
-                    setErrors({ ...errors, stockQuantity: undefined });
+                    const value = Number(e.target.value);
+                    // Giới hạn số lượng không vượt quá 1 triệu
+                    if (value <= 1000000) {
+                      setCurrentVariant({
+                        ...currentVariant,
+                        stockQuantity: value,
+                      });
+                      setErrors({ ...errors, stockQuantity: undefined });
+                    }
                   }}
                 />
               </div>
@@ -404,6 +481,20 @@ export default function InputVariants({
                   <span className="text-danger text-sm">{errors.color}</span>
                 )}
               </div>
+            </div>
+
+            <div className="mb-6">
+              <Checkbox
+                isSelected={currentVariant.isEnabled}
+                onValueChange={(isSelected) => {
+                  setCurrentVariant({
+                    ...currentVariant,
+                    isEnabled: isSelected,
+                  });
+                }}
+              >
+                Kích hoạt biến thể
+              </Checkbox>
             </div>
 
             <div className="flex justify-end gap-3">

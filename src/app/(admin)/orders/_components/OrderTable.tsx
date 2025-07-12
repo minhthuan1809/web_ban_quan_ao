@@ -101,7 +101,9 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
         filteredOrders = filteredOrders.filter((order: Order) => 
           order.status === 'DELIVERED' || 
           order.status === 'CANCELLED' ||
-          order.status === 'REFUNDED'
+          order.status === 'REFUNDED' ||
+          order.status === 'NOT_RECEIVED' ||
+          order.status === 'RECEIVED'
         );
       } else if (mode === 'confirm') {
         // Hiển thị đơn hàng đang trong quá trình xử lý
