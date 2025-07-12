@@ -29,7 +29,7 @@ export default function ProductsPage({filter} : {filter: any}) {
     const params = new URLSearchParams(Array.from(searchParams.entries()));
     params.set('search', searchTerm);
     router.push(`/products?${params.toString()}`);
-  }, [searchTerm]);
+  }, [searchTerm, searchParams, router]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -55,7 +55,7 @@ export default function ProductsPage({filter} : {filter: any}) {
           categories: urlCategories.length > 0 ? urlCategories : (filter?.categories || [])
         };
 
-        const res = await getProducts_API("", page, limit, currentFilter);
+        const res = await getProducts_API(searchTerm, page, limit, currentFilter);
         if (res.status === 200) {
           let sortedProducts = [...res.data.data];
           
@@ -82,7 +82,7 @@ export default function ProductsPage({filter} : {filter: any}) {
     }, 300);
 
     return () => clearTimeout(timeout);
-  }, [page, limit, filter, searchParams, sort]);
+  }, [page, limit, filter, searchParams, sort, searchTerm]);
 
   if (loading) {
     return <ProductGridSkeleton />;
