@@ -11,6 +11,11 @@ const formatPrice = (price : number) => {
 };
 
 const CardProduct = ({ product } : { product : any }  ) => {
+  // Nếu sản phẩm không hoạt động, không hiển thị
+  if (product.status === "INACTIVE") {
+    return null;
+  }
+
   // Tìm variant có priceAdjustment thấp nhất
   const minPriceAdjustment = React.useMemo(() => {
     if (!product?.variants?.length) return product.price;
@@ -38,6 +43,11 @@ const CardProduct = ({ product } : { product : any }  ) => {
             {product.salePrice && product.salePrice > 0 && (
               <div className="bg-green-500 text-white px-1.5 py-0.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm border border-white/20">
                 -{product.salePrice}%
+              </div>
+            )}
+            {product.status === "INACTIVE" && (
+              <div className="bg-gray-500 text-white px-1.5 py-0.5 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm border border-white/20">
+                Hết hàng
               </div>
             )}
           </div>
