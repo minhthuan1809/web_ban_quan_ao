@@ -31,7 +31,7 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
     try {
       setLoading(true);
       const response = await GetAllSize_API(
-        searchTerm,
+        "",
         1,
         accessToken || ""
       );
@@ -41,7 +41,7 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, accessToken]);
+  }, [accessToken]);
 
   useEffect(() => {
     if (mounted && size) {
@@ -49,13 +49,11 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
       if (selectedSize) {
         setSearchTerm(selectedSize.name);
       } else {
-        // Nếu không tìm thấy size trong list hiện tại, fetch lại data
         fetchSize();
       }
     }
   }, [size, sizeList, mounted, fetchSize]);
 
-  // Thêm useEffect để fetch size list khi component mount hoặc khi size thay đổi
   useEffect(() => {
     if (mounted && size && sizeList.length === 0) {
       fetchSize();
@@ -74,17 +72,11 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
           labelPlacement="outside"
           type="text"
           value={searchTerm}
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setSize("");
-          }}
-          onFocus={() => setShowDropdown(true)}
+          readOnly
+          onClick={() => setShowDropdown(true)}
           onBlur={() => {
             setTimeout(() => {
-              if (!size) {
-                setSearchTerm("");
-              }
-              setShowDropdown(false)
+              setShowDropdown(false);
             }, 200)
           }}
           endContent={mounted ? (!showDropdown ? <ChevronDownIcon className='w-4 h-4 text-default-400' /> : <ChevronUpIcon className='w-4 h-4 text-default-400' />) : null}
@@ -93,8 +85,8 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
           size='lg'
           classNames={{
             label: "font-medium text-foreground",
-            input: "text-foreground",
-            inputWrapper: "bg-background"
+            input: "text-foreground cursor-pointer",
+            inputWrapper: "bg-background cursor-pointer"
           }}
         />
         {loading && (
@@ -129,4 +121,3 @@ export default function InputSize({ setSize, size }: { setSize: (size: string) =
     </div>
   )
 }
-

@@ -40,15 +40,7 @@ interface FormData {
   materialList: any[];
 }
 
-interface Variant {
-  priceAdjustment: number;
-  code: string;
-  stockQuantity: number;
-  sizeId: number;
-  status: string;
-  colorId: number;
-  isEnabled: boolean;
-}
+
 
 const initialFormState: FormData = {
   name: '',

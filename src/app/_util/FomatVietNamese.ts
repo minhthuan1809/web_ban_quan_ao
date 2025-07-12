@@ -73,6 +73,18 @@ export const formatOrderStatus = (status: string) => {
         color: 'default',
         bgColor: 'bg-default/20 text-default-600'
       };
+    case 'NOT_RECEIVED':
+      return {
+        label: 'Khách không nhận',
+        color: 'warning',
+        bgColor: 'bg-warning/20 text-warning-600'
+      };
+    case 'RECEIVED':
+      return {
+        label: 'Đã nhận hàng',
+        color: 'success',
+        bgColor: 'bg-success/20 text-success-600'
+      };
     default:
       return {
         label: 'Không xác định',

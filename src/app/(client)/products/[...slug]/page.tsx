@@ -71,7 +71,12 @@ export default function ProductDetailPage({
         setIsLoading(true);
         const resVariant = await getVariantDetail_API(id);
         if (resVariant?.data) {
-          setProduct(resVariant.data);
+          // Filter variants to only include enabled ones
+          const filteredProduct = {
+            ...resVariant.data,
+            variants: (resVariant.data as any).variants.filter((v: any) => v.isEnabled)
+          };
+          setProduct(filteredProduct);
         }
       } catch (error) {
         console.error('Error fetching product:', error);
@@ -216,7 +221,7 @@ export default function ProductDetailPage({
           addToCart(cartItem);
         }
       } catch (error) {
-        toast.error("Thêm vào giỏ hàng thất bại");
+        toast.error("Sản phẩm đã hết hàng , hoặc đã có lỗi xảy ra");
       }
     }else{
       toast.error("Vui lòng đăng nhập để thêm vào giỏ hàng");
