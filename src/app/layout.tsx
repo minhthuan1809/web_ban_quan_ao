@@ -5,6 +5,7 @@ import 'suneditor/dist/css/suneditor.min.css';
 import { Inter, Plus_Jakarta_Sans } from 'next/font/google';
 import { Providers } from "./Providers";
 import StagewiseWrapper from './components/StagewiseWrapper';
+import { DisableDevTools } from "./_util/DisableDevTools";
 
 // Optimized font loading
 const inter = Inter({ 
@@ -192,6 +193,9 @@ export default function RootLayout({
       </head>
       
       <body className="font-inter antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300 overflow-x-hidden">
+        {/* Chặn Developer Tools */}
+        <DisableDevTools />
+        
         {/* Skip to main content for accessibility */}
         <a
           href="#main-content"
