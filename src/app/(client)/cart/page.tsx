@@ -136,7 +136,8 @@ export default function Page() {
         return selectedItems.reduce((total, itemId) => {
             const item = cartItems.find(item => item.id === itemId);
             if (item) {
-                return total + item?.variant?.priceAdjustment;
+                // Tổng = giá * số lượng
+                return total + ((item?.variant?.priceAdjustment || 0) * (item?.quantity || 1));
             }
             return total;
         }, 0);

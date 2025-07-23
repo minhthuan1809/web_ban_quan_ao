@@ -129,16 +129,15 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     if (!accessToken) return;
-    
     try {
-      // Gọi API logout nếu có accessToken
       await authLogout_API(accessToken);
     } catch (error) {
-      console.error('Logout API error:', error);
+      // Có thể log lỗi nếu cần
     } finally {
-      // Luôn clear tất cả auth data bất kể API có lỗi hay không
-      clearAuthData(); // Clear tất cả auth data
-      clearCart(); // Clear giỏ hàng
+      clearAuthData();           // Xóa cookie, localStorage, state trong hook
+      clearCart();               // Xóa giỏ hàng nếu có
+      setUser(null);             // Xóa state cục bộ
+      setUser_Zustand(null);     // Xóa zustand
       router.push("/login");
     }
   };

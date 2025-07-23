@@ -1,35 +1,26 @@
 "use client";
 import { useState, useEffect, useCallback } from 'react';
 import { getCookie, setCookie, deleteCookie } from 'cookies-next';
+import type { AuthUser } from '../../types/auth';
 
-// TypeScript interfaces
-// Import types from centralized location
-import type { AuthUser, UserRole } from '../../types/auth';
-
-// Custom hook for authentication information
 const useAuthInfor = () => {
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [accessToken, setAccessTokenState] = useState<string | null>(null);
+  const [user, setUserState] = useState<AuthUser | null>(null);
 
   // Khởi tạo từ cookie/localStorage khi component mount
   useEffect(() => {
-  
-    
     // Ưu tiên lấy từ cookies trước
     const tokenFromCookie = getCookie('accessToken') as string;
     const userFromCookie = getCookie('user') as string;
-    
-    if (tokenFromCookie) {
 
-      setAccessToken(tokenFromCookie);
+    if (tokenFromCookie) {
+      setAccessTokenState(tokenFromCookie);
     } else if (typeof window !== 'undefined') {
-      // Fallback sang localStorage
       const tokenFromStorage = localStorage.getItem('accessToken');
       if (tokenFromStorage) {
-
-        setAccessToken(tokenFromStorage);
+        setAccessTokenState(tokenFromStorage);
         setCookie('accessToken', tokenFromStorage, {
-          maxAge: 60 * 60 * 24 * 7, // 7 days
+          maxAge: 60 * 60 * 24 * 7,
           secure: process.env.NODE_ENV === 'production',
           sameSite: 'lax',
           path: '/'
@@ -39,44 +30,36 @@ const useAuthInfor = () => {
 
     if (userFromCookie) {
       try {
-
         const userData = JSON.parse(decodeURIComponent(userFromCookie));
-        setUser(userData);
-      } catch (error) {
-        console.error('❌ [AuthInfor] Error parsing user từ cookie:', error);
+        setUserState(userData);
+      } catch {
         deleteCookie('user');
       }
     } else if (typeof window !== 'undefined') {
-      // Fallback sang localStorage
       const userFromStorage = localStorage.getItem('user');
       if (userFromStorage) {
         try {
-
           const userData = JSON.parse(userFromStorage);
-          setUser(userData);
+          setUserState(userData);
           setCookie('user', JSON.stringify(userData), {
-            maxAge: 60 * 60 * 24 * 7, // 7 days
+            maxAge: 60 * 60 * 24 * 7,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
             path: '/'
           });
-        } catch (error) {
-          console.error('❌ [AuthInfor] Error parsing user từ localStorage:', error);
+        } catch {
           localStorage.removeItem('user');
         }
       }
     }
   }, []);
 
-  // Function để set accessToken mới
-  const setAccessTokenNew = useCallback((token: string | null) => {
-
-    setAccessToken(token);
-    
+  // Khi login: set accessToken và user, lưu vào cookies + localStorage
+  const setAccessToken = useCallback((token: string | null) => {
+    setAccessTokenState(token);
     if (token) {
-      // Lưu vào cả cookies và localStorage
       setCookie('accessToken', token, {
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 60 * 60 * 24 * 7,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/'
@@ -85,7 +68,6 @@ const useAuthInfor = () => {
         localStorage.setItem('accessToken', token);
       }
     } else {
-      // Clear khỏi cả cookies và localStorage
       deleteCookie('accessToken');
       if (typeof window !== 'undefined') {
         localStorage.removeItem('accessToken');
@@ -93,16 +75,12 @@ const useAuthInfor = () => {
     }
   }, []);
 
-  // Function để set user mới
-  const setUserNew = useCallback((userData: AuthUser | null) => {
-
-    setUser(userData);
-    
+  const setUser = useCallback((userData: AuthUser | null) => {
+    setUserState(userData);
     if (userData) {
-      // Lưu vào cả cookies và localStorage
       const userStr = JSON.stringify(userData);
       setCookie('user', userStr, {
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 60 * 60 * 24 * 7,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/'
@@ -111,7 +89,6 @@ const useAuthInfor = () => {
         localStorage.setItem('user', userStr);
       }
     } else {
-      // Clear khỏi cả cookies và localStorage
       deleteCookie('user');
       if (typeof window !== 'undefined') {
         localStorage.removeItem('user');
@@ -119,74 +96,54 @@ const useAuthInfor = () => {
     }
   }, []);
 
-  // Function để clear tất cả data (sử dụng cho logout)
+  // Khi logout: clear toàn bộ
   const clearAuthData = useCallback(() => {
-
     
-    // Clear state
-    setAccessToken(null);
-    setUser(null);
-    
-    // Clear cookies
+    setAccessTokenState(null);
+    setUserState(null);
     deleteCookie('accessToken');
     deleteCookie('user');
-    deleteCookie('token'); // Clear token cũ nếu có
-    
-    // Clear localStorage
+    deleteCookie('token');
     if (typeof window !== 'undefined') {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
       localStorage.removeItem('token');
     }
-    
-
   }, []);
 
-  // Function để force refresh từ cookies/localStorage
+  // Force refresh từ cookies/localStorage
   const refreshFromCookies = useCallback(() => {
-
-    
     const tokenFromCookie = getCookie('accessToken') as string;
     const userFromCookie = getCookie('user') as string;
-    
     if (tokenFromCookie) {
-      setAccessToken(tokenFromCookie);
+      setAccessTokenState(tokenFromCookie);
     } else if (typeof window !== 'undefined') {
       const tokenFromStorage = localStorage.getItem('accessToken');
       if (tokenFromStorage) {
-        setAccessToken(tokenFromStorage);
+        setAccessTokenState(tokenFromStorage);
       }
     }
-
     if (userFromCookie) {
       try {
         const userData = JSON.parse(decodeURIComponent(userFromCookie));
-        setUser(userData);
-      } catch (error) {
-        console.error('Error parsing user từ cookie:', error);
-      }
+        setUserState(userData);
+      } catch {}
     } else if (typeof window !== 'undefined') {
       const userFromStorage = localStorage.getItem('user');
       if (userFromStorage) {
         try {
           const userData = JSON.parse(userFromStorage);
-          setUser(userData);
-        } catch (error) {
-          console.error('Error parsing user từ localStorage:', error);
-        }
+          setUserState(userData);
+        } catch {}
       }
     }
   }, []);
 
-  // Function để sync từ localStorage sang cookies
+  // Sync localStorage -> cookies
   const syncFromLocalStorage = useCallback(() => {
     if (typeof window === 'undefined') return;
-    
-
-    
     const tokenFromStorage = localStorage.getItem('accessToken');
     const userFromStorage = localStorage.getItem('user');
-    
     if (tokenFromStorage) {
       setCookie('accessToken', tokenFromStorage, {
         maxAge: 60 * 60 * 24 * 7,
@@ -194,9 +151,8 @@ const useAuthInfor = () => {
         sameSite: 'lax',
         path: '/'
       });
-      setAccessToken(tokenFromStorage);
+      setAccessTokenState(tokenFromStorage);
     }
-    
     if (userFromStorage) {
       try {
         const userData = JSON.parse(userFromStorage);
@@ -206,34 +162,21 @@ const useAuthInfor = () => {
           sameSite: 'lax',
           path: '/'
         });
-        setUser(userData);
-      } catch (error) {
-        console.error('Error parsing user từ localStorage:', error);
+        setUserState(userData);
+      } catch {
         localStorage.removeItem('user');
       }
     }
   }, []);
 
-  // Function để manual sync (để debug)
-  const manualSync = useCallback(() => {
-    if (typeof window === 'undefined') return;
-    
-
-    const tokenFromStorage = localStorage.getItem('accessToken');
-    const userFromStorage = localStorage.getItem('user');
-    
-    syncFromLocalStorage();
-  }, [accessToken, user, syncFromLocalStorage]);
-
   return {
     accessToken,
     user,
-    setAccessToken: setAccessTokenNew,
-    setUser: setUserNew,
+    setAccessToken,
+    setUser,
     clearAuthData,
     refreshFromCookies,
-    syncFromLocalStorage,
-    manualSync
+    syncFromLocalStorage
   };
 };
 

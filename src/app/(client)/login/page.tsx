@@ -20,66 +20,29 @@ export default function PageLogin() {
   const router = useRouter();
   
   // Auth hook để cập nhật state sau khi login
-  const { setAccessToken, setUser, manualSync } = useAuthInfor();
+  const { setAccessToken, setUser, syncFromLocalStorage } = useAuthInfor();
   
   // Cart store để clear cart cũ và sync mới
   const { clearCart } = useCartStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      setLoading(true);
       const response = await authLogin_API({
         email: gmail,
         password: password,
       });
-      
-            // Sử dụng response từ API và map cho đúng interface
-      const tokenData = {
-        accessToken: response.accessToken,
-        tokenType: response.tokenType,
-        userInfo: response.userInfo, // API trả về 'user', hook cần 'userInfo'
-        expiresIn: response.expiresIn,
-        issuedAt: Date.now()
-      };
-      
-      const cookieOptions = {
-        maxAge: rememberMe ? 30 * 24 * 60 * 60 : 24 * 60 * 60, // 30 days or 1 day
-        httpOnly: false,
-        secure: false,
-        sameSite: 'lax' as const
-      };
-      
-      // Lưu token data đầy đủ
-      setCookie("token", JSON.stringify(tokenData), cookieOptions);
-      setCookie("accessToken", response.accessToken, cookieOptions);
-      setCookie("user", JSON.stringify(response.userInfo), cookieOptions);
-      
-      // Backup vào localStorage
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('token', JSON.stringify(tokenData));
-        localStorage.setItem('accessToken', response.accessToken);
-        localStorage.setItem('user', JSON.stringify(response.userInfo));
+      if (!response.accessToken || !response.userInfo) {
+        throw new Error("Dữ liệu trả về không hợp lệ");
       }
-      
-      // Cập nhật hook state ngay lập tức
       setAccessToken(response.accessToken);
       setUser(response.userInfo);
-      
-      // Clear cart cũ để sync mới từ server
-      clearCart();
-      
-      // Force sync để đảm bảo tất cả component nhận được update
-      manualSync();
-      
       toast.success("Đăng nhập thành công");
-      
-      // Delay nhỏ để đảm bảo state đã sync hoàn toàn
       setTimeout(() => {
-        router.push("/");
-      }, 100);
+        window.location.reload(); // Reload để đồng bộ toàn bộ state
+      }, 200);
     } catch (error) {
-      console.error('Login error details:', error);
       toast.error("Đăng nhập thất bại");
       console.error(error);
     } finally {

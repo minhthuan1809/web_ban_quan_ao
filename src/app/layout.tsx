@@ -194,7 +194,7 @@ export default function RootLayout({
       
       <body className="font-inter antialiased bg-gray-50 dark:bg-gray-900 transition-colors duration-300 overflow-x-hidden">
         {/* Chặn Developer Tools */}
-        <DisableDevTools />
+        {/* <DisableDevTools /> */}
         
         {/* Skip to main content for accessibility */}
         <a
