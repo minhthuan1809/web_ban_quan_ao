@@ -16,12 +16,14 @@ interface CardPayProps {
   selectedItems: number[];
   calculateTotal: () => number;
   cartData: any;
+  cartItems: any[]; // thêm dòng này
 }
 
 export default function CardPay({
   selectedItems,
   calculateTotal,
-  cartData
+  cartData,
+  cartItems
 }: CardPayProps) {
   const { user : userInfo, accessToken } = useAuthInfor();
   const [address, setAddress] = useState<any>({
@@ -134,12 +136,14 @@ const handlePayment = async () => {
   try {
     setIsProcessing(true);
 
-    const orderItems = cartData.cartItems.filter((item: any) => 
-      selectedItems.includes(item.id)
-    ).map((item: any) => ({
-      "variantId": item.variant.id,
-      "quantity": item.quantity
-    }));
+    // Lấy quantity mới nhất từ selectedItems và cartItems
+    const orderItems = selectedItems.map((itemId) => {
+      const item = cartItems.find((i: any) => i.id === itemId);
+      return {
+        variantId: item.variant.id,
+        quantity: item.quantity // quantity mới nhất
+      };
+    });
 
     const orderData = {
       "paymentMethodId": paymentMethod,
@@ -156,6 +160,8 @@ const handlePayment = async () => {
       "items": orderItems,
       "totalAmount": calculateTotalAfterDiscount()
     };
+    console.log("data", orderData);
+    
     
     if (paymentMethod === 6) {
       // VNPay payment - Show loading modal

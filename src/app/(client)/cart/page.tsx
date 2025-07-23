@@ -372,6 +372,7 @@ export default function Page() {
                         selectedItems={selectedItems}
                         calculateTotal={calculateTotal}
                         cartData={cartData}
+                        cartItems={cartItems} // truyền thêm prop này
                     />
                 </div>
             </div>
