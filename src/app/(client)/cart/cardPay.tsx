@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FormatPrice from "@/app/_util/FormatPrice";
 import InputAddress from "@/app/components/ui/InputAddress";
 import { Input, Textarea } from "@nextui-org/react";
@@ -63,6 +63,29 @@ export default function CardPay({
   };
 
   const router = useRouter();
+
+  // Khi thay đổi số lượng hoặc sản phẩm, clear mã giảm giá
+  useEffect(() => {
+    setDiscountCode({ code: "" });
+    setDiscount(0);
+  }, [selectedItems, cartData]);
+
+  // Tự động cập nhật lại discount khi số lượng hoặc selectedItems thay đổi
+  useEffect(() => {
+    if (discountCode.code) {
+      // Nếu bạn có API tính discount, hãy gọi lại ở đây
+      // Hoặc tính lại discount dựa trên calculateTotal()
+      // Ví dụ đơn giản:
+      // setDiscount(calculateDiscount(calculateTotal(), discountCode.code));
+      // Nếu discount là số cố định, giữ nguyên
+      // Nếu discount là phần trăm, tính lại:
+      // setDiscount(Math.floor(calculateTotal() * 0.1));
+      // Ở đây giả sử discount là số cố định, bạn có thể thay đổi logic này
+      setDiscount(discount); // Nếu cần, thay bằng logic tính lại discount
+    } else {
+      setDiscount(0);
+    }
+  }, [calculateTotal(), discountCode.code, cartData, selectedItems]);
 
 const handlePayment = async () => {
   // Prevent multiple submissions

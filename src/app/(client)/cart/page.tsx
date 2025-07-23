@@ -80,7 +80,6 @@ export default function Page() {
 
     const handleQuantityChange = async (itemId: number, newQuantity: number, variantId: number, cartId: number) => {
         if (newQuantity < 1) return;
-        
         try {
             const res = await UpdateCard_API(itemId.toString(), { quantity: newQuantity, variantId: variantId, cartId: cartId });
             const updatedItems = cartItems.map(item => 
@@ -89,6 +88,8 @@ export default function Page() {
             setCartItems(updatedItems);
             // Cập nhật store
             updateQuantity(itemId, newQuantity);
+            // Clear selectedItems để trigger clear mã giảm giá
+            setSelectedItems([]);
         } catch (error) {
             toast.error("Không thể cập nhật số lượng");
         }
