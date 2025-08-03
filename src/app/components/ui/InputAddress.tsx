@@ -35,6 +35,50 @@ interface InputAddressProps {
   onValidationChange?: (isValid: boolean) => void;
 }
 
+const normalizeName = (name: string) => {
+  if (!name) return "";
+  return name
+    .replace(/^(Tỉnh|Thành phố|Quận|Huyện|Phường|Xã)\s*/i, "") // Remove common prefixes
+    .trim();
+};
+
+const findBestMatch = (searchName: string, items: any[], nameKey: string = 'name') => {
+  if (!searchName) return null;
+  
+  const normalizedSearch = normalizeName(searchName);
+  console.log(`Searching for "${searchName}" (normalized: "${normalizedSearch}")`);
+  
+  // First try exact match
+  let match = items.find(item => normalizeName(item[nameKey]) === normalizedSearch);
+  if (match) {
+    console.log(`Exact match found: ${match[nameKey]}`);
+    return match;
+  }
+  
+  // Then try contains
+  match = items.find(item => 
+    normalizeName(item[nameKey]).includes(normalizedSearch) ||
+    normalizedSearch.includes(normalizeName(item[nameKey]))
+  );
+  if (match) {
+    console.log(`Partial match found: ${match[nameKey]}`);
+    return match;
+  }
+  
+  // Finally try case-insensitive contains
+  match = items.find(item => 
+    normalizeName(item[nameKey]).toLowerCase().includes(normalizedSearch.toLowerCase()) ||
+    normalizedSearch.toLowerCase().includes(normalizeName(item[nameKey]).toLowerCase())
+  );
+  if (match) {
+    console.log(`Case-insensitive match found: ${match[nameKey]}`);
+    return match;
+  }
+  
+  console.log(`No match found for "${searchName}"`);
+  return null;
+};
+
 export default function InputAddress({
   onChange,
   className = "",
@@ -58,25 +102,51 @@ export default function InputAddress({
         setDataCityVietnam(data);
         
         // Set default values if provided
-        if (defaultValue?.city.cityId) {
-                     const city = data.find((c: City) => c.code === defaultValue.city.cityId);
-           if (city) {
-             setSelectedCity(city);
-             
-             if (defaultValue.district.districtId) {
-               const district = city.districts.find((d: District) => d.code === defaultValue.district.districtId);
-               if (district) {
-                 setSelectedDistrict(district);
-                 
-                 if (defaultValue.ward.wardId) {
-                   const ward = district.wards.find((w: Ward) => w.code === defaultValue.ward.wardId);
-                   if (ward) {
-                     setSelectedWard(ward);
-                   }
-                 }
-               }
-             }
-           }
+        if (defaultValue?.city.cityName) {
+          console.log("Tìm city với tên:", defaultValue.city.cityName);
+          const city = findBestMatch(defaultValue.city.cityName, data);
+          console.log("Kết quả tìm city:", city);
+          if (city) {
+            setSelectedCity(city);
+            
+            if (defaultValue.district.districtName) {
+              console.log("Tìm district với tên:", defaultValue.district.districtName);
+              const district = findBestMatch(defaultValue.district.districtName, city.districts);
+              console.log("Kết quả tìm district:", district);
+              if (district) {
+                setSelectedDistrict(district);
+                
+                if (defaultValue.ward.wardName) {
+                  console.log("Tìm ward với tên:", defaultValue.ward.wardName);
+                  const ward = findBestMatch(defaultValue.ward.wardName, district.wards);
+                  console.log("Kết quả tìm ward:", ward);
+                  if (ward) {
+                    setSelectedWard(ward);
+                  }
+                }
+              }
+            }
+          }
+        } else if (defaultValue?.city.cityId) {
+          // Fallback: tìm theo ID nếu có
+          const city = data.find((c: City) => c.code === defaultValue.city.cityId);
+          if (city) {
+            setSelectedCity(city);
+            
+            if (defaultValue.district.districtId) {
+              const district = city.districts.find((d: District) => d.code === defaultValue.district.districtId);
+              if (district) {
+                setSelectedDistrict(district);
+                
+                if (defaultValue.ward.wardId) {
+                  const ward = district.wards.find((w: Ward) => w.code === defaultValue.ward.wardId);
+                  if (ward) {
+                    setSelectedWard(ward);
+                  }
+                }
+              }
+            }
+          }
         }
       } catch (err) {
         setError("Không thể tải dữ liệu địa chỉ");

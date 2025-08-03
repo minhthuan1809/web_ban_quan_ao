@@ -4,26 +4,20 @@ import React, { useState } from "react";
 import InputGmail from "@/app/components/ui/InputGmail";
 import InputPassword from "@/app/components/ui/InputPassword";
 import { authLogin_API } from "@/app/_service/authClient";
-import { setCookie } from "cookies-next";
-import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import Loading from "@/app/_util/Loading";
 import { Checkbox } from "@nextui-org/react";
 import useAuthInfor from "@/app/customHooks/AuthInfor";
-import { useCartStore } from "@/app/_zustand/client/CartStore";
 
 export default function PageLogin() {
   const [password, setPassword] = useState("");
   const [gmail, setGmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const router = useRouter();
   
   // Auth hook để cập nhật state sau khi login
   const { setAccessToken, setUser, syncFromLocalStorage } = useAuthInfor();
   
-  // Cart store để clear cart cũ và sync mới
-  const { clearCart } = useCartStore();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +27,9 @@ export default function PageLogin() {
         email: gmail,
         password: password,
       });
+
+      console.log("response", response);
+      
       if (!response.accessToken || !response.userInfo) {
         throw new Error("Dữ liệu trả về không hợp lệ");
       }

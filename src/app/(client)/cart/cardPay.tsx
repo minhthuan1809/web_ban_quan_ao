@@ -29,17 +29,17 @@ export default function CardPay({
   const [address, setAddress] = useState<any>({
     city: {
       cityId: 0,
-      cityName: "",
+      cityName: userInfo?.address || "",
     },
     district: {
       districtId: 0,
-      districtName: "",
+      districtName: userInfo?.district || "",
     },
     ward: {
       wardId: 0,
-      wardName: "",
+      wardName: userInfo?.ward || "",
     },
-    detail: "",
+          detail: userInfo?.ward + " " + userInfo?.address + " " + userInfo?.district || "",
   });
   const [name, setName] = useState<string>(userInfo?.fullName || "");
   const [phone, setPhone] = useState<string>(userInfo?.phone || "");
@@ -72,17 +72,33 @@ export default function CardPay({
     setDiscount(0);
   }, [selectedItems, cartData]);
 
+  // Cập nhật thông tin người dùng khi userInfo thay đổi
+  useEffect(() => {
+    if (userInfo) {
+      setName(userInfo.fullName || "");
+      setPhone(userInfo.phone || "");
+      setAddress({
+        city: {
+          cityId: 0,
+          cityName: userInfo.address || "",
+        },
+        district: {
+          districtId: 0,
+          districtName: userInfo.district || "",
+        },
+        ward: {
+          wardId: 0,
+          wardName: userInfo.ward || "",
+        },
+        detail: userInfo?.ward + " " + userInfo?.address + " " + userInfo?.district || ""
+      });
+    }
+  }, [userInfo]);
+
   // Tự động cập nhật lại discount khi số lượng hoặc selectedItems thay đổi
   useEffect(() => {
     if (discountCode.code) {
-      // Nếu bạn có API tính discount, hãy gọi lại ở đây
-      // Hoặc tính lại discount dựa trên calculateTotal()
-      // Ví dụ đơn giản:
-      // setDiscount(calculateDiscount(calculateTotal(), discountCode.code));
-      // Nếu discount là số cố định, giữ nguyên
-      // Nếu discount là phần trăm, tính lại:
-      // setDiscount(Math.floor(calculateTotal() * 0.1));
-      // Ở đây giả sử discount là số cố định, bạn có thể thay đổi logic này
+
       setDiscount(discount); // Nếu cần, thay bằng logic tính lại discount
     } else {
       setDiscount(0);
@@ -281,14 +297,17 @@ const handlePayment = async () => {
             />
           </div>
 
-          {/* Địa chỉ giao hàng */}
+          {/* Địa chỉ giao hàng */} 
           <div className="space-y-3">
             <div className="flex items-center gap-2">
               <MapPin className="text-blue-600 dark:text-blue-400" size={18} />
               <span className="font-semibold text-gray-900 dark:text-gray-100">Địa chỉ giao hàng</span>
             </div>
             <div className="space-y-4">
-              <InputAddress onChange={(e) => setAddress(e)} />
+              <InputAddress 
+                onChange={(e) => setAddress(e)} 
+                defaultValue={address}
+              />
               <Textarea
                 value={address.detail}
                 onChange={(e) => setAddress({ ...address, detail: e.target.value })}
