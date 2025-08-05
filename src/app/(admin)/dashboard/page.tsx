@@ -70,9 +70,6 @@ export default function DashboardPage() {
   const [endDate, setEndDate] = useState<string>("");
   const { accessToken } = useAuthInfor()
 
-  console.log(startDate, endDate);
-  
-
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
   }
