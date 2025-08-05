@@ -46,12 +46,10 @@ const findBestMatch = (searchName: string, items: any[], nameKey: string = 'name
   if (!searchName) return null;
   
   const normalizedSearch = normalizeName(searchName);
-  console.log(`Searching for "${searchName}" (normalized: "${normalizedSearch}")`);
   
   // First try exact match
   let match = items.find(item => normalizeName(item[nameKey]) === normalizedSearch);
   if (match) {
-    console.log(`Exact match found: ${match[nameKey]}`);
     return match;
   }
   
@@ -61,7 +59,6 @@ const findBestMatch = (searchName: string, items: any[], nameKey: string = 'name
     normalizedSearch.includes(normalizeName(item[nameKey]))
   );
   if (match) {
-    console.log(`Partial match found: ${match[nameKey]}`);
     return match;
   }
   
@@ -71,11 +68,9 @@ const findBestMatch = (searchName: string, items: any[], nameKey: string = 'name
     normalizedSearch.toLowerCase().includes(normalizeName(item[nameKey]).toLowerCase())
   );
   if (match) {
-    console.log(`Case-insensitive match found: ${match[nameKey]}`);
     return match;
   }
   
-  console.log(`No match found for "${searchName}"`);
   return null;
 };
 
@@ -103,23 +98,17 @@ export default function InputAddress({
         
         // Set default values if provided
         if (defaultValue?.city.cityName) {
-          console.log("Tìm city với tên:", defaultValue.city.cityName);
           const city = findBestMatch(defaultValue.city.cityName, data);
-          console.log("Kết quả tìm city:", city);
           if (city) {
             setSelectedCity(city);
             
             if (defaultValue.district.districtName) {
-              console.log("Tìm district với tên:", defaultValue.district.districtName);
               const district = findBestMatch(defaultValue.district.districtName, city.districts);
-              console.log("Kết quả tìm district:", district);
               if (district) {
                 setSelectedDistrict(district);
                 
                 if (defaultValue.ward.wardName) {
-                  console.log("Tìm ward với tên:", defaultValue.ward.wardName);
                   const ward = findBestMatch(defaultValue.ward.wardName, district.wards);
-                  console.log("Kết quả tìm ward:", ward);
                   if (ward) {
                     setSelectedWard(ward);
                   }

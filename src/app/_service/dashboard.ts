@@ -12,17 +12,15 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export const getDashboardSummary = async (
   accessToken?: string,
   params?: {
-    year?: number;
-    month?: number;
-    day?: number;
+    startDate?: string;
+    endDate?: string;
   }
 ): Promise<DashboardSummaryResponse> => {
   const queryParams = new URLSearchParams();
-  if (params?.year) queryParams.append('year', params.year.toString());
-  if (params?.month) queryParams.append('month', params.month.toString());
-  if (params?.day) queryParams.append('day', params.day.toString());
+  if (params?.startDate) queryParams.append('startDate', params.startDate);
+  if (params?.endDate) queryParams.append('endDate', params.endDate);
 
-  const res = await axios.get(`${API_URL}/statistics/dashboard?${queryParams}`, {
+  const res = await axios.get(`${API_URL}/statistics/dashboard?${queryParams}`, { 
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -33,15 +31,11 @@ export const getDashboardSummary = async (
 
 // Thống kê doanh thu theo ngày
 export const getDailyRevenue = async (
-  date: string,
+  startDate: string,
+  endDate: string,
   accessToken?: string
 ): Promise<RevenueStatResponse> => {
-  const dateObj = new Date(date);
-  const year = dateObj.getFullYear();
-  const month = dateObj.getMonth() + 1;
-  const day = dateObj.getDate();
-  
-  const res = await axios.get(`${API_URL}/statistics/revenue/daily?year=${year}&month=${month}&day=${day}`, {
+  const res = await axios.get(`${API_URL}/statistics/revenue/daily?startDate=${startDate}&endDate=${endDate}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -52,11 +46,11 @@ export const getDailyRevenue = async (
 
 // Thống kê doanh thu theo tháng
 export const getMonthlyRevenue = async (
-  year: number,
-  month: number,
+  startDate: string,
+  endDate: string,
   accessToken?: string
 ): Promise<RevenueStatResponse> => {
-  const res = await axios.get(`${API_URL}/statistics/revenue/monthly?year=${year}&month=${month}`, {
+  const res = await axios.get(`${API_URL}/statistics/revenue/monthly?startDate=${startDate}&endDate=${endDate}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -67,10 +61,11 @@ export const getMonthlyRevenue = async (
 
 // Thống kê doanh thu theo năm
 export const getYearlyRevenue = async (
-  year: number,
+  startDate: string,
+  endDate: string,
   accessToken?: string
 ): Promise<RevenueStatResponse> => {
-  const res = await axios.get(`${API_URL}/statistics/revenue/yearly?year=${year}`, {
+  const res = await axios.get(`${API_URL}/statistics/revenue/yearly?startDate=${startDate}&endDate=${endDate}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -81,16 +76,12 @@ export const getYearlyRevenue = async (
 
 // Top sản phẩm bán chạy theo ngày
 export const getTopSellingProductsDaily = async (
-  date: string,
+  startDate: string,
+  endDate: string,
   limit: number = 10,
   accessToken?: string
 ): Promise<ProductSalesResponse[]> => {
-  const dateObj = new Date(date);
-  const year = dateObj.getFullYear();
-  const month = dateObj.getMonth() + 1;
-  const day = dateObj.getDate();
-  
-  const res = await axios.get(`${API_URL}/statistics/products/top-selling/daily?year=${year}&month=${month}&day=${day}&limit=${limit}`, {
+  const res = await axios.get(`${API_URL}/statistics/products/top-selling/daily?startDate=${startDate}&endDate=${endDate}&limit=${limit}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -101,12 +92,12 @@ export const getTopSellingProductsDaily = async (
 
 // Top sản phẩm bán chạy theo tháng
 export const getTopSellingProductsMonthly = async (
-  year: number,
-  month: number,
+  startDate: string,
+  endDate: string,
   limit: number = 10,
   accessToken?: string
 ): Promise<ProductSalesResponse[]> => {
-  const res = await axios.get(`${API_URL}/statistics/products/top-selling/monthly?year=${year}&month=${month}&limit=${limit}`, {
+  const res = await axios.get(`${API_URL}/statistics/products/top-selling/monthly?startDate=${startDate}&endDate=${endDate}&limit=${limit}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -117,11 +108,12 @@ export const getTopSellingProductsMonthly = async (
 
 // Top sản phẩm bán chạy theo năm
 export const getTopSellingProductsYearly = async (
-  year: number,
+  startDate: string,
+  endDate: string,
   limit: number = 10,
   accessToken?: string
 ): Promise<ProductSalesResponse[]> => {
-  const res = await axios.get(`${API_URL}/statistics/products/top-selling/yearly?year=${year}&limit=${limit}`, {
+  const res = await axios.get(`${API_URL}/statistics/products/top-selling/yearly?startDate=${startDate}&endDate=${endDate}&limit=${limit}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })
@@ -145,10 +137,12 @@ export const getUsersWithTotalSpent = async (
 
 // Top khách hàng chi tiêu nhiều nhất
 export const getTopCustomers = async (
+  startDate: string,
+  endDate: string,
   limit: number = 10,
   accessToken?: string
 ): Promise<UserStatResponse[]> => {
-  const res = await axios.get(`${API_URL}/statistics/users/top-customers?limit=${limit}`, {
+  const res = await axios.get(`${API_URL}/statistics/users/top-customers?startDate=${startDate}&endDate=${endDate}&limit=${limit}`, {
     headers: {
       'Content-Type': 'application/json',
       ...(accessToken && { 'Authorization': `Bearer ${accessToken}` })

@@ -176,7 +176,6 @@ const handlePayment = async () => {
       "items": orderItems,
       "totalAmount": calculateTotalAfterDiscount()
     };
-    console.log("data", orderData);
     
     
     if (paymentMethod === 6) {
@@ -189,7 +188,6 @@ const handlePayment = async () => {
 
       try {
         const res = await createOrderWithPaymentMethod6_API(calculateTotalAfterDiscount(), userInfo.id, accessToken);
-        
         if (res.status === 200 && res.data) {
           sessionStorage.setItem("tempOrderData", JSON.stringify(orderData));
           setVnpayLoading({

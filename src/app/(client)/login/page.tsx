@@ -28,7 +28,6 @@ export default function PageLogin() {
         password: password,
       });
 
-      console.log("response", response);
       
       if (!response.accessToken || !response.userInfo) {
         throw new Error("Dữ liệu trả về không hợp lệ");

@@ -35,6 +35,7 @@ import type {
   ProductSalesResponse,
   UserStatResponse
 } from '@/types/api'
+import DateRangeFilter from '@/app/components/ui/DateRangeFilter'
 
 type PeriodType = 'today' | 'month' | 'year';
 
@@ -65,11 +66,12 @@ export default function DashboardPage() {
     topCustomers: []
   })
   const [loading, setLoading] = useState(true)
-  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('today')
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
-  const [selectedDay, setSelectedDay] = useState(new Date().getDate())
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
   const { accessToken } = useAuthInfor()
+
+  console.log(startDate, endDate);
+  
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
@@ -77,10 +79,6 @@ export default function DashboardPage() {
 
   const formatNumber = (value: number) => {
     return new Intl.NumberFormat('vi-VN').format(value)
-  }
-
-  const formatDate = (year: number, month: number, day: number) => {
-    return `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
   }
 
   const fetchAllStats = async () => {
@@ -101,17 +99,16 @@ export default function DashboardPage() {
         topCustomersRes
       ] = await Promise.allSettled([
         getDashboardSummary(accessToken, {
-          year: selectedYear,
-          month: selectedMonth,
-          day: selectedDay
+          startDate: startDate,
+          endDate: endDate
         }),
-        getDailyRevenue(`${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`, accessToken),
-        getMonthlyRevenue(selectedYear, selectedMonth, accessToken),
-        getYearlyRevenue(selectedYear, accessToken),
-        getTopSellingProductsDaily(`${selectedYear}-${selectedMonth.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`, 5, accessToken),
-        getTopSellingProductsMonthly(selectedYear, selectedMonth, 5, accessToken),
-        getTopSellingProductsYearly(selectedYear, 5, accessToken),
-        getTopCustomers(5, accessToken)
+        getDailyRevenue(startDate, endDate, accessToken),
+        getMonthlyRevenue(startDate, endDate, accessToken),
+        getYearlyRevenue(startDate, endDate, accessToken),
+        getTopSellingProductsDaily(startDate, endDate, 5, accessToken),
+        getTopSellingProductsMonthly(startDate, endDate, 5, accessToken),
+        getTopSellingProductsYearly(startDate, endDate, 5, accessToken),
+        getTopCustomers(startDate, endDate, 5, accessToken)
       ])
 
       setStats({
@@ -134,47 +131,21 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetchAllStats()
-  }, [accessToken, selectedYear, selectedMonth, selectedDay])
+  }, [accessToken, startDate, endDate])
 
   const getRevenueByPeriod = (): { revenue: number; orders: number; label: string } => {
-    switch (selectedPeriod) {
-      case 'today':
-        return {
-          revenue: stats.dailyRevenue?.totalRevenue || stats.summary?.todayRevenue || 0,
-          orders: stats.dailyRevenue?.totalOrders || stats.summary?.todayOrders || 0,
-          label: 'Hôm nay'
-        }
-      case 'month':
-        return {
-          revenue: stats.monthlyRevenue?.totalRevenue || stats.summary?.monthRevenue || 0,
-          orders: stats.monthlyRevenue?.totalOrders || stats.summary?.monthOrders || 0,
-          label: 'Tháng này'
-        }
-      case 'year':
-        return {
-          revenue: stats.yearlyRevenue?.totalRevenue || stats.summary?.yearRevenue || 0,
-          orders: stats.yearlyRevenue?.totalOrders || stats.summary?.yearOrders || 0,
-          label: 'Năm nay'
-        }
-      default:
-        return { revenue: 0, orders: 0, label: '' }
+    return {
+      revenue: stats.dailyRevenue?.totalRevenue || stats.summary?.todayRevenue || 0,
+      orders: stats.dailyRevenue?.totalOrders || stats.summary?.todayOrders || 0,
+      label: 'Hôm nay'
     }
-  }
+    } 
 
   const getTopProductsByPeriod = (): ProductSalesResponse[] => {
-    switch (selectedPeriod) {
-      case 'today':
-        return stats.topProductsDaily
-      case 'month':
-        return stats.topProductsMonthly
-      case 'year':
-        return stats.topProductsYearly
-      default:
-        return []
-    }
+    return stats.topProductsDaily
   }
 
-  const currentData = getRevenueByPeriod()
+  const currentData = getRevenueByPeriod()  
   const currentTopProducts = getTopProductsByPeriod()
 
   // Show skeleton while loading
@@ -221,82 +192,18 @@ export default function DashboardPage() {
     }
   ]
 
-  const years = Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i)
-  const months = Array.from({ length: 12 }, (_, i) => i + 1)
-  
-  // Tính số ngày trong tháng đã chọn
-  const getDaysInMonth = (year: number, month: number) => {
-    return new Date(year, month, 0).getDate();
-  }
-  
-  const days = Array.from({ length: getDaysInMonth(selectedYear, selectedMonth) }, (_, i) => i + 1)
+
 
   return (
     <div className="p-6 space-y-8  mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
-     
-        <div className="flex items-center space-x-4">
-          <div className="flex flex-col sm:flex-row gap-2">
-            <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Năm</label>
-              <Select
-                size="sm"
-                selectedKeys={[selectedYear.toString()]}
-                onSelectionChange={(keys) => setSelectedYear(Number(Array.from(keys)[0]))}
-                className="w-24"
-                isDisabled={loading}
-              >
-                {years.map(year => (
-                  <SelectItem key={year.toString()} value={year.toString()}>
-                    {year.toString()}
-                  </SelectItem>
-                ))}
-              </Select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Tháng</label>
-              <Select
-                size="sm"
-                selectedKeys={[selectedMonth.toString()]}
-                onSelectionChange={(keys) => setSelectedMonth(Number(Array.from(keys)[0]))}
-                className="w-24"
-                isDisabled={loading}
-              >
-                {months.map(month => (
-                  <SelectItem key={month.toString()} value={month.toString()}>
-                    {month.toString()}
-                  </SelectItem>
-                ))}
-              </Select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-foreground/70 mb-1">Ngày</label>
-              <Select
-                size="sm"
-                selectedKeys={[selectedDay.toString()]}
-                onSelectionChange={(keys) => setSelectedDay(Number(Array.from(keys)[0]))}
-                className="w-24"
-                isDisabled={loading}
-              >
-                {days.map(day => (
-                  <SelectItem key={day.toString()} value={day.toString()}>
-                    {day.toString()}
-                  </SelectItem>
-                ))}
-              </Select>
-            </div>
-          </div>
-          <button
-            onClick={fetchAllStats}
-            disabled={loading}
-            className="p-2 rounded-lg bg-primary/10 hover:bg-primary/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-6"
-            title="Làm mới dữ liệu"
-          >
-            <RefreshCw className={`w-4 h-4 text-primary ${loading ? 'animate-spin' : ''}`} />
-          </button>
-        </div>
-      </div>
+     <DateRangeFilter
+      startDate={startDate}
+      endDate={endDate}
+      onStartDateChange={setStartDate}
+      onEndDateChange={setEndDate}
+      onReset={() => {}}
+     />
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -343,7 +250,7 @@ export default function DashboardPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between w-full">
               <div>
-                <h3 className="text-xl font-semibold text-foreground">Tiến độ doanh thu năm {selectedYear}</h3>
+                <h3 className="text-xl font-semibold text-foreground">Tiến độ doanh thu năm {new Date().getFullYear()}</h3> 
                 <p className="text-sm text-foreground/60">So sánh với mục tiêu đề ra</p>
               </div>
               <Chip color="primary" variant="flat" size="sm">

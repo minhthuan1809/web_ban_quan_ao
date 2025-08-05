@@ -153,7 +153,6 @@ export function DisableDevTools() {
       disableCut: false, // Không vô hiệu hóa cut
       disablePaste: false, // Không vô hiệu hóa paste
       ondevtoolopen: (type) => {
-        console.log('DevTools mở với type:', type);
         
         // Hiện modal thông báo và đóng băng trang
         if (!showModal) {
