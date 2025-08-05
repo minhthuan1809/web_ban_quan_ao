@@ -57,7 +57,7 @@ export default function OrderItem({ order, statusMap }: OrderItemProps) {
             statusMessage = "Không nhận hàng";
             break;
           case 'RECEIVED':
-            statusMessage = "Đã thành công";
+            statusMessage = "Đã thanh toán";
             break;
           default:
             statusMessage = newStatus;

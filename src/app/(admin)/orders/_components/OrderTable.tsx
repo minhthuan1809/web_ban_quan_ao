@@ -22,7 +22,7 @@ export const ORDER_STATUSES = {
   DELIVERED: { label: 'Đã giao hàng', color: 'bg-success/20 text-success-600' },
   CANCELLED: { label: 'Đã hủy', color: 'bg-danger/20 text-danger-600' },
   NOT_RECEIVED: { label: 'Khách không nhận', color: 'bg-warning/20 text-warning-600' },
-  RECEIVED: { label: 'Đã thành công', color: 'bg-success/20 text-success-600' }
+  RECEIVED: { label: 'Đã thanh toán', color: 'bg-success/20 text-success-600' }
 };
 
 // Định nghĩa luồng xử lý đơn hàng và các trạng thái tiếp theo có thể có
