@@ -78,6 +78,7 @@ export default function HistoryOrderPage() {
 
 
 useEffect(() => {
+      toast.dismiss();
       const fetchOrders = async (showLoading: boolean) => {
         try {
           if (showLoading) setLoading(true);
@@ -154,17 +155,18 @@ useEffect(() => {
   }, [userInfo?.id, accessToken]);
   
   useEffect(() => {
+    toast.dismiss();
     // Kiểm tra nếu đã xử lý thanh toán rồi thì không làm gì
     if (hasProcessedPayment) return;
     
     const vnpResponseCode = params.get('vnp_ResponseCode');
+    
     
     if(vnpResponseCode === '00' && userInfo?.id && accessToken){
       const createOrder = async () => {
         try {
           setIsCreatingOrder(true);
           setHasProcessedPayment(true); // Đánh dấu đã xử lý
-          
           const data = sessionStorage.getItem('tempOrderData');
           
           if(data){
@@ -191,6 +193,10 @@ useEffect(() => {
         }
       }
       createOrder();
+    }
+   
+    else{
+      toast.error("Thanh toán thất bại, Đơn hàng đã bị hủy thanh toán");
     }
   }, [params, userInfo?.id, accessToken, hasProcessedPayment]);
   // Lọc đơn hàng theo trạng thái
