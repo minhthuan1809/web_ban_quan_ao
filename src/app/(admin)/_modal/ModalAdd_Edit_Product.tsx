@@ -140,8 +140,8 @@ export default function ModalAdd_Edit_Product({
         try {
           const newUploadedImages = await uploadToCloudinary(newImages, process.env.NEXT_PUBLIC_FOLDER || "");
           uploadedImages = [...form.imageUrls.filter(img => typeof img === 'string'), ...newUploadedImages];
-        } catch (error) {
-          toast.error("Có lỗi khi tải lên hình ảnh. Vui lòng kiểm tra định dạng file.");
+        } catch (error: any) {
+          toast.error(error.response.data.message);
           throw error;
         }
       }
@@ -181,8 +181,8 @@ export default function ModalAdd_Edit_Product({
           isEnabled: v.isEnabled !== undefined ? v.isEnabled : true
         }))
       };
-    } catch (error) {
-      console.error("Error in callApiCloudinary:", error);
+    } catch (error: any) {
+      toast.error(error.response.data.message);
       throw error;
     }
   };
@@ -226,7 +226,6 @@ export default function ModalAdd_Edit_Product({
       }
     } catch (error: any) {
       toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi thêm sản phẩm");
-      console.error(error);
     } finally {
       setLoadingBtn(false);
     }
@@ -269,8 +268,7 @@ export default function ModalAdd_Edit_Product({
         toast.error("Có lỗi xảy ra khi cập nhật sản phẩm");
       }
     } catch (error: any) {
-      toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi cập nhật sản phẩm");
-      console.error(error);
+      toast.error(error?.response?.data?.message || "Có lỗi xảy ra khi cập nhật sản phẩm"); 
     } finally {
       setLoadingBtn(false);
     }

@@ -81,8 +81,8 @@ export default function Category() {
             } else {
                 toast.error("Xóa phân loại thất bại");
             }
-        } catch (error) {
-            toast.error("Có lỗi xảy ra khi xóa phân loại");
+        } catch (error: any) {
+            toast.error(error.response.data.message);
         } finally {
             setLoadingBtn(false);
         }

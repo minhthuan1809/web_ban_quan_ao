@@ -63,7 +63,7 @@ export default function page() {
       setColor(res.data);
       setMetadata(res.metadata);
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.response.data.message);
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ export default function page() {
         fetchData()
       }
     } catch (error: any) {
-      toast.error(error.message || 'Thêm màu sắc thất bại')
+      toast.error(error.response.data.message || 'Thêm màu sắc thất bại')
     } finally {
       setLoadingBtn(false)
     }
@@ -112,6 +112,7 @@ export default function page() {
     if (result.isConfirmed) {
             try {
         setLoadingBtn(true)
+        
         const res = await DeleteColor_API(id, accessToken || "")
         if (res.status === 204 ) {
           toast.success('Xóa màu sắc thành công')
@@ -120,7 +121,7 @@ export default function page() {
           toast.error('Xóa màu sắc thất bại')
         }
       } catch (error: any) {
-        toast.error(error.message || 'Xóa màu sắc thất bại')
+        toast.error(error.response.data.message || 'Xóa màu sắc thất bại')
       } finally {
         setLoadingBtn(false)
       }
@@ -150,7 +151,7 @@ export default function page() {
         toast.error('Sửa màu sắc thất bại')
       }
     } catch (error: any) {
-      toast.error(error.message || 'Sửa màu sắc thất bại')
+      toast.error(error.response.data.message || 'Sửa màu sắc thất bại')
     } finally {
       setLoadingBtn(false)
     }

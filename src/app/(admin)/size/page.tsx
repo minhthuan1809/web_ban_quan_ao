@@ -61,7 +61,7 @@ export default function page() {
       setSize(res.data);
       setMetadata(res.metadata);
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.response.data.message);
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ export default function page() {
         fetchData()
       }
     } catch (error: any) {
-      toast.error(error.message || 'Thêm kích cỡ thất bại')
+      toast.error(error.response.data.message || 'Thêm kích cỡ thất bại')
     } finally {
       setLoadingBtn(false)
     }
@@ -139,7 +139,7 @@ export default function page() {
         toast.error('Sửa kích cỡ thất bại')
       }
     } catch (error: any) {
-      toast.error(error.message || 'Sửa kích cỡ thất bại')
+      toast.error(error.response.data.message || 'Sửa kích cỡ thất bại')
     } finally {
       setLoadingBtn(false)
     }

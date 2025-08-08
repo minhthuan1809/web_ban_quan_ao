@@ -1,4 +1,5 @@
 import axios, { AxiosInstance, AxiosResponse } from "axios";
+import { toast } from "react-toastify";
 
 // API Configuration
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -115,8 +116,8 @@ export const materialService = {
         }
       });
       return response.data;
-    } catch (error) {
-      console.error('Error fetching materials:', error);
+    } catch (error: any) {
+      toast.error(error.response.data.message);
       throw error;
     }
   },
@@ -131,8 +132,8 @@ export const materialService = {
         { headers: createAuthHeaders(accessToken) }
       );
       return response;
-    } catch (error) {
-      console.error('Error adding material:', error);
+    } catch (error: any) {
+      toast.error(error.response.data.message);
       throw error;
     }
   },

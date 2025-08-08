@@ -158,10 +158,7 @@ useEffect(() => {
     toast.dismiss();
     // Kiểm tra nếu đã xử lý thanh toán rồi thì không làm gì
     if (hasProcessedPayment) return;
-    
     const vnpResponseCode = params.get('vnp_ResponseCode');
-    
-    
     if(vnpResponseCode === '00' && userInfo?.id && accessToken){
       const createOrder = async () => {
         try {
@@ -178,7 +175,6 @@ useEffect(() => {
                 sessionStorage.removeItem('tempOrderData');
                 window.location.href = "/history-order";
               }
-              
               // Xóa params khỏi URL mà không reload trang
             } else {
               toast.error("Có lỗi xảy ra khi tạo đơn hàng");
@@ -194,10 +190,10 @@ useEffect(() => {
       }
       createOrder();
     }
-   
-    else{
+    if(vnpResponseCode === '01' && userInfo?.id && accessToken){
       toast.error("Thanh toán thất bại, Đơn hàng đã bị hủy thanh toán");
     }
+   
   }, [params, userInfo?.id, accessToken, hasProcessedPayment]);
   // Lọc đơn hàng theo trạng thái
   const filteredOrders = React.useMemo(() => {

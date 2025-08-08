@@ -83,8 +83,8 @@ export default function Material() {
       } else {
         toast.error("Thêm vật liệu thất bại");
       }
-    } catch (error) {
-      toast.error("Có lỗi xảy ra khi thêm vật liệu");
+    } catch (error: any) {
+      toast.error(error.response.data.message);
     } finally {
       setLoadingBtn(false);
     }
@@ -100,8 +100,8 @@ export default function Material() {
       } else {
         toast.error("Xóa vật liệu thất bại");
       }
-    } catch (error) {
-      toast.error("Có lỗi xảy ra khi xóa vật liệu");
+    } catch (error: any) {
+      toast.error(error.response.data.message);
     } finally {
       setLoadingBtn(false);
     }
@@ -129,8 +129,8 @@ export default function Material() {
       } else {
         handleAddMaterial();
       }
-    } catch (error) {
-      toast.error("Có lỗi xảy ra khi sửa vật liệu");
+    } catch (error: any) {
+      toast.error(error.response.data.message);
     } finally {
       setLoadingBtn(false);
     }

@@ -78,9 +78,8 @@ export default function ModalSentMail({
       } else {
         toast.error("Có lỗi xảy ra khi gửi email");
       }
-    } catch (error) {
-      console.error("Lỗi khi gửi email:", error);
-      toast.error("Có lỗi xảy ra khi gửi email");
+    } catch (error :any) {
+      toast.error(error.response.data.message);
     } finally {
       setLoading(false);
     }

@@ -52,8 +52,8 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
       } else {
         toast.error("Thêm đội bóng thất bại!");
       }
-    } catch (error) {
-      toast.error("Có lỗi xảy ra khi thêm đội bóng!");
+    } catch (error: any) {
+      toast.error(error.response.data.message);
     } finally {
       setLoading(false);
     }
@@ -90,14 +90,14 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
         toast.success("Cập nhật đội bóng thành công!");
         onClose();
       }
-    } catch (error) {
-      toast.error("Có lỗi xảy ra khi cập nhật đội bóng!");
+    } catch (error: any) {
+      toast.error(error.response.data.message);
     } finally {
       setLoading(false);
     }
   }
 
-  const handleFinish = async () => {  
+  const handleFinish = async () => {    
     if (!form.name || !form.league || !form.country || !(logoFile || form.logoUrl)) {
       toast.error("Vui lòng điền đầy đủ thông tin!");
       return;
@@ -105,8 +105,8 @@ export default function ModalAddEditTeam({ id, form, onClose, open }: ModalAddEd
     try {
       const res = await addImg(logoFile || form.logoUrl);
       await handleAddTeam(res[0]);
-    } catch (error) {
-      console.error(error);
+    } catch (error: any) {
+      toast.error(error.response.data.message);
     }
   }
 

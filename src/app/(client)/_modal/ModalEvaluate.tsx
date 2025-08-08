@@ -88,9 +88,8 @@ export default function ModalEvaluate({ isOpen, onClose, dataOrder}: ModalEvalua
       }
       toast.success("Gửi tất cả đánh giá thành công");
       onClose();
-    } catch (error) {
-      console.error("Lỗi khi gửi đánh giá:", error);
-      toast.error("Có lỗi xảy ra khi gửi đánh giá");
+    } catch (error: any) {
+      toast.error(error.response.data.message);
     } finally {
       setIsSubmitting(false);
     }

@@ -49,6 +49,7 @@ import type {
   AuthResponse,
   RefreshTokenResponse
 } from '../../types/auth';
+import { toast } from 'react-toastify';
 
 // Local interfaces that differ from centralized types
 export interface LoginRequest {
@@ -145,7 +146,8 @@ export class AuthService {
     try {
       const response = await authApiClient.post('/auth/register', userData);
       return response;
-    } catch (error: any) {
+    } catch (error: any) {  
+      toast.error(error.response.data.message); 
       console.error('Registration failed:', error);
       
       if (error.response?.status === 422) {

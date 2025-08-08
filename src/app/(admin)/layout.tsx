@@ -259,9 +259,8 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
         clearUser(); // Clear Zustand user data
         toast.success('Đăng xuất thành công');
         router.push('/login');
-      } catch (error) {
-        console.error('Logout error:', error);
-        toast.error('Có lỗi xảy ra khi đăng xuất');
+      } catch (error: any) {
+        toast.error(error.response.data.message);
       }
     }, [clearAuthData, clearUser, router]);
 
