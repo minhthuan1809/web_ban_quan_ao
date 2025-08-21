@@ -153,8 +153,8 @@ export default function Navbar() {
           {/* Logo Section */}
           <Link href="/" className="flex items-center space-x-3 group" onClick={handleMobileLinkClick}>
             <Image
-              className="rounded-full w-12 h-12 md:w-14 md:h-14 object-cover transform transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6"
-              src="https://plus.unsplash.com/premium_photo-1687686676757-9d849a16e4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGVyc2lvbnxlbnwwfHwwfHx8MA%3D%3D"
+              className="w-12 h-12 md:w-14 md:h-14 object-contain transform transition-transform duration-300 group-hover:scale-110"
+              src="https://image.lubumall.com/medias/images/lg.jpg"
               alt="KICKSTYLE Logo"
               width={56}
               height={56}
@@ -347,13 +347,13 @@ export default function Navbar() {
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b border-border bg-background/95 backdrop-blur-md">
                 <div className="flex items-center space-x-3">
-                  <Image
-                    className="rounded-full w-10 h-10 object-cover"
-                    src="https://plus.unsplash.com/premium_photo-1687686676757-9d849a16e4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGVyc2lvbnxlbnwwfHwwfHx8MA%3D%3D"
-                    alt="KICKSTYLE"
-                    width={40}
-                    height={40}
-                  />
+                                     <Image
+                     className="rounded-full w-10 h-10 object-cover"
+                     src="https://image.lubumall.com/medias/images/lg.jpg"
+                     alt="KICKSTYLE"
+                     width={40}
+                     height={40}
+                   />
                   <span className="text-lg font-bold text-primary">
                     KICKSTYLE
                   </span>

@@ -23,6 +23,7 @@ export default function Page() {
     const [cartData, setCartData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [expandedItems, setExpandedItems] = useState<number[]>([]);
+    const [updatingItems, setUpdatingItems] = useState<Set<number>>(new Set());
     const router = useRouter();
     // Force sync nếu cần thiết
     useEffect(() => {
@@ -79,7 +80,28 @@ export default function Page() {
     }, [userInfo])
 
     const handleQuantityChange = async (itemId: number, newQuantity: number, variantId: number, cartId: number) => {
-        if (newQuantity < 1) return;
+        // Validation số lượng tối thiểu
+        if (newQuantity < 1) {
+            toast.warning("Số lượng sản phẩm không thể nhỏ hơn 1");
+            return;
+        }
+
+        // Tìm item trong giỏ hàng để kiểm tra stock
+        const currentItem = cartItems.find(item => item.id === itemId);
+        if (!currentItem) {
+            toast.error("Không tìm thấy sản phẩm trong giỏ hàng");
+            return;
+        }
+
+        // Validation số lượng tối đa
+        if (newQuantity > currentItem.variant.stockQuantity) {
+            toast.warning(`Chỉ còn ${currentItem.variant.stockQuantity} sản phẩm trong kho. Không thể thêm quá số lượng này.`);
+            return;
+        }
+
+        // Thêm item vào danh sách đang cập nhật
+        setUpdatingItems(prev => new Set(prev).add(itemId));
+
         try {
             const res = await UpdateCard_API(itemId.toString(), { quantity: newQuantity, variantId: variantId, cartId: cartId });
             const updatedItems = cartItems.map(item => 
@@ -90,8 +112,22 @@ export default function Page() {
             updateQuantity(itemId, newQuantity);
             // Clear selectedItems để trigger clear mã giảm giá
             setSelectedItems([]);
+            
+            // Thông báo thành công
+            if (newQuantity > currentItem.quantity) {
+                // toast.success(`Đã tăng số lượng sản phẩm lên ${newQuantity}`);
+            } else if (newQuantity < currentItem.quantity) {
+                // toast.success(`Đã giảm số lượng sản phẩm xuống ${newQuantity}`);
+            }
         } catch (error) {
-            toast.error("Không thể cập nhật số lượng");
+            toast.error("Không thể cập nhật số lượng. Vui lòng thử lại sau.");
+        } finally {
+            // Xóa item khỏi danh sách đang cập nhật
+            setUpdatingItems(prev => {
+                const newSet = new Set(prev);
+                newSet.delete(itemId);
+                return newSet;
+            });
         }
     }
 
@@ -306,24 +342,66 @@ export default function Page() {
     
                                                     {/* Quantity Controls */}
                                                     <div className="flex items-center justify-between">
-                                                        <div className="flex items-center border-2 border-blue-200 dark:border-blue-700 rounded-xl overflow-hidden">
-                                                            <button 
-                                                                onClick={() => handleQuantityChange(item.id, item.quantity - 1, item.variant.id, cartData.id)}
-                                                                className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50 transition-colors font-bold"
-                                                                disabled={item.quantity <= 1}
-                                                            >
-                                                                -
-                                                            </button>
-                                                            <span className="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 font-bold min-w-[3rem] text-center">
-                                                                {item.quantity}
-                                                            </span>
-                                                            <button 
-                                                                onClick={() => handleQuantityChange(item.id, item.quantity + 1, item.variant.id, cartData.id)}
-                                                                className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50 transition-colors font-bold"
-                                                                disabled={item.quantity >= item.variant.stockQuantity}
-                                                            >
-                                                                +
-                                                            </button>
+                                                        <div className="flex flex-col gap-2">
+                                                            <div className="flex items-center border-2 border-blue-200 dark:border-blue-700 rounded-xl overflow-hidden">
+                                                                <button 
+                                                                    onClick={() => handleQuantityChange(item.id, item.quantity - 1, item.variant.id, cartData.id)}
+                                                                    className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50 transition-colors font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                    disabled={item.quantity <= 1}
+                                                                    title={item.quantity <= 1 ? "Đã đạt số lượng tối thiểu" : "Giảm số lượng"}
+                                                                >
+                                                                    -
+                                                                </button>
+                                                                <input
+                                                                    type="number"
+                                                                    value={item.quantity}
+                                                                    onChange={(e) => {
+                                                                        const value = parseInt(e.target.value) || 1;
+                                                                        if (value >= 1 && value <= item.variant.stockQuantity) {
+                                                                            handleQuantityChange(item.id, value, item.variant.id, cartData.id);
+                                                                        }
+                                                                    }}
+                                                                    onBlur={(e) => {
+                                                                        const value = parseInt(e.target.value) || 1;
+                                                                        if (value < 1) {
+                                                                            e.target.value = '1';
+                                                                            handleQuantityChange(item.id, 1, item.variant.id, cartData.id);
+                                                                        } else if (value > item.variant.stockQuantity) {
+                                                                            e.target.value = item.variant.stockQuantity.toString();
+                                                                            handleQuantityChange(item.id, item.variant.stockQuantity, item.variant.id, cartData.id);
+                                                                        }
+                                                                    }}
+                                                                    min="1"
+                                                                    max={item.variant.stockQuantity}
+                                                                    className="px-4 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-900 dark:text-blue-100 font-bold min-w-[3rem] text-center border-none outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                                                                    style={{ WebkitAppearance: 'none', MozAppearance: 'textfield' }}
+                                                                />
+                                                                <button 
+                                                                    onClick={() => handleQuantityChange(item.id, item.quantity + 1, item.variant.id, cartData.id)}
+                                                                    className="px-4 py-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50 transition-colors font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                    disabled={item.quantity >= item.variant.stockQuantity}
+                                                                    title={item.quantity >= item.variant.stockQuantity ? "Đã đạt số lượng tối đa trong kho" : "Tăng số lượng"}
+                                                                >
+                                                                    +
+                                                                </button>
+                                                            </div>
+                                                            {/* Hiển thị thông tin giới hạn */}
+                                                            <div className="text-xs text-center">
+                                                                <span className="text-gray-500 dark:text-gray-400">
+                                                                    Min: 1 | Max: {item.variant.stockQuantity}
+                                                                </span>
+                                                                {/* Hiển thị cảnh báo khi số lượng đạt giới hạn */}
+                                                                {item.quantity === 1 && (
+                                                                    <div className="text-orange-600 dark:text-orange-400 font-medium mt-1">
+                                                                        ⚠️ Đã đạt số lượng tối thiểu
+                                                                    </div>
+                                                                )}
+                                                                {item.quantity === item.variant.stockQuantity && (
+                                                                    <div className="text-red-600 dark:text-red-400 font-medium mt-1">
+                                                                        ⚠️ Đã đạt số lượng tối đa trong kho
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </div>
     
                                                         {/* Stock Info */}

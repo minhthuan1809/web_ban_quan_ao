@@ -31,6 +31,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'file.hstatic.net',
       },
+      {
+        protocol: 'https',
+        hostname: 'image.lubumall.com',
+      },
     ],
   },
   swcMinify: true,

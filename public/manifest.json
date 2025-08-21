@@ -9,19 +9,19 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/favicon.ico",
+      "src": "https://image.lubumall.com/medias/images/lg.jpg",
       "sizes": "48x48",
-      "type": "image/x-icon"
+      "type": "image/jpeg"
     },
     {
-      "src": "/next.svg",
+      "src": "https://image.lubumall.com/medias/images/lg.jpg",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/jpeg"
     },
     {
-      "src": "/next.svg",
+      "src": "https://image.lubumall.com/medias/images/lg.jpg",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/jpeg"
     }
   ],
   "categories": ["shopping", "fashion", "lifestyle"],

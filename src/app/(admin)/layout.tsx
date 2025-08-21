@@ -7,6 +7,7 @@ import useAuthInfor from '@/app/customHooks/AuthInfor';
 import Loading from '@/app/_util/Loading';
 import { ThemeToggle } from './_conponents/ThemeToggle';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   Home, 
   Package, 
@@ -407,8 +408,14 @@ export default function AdminLayout({children}: {children: React.ReactNode}) {
                 <div className="h-16 border-b border-divider flex items-center justify-between px-6 bg-content1">
                     {!isCollapsed && (
                         <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center ">
-                                <Package2 className="" size={24} />
+                            <div className="w-10 h-10 flex items-center justify-center">
+                                <Image
+                                    src="https://image.lubumall.com/medias/images/lg.jpg"
+                                    alt="KICKSTYLE Logo"
+                                    width={40}
+                                    height={40}
+                                    className="object-contain"
+                                />
                             </div>
                             <div>
                               <Link href="/">

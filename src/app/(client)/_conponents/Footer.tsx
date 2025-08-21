@@ -10,13 +10,13 @@ export default function PageFooter() {
           {/* Brand Section */}
           <div className="flex flex-col items-center md:items-start">
             <div className="flex items-center space-x-4 mb-6">
-              <Image 
-                src="https://plus.unsplash.com/premium_photo-1687686676757-9d849a16e4ea?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cGVyc2lvbnxlbnwwfHwwfHx8MA%3D%3D" 
-                className="w-20 h-20 rounded-full border-4 border-card shadow-lg" 
-                alt="KICKSTYLE Logo" 
-                height={80}
-                width={80}
-              />
+                             <Image 
+                 src="https://image.lubumall.com/medias/images/lg.jpg" 
+                 className="w-20 h-20 object-contain border-4 border-card shadow-lg" 
+                 alt="KICKSTYLE Logo" 
+                 height={80}
+                 width={80}
+               />
               <div>
                 <p className="text-3xl font-extrabold text-card-foreground tracking-wider">KICKSTYLE</p>
                 <p className="text-sm text-muted-foreground italic">Fashion & Style</p>
